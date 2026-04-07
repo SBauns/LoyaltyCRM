@@ -5,4 +5,5 @@
   <Project Path="LoyaltyCRM.Infrastructure/LoyaltyCRM.Infrastructure.csproj" />
   <Project Path="LoyaltyCRM.Services/LoyaltyCRM.Services.csproj" />
   <Project Path="LoyaltyCRM.Tests/LoyaltyCRM.Tests.csproj" />
+  <Project Path="LoyaltyCRM.WebApp/LoyaltyCRM.WebApp.csproj" />
 </Solution>

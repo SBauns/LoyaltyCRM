@@ -18,6 +18,7 @@ dotnet new xunit -n LoyaltyCRM.Tests
 
 # Add projects to the solution
 dotnet sln add LoyaltyCRM.Api/LoyaltyCRM.Api.csproj
+dotnet sln add LoyaltyCRM.WebApp/LoyaltyCRM.WebApp.csproj
 dotnet sln add LoyaltyCRM.Domain/LoyaltyCRM.Domain.csproj
 dotnet sln add LoyaltyCRM.DTOs/LoyaltyCRM.DTOs.csproj
 dotnet sln add LoyaltyCRM.Infrastructure/LoyaltyCRM.Infrastructure.csproj
