@@ -1,6 +1,54 @@
-﻿<Router AppAssembly="@typeof(App).Assembly" NotFoundPage="typeof(Pages.NotFound)">
-    <Found Context="routeData">
-        <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)"/>
-        <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-    </Found>
-</Router>
+﻿@inject AuthService AuthService
+@inject NavigationManager Navigation
+@inject StorageService StorageService
+
+<CascadingAuthenticationState>
+    @if (_readyToRender)
+    {
+        <Router AppAssembly="@typeof(App).Assembly" OnNavigateAsync="HandleNavigation">
+            <Found Context="routeData">
+                <RouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)" />
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p>Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    }
+</CascadingAuthenticationState>
+
+@code {
+    private bool _readyToRender = false;
+
+    private string homeUrl = "/yearcard/create";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var uri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
+
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (!isAuthenticated && uri != "login")
+        {
+            // If the user is not authenticated and not on the login page, redirect to login
+            Navigation.NavigateTo("/login", true);
+            return;
+        }
+        else if(isAuthenticated && uri == "login"){
+            Navigation.NavigateTo(homeUrl, true);
+            return;
+        }
+        else if(isAuthenticated && (uri == "" || uri == "/")){
+            Navigation.NavigateTo(homeUrl, true);
+            return;
+        }
+
+        _readyToRender = true;
+    }
+
+    private async Task HandleNavigation(NavigationContext args)
+    {
+        // Optional: recheck on every navigation if needed
+    }
+}

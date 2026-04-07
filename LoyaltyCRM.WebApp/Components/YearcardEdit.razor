@@ -1,0 +1,204 @@
+@using papacrm_web.Locales
+@using System.Text.RegularExpressions
+@inject YearcardService yearcards
+@inject IStringLocalizer<Resources> L
+
+<div class="d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-sm p-4 w-100" style="max-width: 600px;">
+        <EditForm Model="@Yearcard" OnSubmit="HandleSubmit">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="row g-3">
+                <div class="col-12 col-md-6">
+                    <div class="mb-3">
+                        <label for="CardId" class="form-label">@L["CardId"]</label>
+                        <InputNumber id="CardId" class="form-control" @bind-Value="Yearcard!.CardId" />
+                        <ValidationMessage For="@(() => Yearcard.CardId)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Name" class="form-label">@L["First Name"]</label>
+                        <InputText id="Name" class="form-control" @bind-Value="Yearcard.Name" />
+                        <ValidationMessage For="@(() => Yearcard.Name)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="UserName" class="form-label">@L["User Name"]</label>
+                        <InputText id="UserName" class="form-control" @bind-Value="Yearcard.UserName" />
+                        <ValidationMessage For="@(() => Yearcard.UserName)" />
+                    </div>
+                </div>
+                <div class="col-12 col-md-6">
+                    <div class="mb-3">
+                        <label for="Phone" class="form-label">@L["Phone"]</label>
+                        <div class="input-group">
+                            <CountryCodeSelector @bind-SelectedCountryCode="SelectedCountryCode"></CountryCodeSelector>
+                            <InputText id="PhoneNumber" class="form-control" @bind-Value="PhoneNumberInput" oninput="this.value=this.value.replace(/[^0-9]/g,'')" inputmode="numeric" pattern="[0-9]*" />
+                            <!-- dotnet-watch-test -->
+                        </div>
+                        <ValidationMessage For="@(() => Yearcard.PhoneNumber)" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="Email" class="form-label">@L["Email"]</label>
+                        <InputText id="Email" class="form-control" @bind-Value="Yearcard.Email" />
+                        <ValidationMessage For="@(() => Yearcard.Email)" />
+                    </div>
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">@L["Validity Dates"]</label>
+                <div class="row g-2">
+                    @if (Yearcard.ValidityIntervals != null && Yearcard.ValidityIntervals.Count > 0)
+                    {
+                        var sortedIntervals = Yearcard.ValidityIntervals
+                            .Select((interval, idx) => new { interval, idx })
+                            .OrderBy(x => x.interval.StartDate)
+                            .ToList();
+                        foreach (var tuple in sortedIntervals)
+                        {
+                            <div class="col-12 mb-2 d-flex align-items-center gap-2">
+                                <InputDate class="form-control" @bind-Value="tuple.interval.StartDate" />
+                                <span class="mx-2">→</span>
+                                <InputDate class="form-control" @bind-Value="tuple.interval.EndDate" />
+                                <button type="button" class="btn btn-danger btn-sm ms-2" @onclick="() => RemoveInterval(tuple.idx)">✕</button>
+                            </div>
+                        }
+                    }
+                </div>
+                <button type="button" class="btn btn-success btn-sm mt-2" @onclick="AddInterval">@L["Add Interval"]</button>
+            </div>
+            <button type="submit" class="btn btn-primary w-100 mt-3">@L["Update Yearcard"]</button>
+        </EditForm>
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3 text-center">@L["An error occurred:"] @L[ErrorMessage]</div>
+        }
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="alert alert-success mt-3">@L[Message]</div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public YearcardDTO? Yearcard { get; set; }
+
+    private YearcardDTO? OriginalYearcard { get; set; }
+    public string Message { get; set; } = string.Empty;
+
+    public string ErrorMessage { get; set; } = string.Empty;
+
+    private string PhoneNumberInput = string.Empty;
+    private string SelectedCountryCode { get; set; } = "+45";
+
+    protected override void OnInitialized()
+    {
+        if (Yearcard != null && Yearcard.ValidityIntervals == null)
+        {
+            Yearcard.ValidityIntervals = new List<ValidityIntervalDTO>();
+        }
+        if(Yearcard.PhoneNumber.Contains("-")){
+            var splitIndex = Yearcard.PhoneNumber.IndexOf('-') + 1;
+            SelectedCountryCode = Yearcard.PhoneNumber.Substring(0, splitIndex).Replace("-", "");
+        }
+        PhoneNumberInput = Regex.Replace(Yearcard.PhoneNumber, "[^0-9]", "");
+        Yearcard.PhoneNumber = PhoneNumberInput;
+        OriginalYearcard = CloneYearcard(Yearcard!);
+    }
+
+    private async Task HandleSubmit(EditContext context)
+    {
+        ResetMessages();
+        try
+        {
+            Yearcard.PhoneNumber = PhoneNumberInput;
+            if(!context.Validate()){
+                ErrorMessage = "Validation Failed!";
+                return;
+            }
+
+            Yearcard.PhoneNumber = SelectedCountryCode + "-" + PhoneNumberInput;
+            if (await yearcards.UpdateYearcardAsync(Yearcard!))
+            {
+                Message = "Yearcard Updated successfully!";
+            }
+            else
+            {
+                RevertYearcardChanges();
+                ErrorMessage = "Update Failed!";
+            }
+        }
+        catch (Exception ex)
+        {
+            RevertYearcardChanges();
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    private YearcardDTO CloneYearcard(YearcardDTO yearcard)
+    {
+        return new YearcardDTO
+        {
+            CardId = yearcard.CardId,
+            ValidTo = yearcard.ValidTo,
+            PhoneNumber = yearcard.PhoneNumber,
+            Email = yearcard.Email,
+            Name = yearcard.Name,
+            UserName = yearcard.UserName,
+            ValidityIntervals = yearcard.ValidityIntervals.Select(v => new ValidityIntervalDTO
+            {
+                Id = v.Id,
+                StartDate = v.StartDate,
+                EndDate = v.EndDate
+            }).ToList()
+        };
+    }
+
+    private void ResetMessages()
+    {
+        Message = string.Empty;
+        ErrorMessage = string.Empty;
+    }
+
+    private void RevertYearcardChanges()
+    {
+        ResetMessages();
+
+        Yearcard!.CardId = OriginalYearcard!.CardId;
+        Yearcard!.ValidTo = OriginalYearcard!.ValidTo;
+        Yearcard!.PhoneNumber = OriginalYearcard!.PhoneNumber;
+        Yearcard!.Email = OriginalYearcard!.Email;
+        Yearcard!.Name = OriginalYearcard!.Name;
+        Yearcard!.UserName = OriginalYearcard!.UserName;
+        Yearcard!.ValidityIntervals = OriginalYearcard!.ValidityIntervals.Select(v => new ValidityIntervalDTO
+        {
+            Id = v.Id,
+            StartDate = v.StartDate,
+            EndDate = v.EndDate
+        }).ToList();
+    }
+
+    private void AddInterval()
+    {
+        if (Yearcard != null)
+        {
+            DateTime newStart = DateTime.Today;
+            if (Yearcard.ValidityIntervals != null && Yearcard.ValidityIntervals.Count > 0)
+            {
+                newStart = Yearcard.ValidityIntervals.Max(i => i.EndDate);
+            }
+            Yearcard.ValidityIntervals.Add(new ValidityIntervalDTO
+            {
+                StartDate = newStart,
+                EndDate = newStart.AddYears(1)
+            });
+        }
+    }
+
+    private void RemoveInterval(int index)
+    {
+        if (Yearcard != null && index >= 0 && index < Yearcard.ValidityIntervals.Count)
+        {
+            Yearcard.ValidityIntervals.RemoveAt(index);
+        }
+    }
+}

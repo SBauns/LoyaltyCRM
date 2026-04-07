@@ -1,0 +1,126 @@
+@page "/yearcard/checkin"
+@inject YearcardService _yearcardService
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@using papacrm_web.Components
+@using papacrm_web.Locales
+@inject IStringLocalizer<Resources> L
+
+<div class="checkin-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100">
+    <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
+        <h3 class="mb-4 text-center">@L["Check Yearcard Validity"]</h3>
+        <h8 class="mb-4 text-center">@L["Fill out one of the fields"]</h8>
+
+        <EditForm Model="@PhoneNumber" OnValidSubmit="CheckYearcard">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3 text-center">
+                <label for="phoneNumber" class="form-label mb-2">@L["Phone Number:"]</label>
+                <div class="input-group">
+                    <CountryCodeSelector @bind-SelectedCountryCode="SelectedCountryCode"></CountryCodeSelector>
+                    <input type="text" id="phoneNumber" @bind="PhoneNumber.Phone" class="form-control text-center" inputmode="numeric" style="min-width: 150px; max-width: 100%;" />
+                </div>
+            </div>
+            <div class="mb-3 text-center">
+                <label for="email" class="form-label mb-2">@L["Email:"]</label>
+                <input type="text" id="email" @bind="Email.Email" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
+            </div>
+            <div class="mb-3 text-center">
+                <label for="username" class="form-label mb-2">@L["Username:"]</label>
+                <input type="text" id="username" @bind="UserName.UserName" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
+            </div>
+            <button class="btn btn-primary w-100 mt-2" type="submit">@L["Check In"]</button>
+        </EditForm>
+
+        <div style="height: 56px; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            @if (!string.IsNullOrEmpty(ResultMessage))
+            {
+                <div class="alert @ResultClass text-center w-100 m-0" style="position:relative;">
+                    <div>@ResultMessage</div>
+                    <span class="fw-bold">@CountdownSeconds</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    public PhoneNumberDTO PhoneNumber { get; set; } = new PhoneNumberDTO();
+    public EmailDTO Email { get; set; } = new EmailDTO();
+    public UserNameDTO UserName { get; set; } = new UserNameDTO();
+    public string ResultMessage { get; set; } = string.Empty;
+    public string ResultClass { get; set; } = string.Empty;
+    private string LastChecked { get; set; } = string.Empty;
+    private int CountdownSeconds { get; set; } = 0;
+    private CancellationTokenSource? CountdownCts;
+    private bool CardIsValid { get; set; } = false;
+
+    private string SelectedCountryCode { get; set; } = "+45";
+
+    private async Task CheckYearcard()
+    {
+        // Reset animation and message
+        ResultMessage = "";
+        ResultClass = "";
+        LastChecked = "";
+        CountdownSeconds = 10;
+        CountdownCts?.Cancel();
+        CountdownCts = new CancellationTokenSource();
+        StateHasChanged();
+
+        try{
+            // Call the API with the entered phone number
+            if(PhoneNumber.Phone != null && !string.IsNullOrWhiteSpace(PhoneNumber.Phone)){
+                PhoneNumber.Phone = SelectedCountryCode + "-" + PhoneNumber.Phone;
+                CardIsValid = await _yearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
+                LastChecked = PhoneNumber.Phone;
+            }
+            if(!CardIsValid && Email.Email != null && !string.IsNullOrWhiteSpace(Email.Email)){
+                CardIsValid = await _yearcardService.CheckinWithEmailAsync(Email);
+                LastChecked = Email.Email;
+            }
+            if(!CardIsValid && UserName.UserName != null && !string.IsNullOrWhiteSpace(UserName.UserName)){
+                CardIsValid = await _yearcardService.CheckinWithUsernameAsync(UserName);
+                LastChecked = UserName.UserName;
+            }
+            
+            // Display message based on API result
+            if (CardIsValid)
+            {
+                ResultMessage = $"Card with {LastChecked} is valid!";
+                ResultClass = "alert-success";
+            }
+            else
+            {
+                ResultMessage = $"Card with {LastChecked} is invalid!";
+                ResultClass = "alert-danger";
+            }
+        }
+        catch(Exception ex){
+            ResultMessage = ex.Message;
+            ResultClass = "alert-danger";
+        }
+        
+        PhoneNumber = new PhoneNumberDTO();
+        Email = new EmailDTO();
+        UserName = new UserNameDTO();
+        CardIsValid = false;
+        StateHasChanged();
+
+        // Numeric countdown
+        var token = CountdownCts.Token;
+        for (int i = 10; i > 0; i--)
+        {
+            CountdownSeconds = i;
+            StateHasChanged();
+            try { await Task.Delay(1000, token); } catch { break; }
+        }
+        if (!token.IsCancellationRequested)
+        {
+            ResultMessage = string.Empty;
+            ResultClass = string.Empty;
+            CountdownSeconds = 0;
+            StateHasChanged();
+        }
+    }
+}
