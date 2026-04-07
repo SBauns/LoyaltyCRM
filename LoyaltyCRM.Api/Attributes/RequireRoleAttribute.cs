@@ -1,7 +1,7 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using PapasCRM_API.Enums;
+﻿using LoyaltyCRM.Domain.Enums;
+using Microsoft.AspNetCore.Authorization;
 
-namespace PapasCRM_API.Authorization
+namespace LoyaltyCRM.Authorization
 {
     public class RequireRoleAttribute : AuthorizeAttribute
     {

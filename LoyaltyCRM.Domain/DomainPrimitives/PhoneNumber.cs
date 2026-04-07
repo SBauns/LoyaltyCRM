@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using static PapasCRM_API.Services.TranslationService;
 
-namespace PapasCRM_API.DomainPrimitives
+namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class PhoneNumber
     {
@@ -24,20 +23,20 @@ namespace PapasCRM_API.DomainPrimitives
 
             if (string.IsNullOrEmpty(value))
             {
-                throw new ArgumentException(Translate("Phone number cannot be null or empty."));
+                throw new ArgumentException("Phone number cannot be null or empty."); //TRANSLATE
             }
 
             if(value.Length > 21){
-                throw new ArgumentException(Translate("Phone number is too long"));
+                throw new ArgumentException("Phone number is too long"); //TRANSLATE
             }
 
             if(value.Length < 5){
-                throw new ArgumentException(Translate("Phone number is too short"));
+                throw new ArgumentException("Phone number is too short"); //TRANSLATE
             }
 
             if (!Regex.IsMatch(value, pattern))
             {
-                throw new ArgumentException(Translate("Phone number must be only numbers"));
+                throw new ArgumentException("Phone number must be only numbers"); //TRANSLATE
             }
         }
     }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PapasCRM_API.Requests.Yearcard
+namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
     public class ValidityIntervalResponseAndRequest
     {

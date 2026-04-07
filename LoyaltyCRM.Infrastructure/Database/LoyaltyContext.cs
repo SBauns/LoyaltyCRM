@@ -1,11 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+﻿using LoyaltyCRM.Domain.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using PapasCRM_API.Requests;
-using PapasCRM_API.Entities;
 
-namespace PapasCRM_API.Context
+namespace LoyaltyCRM.Infrastructure.Context
 {
-    public class LoyaltyContext : IdentityDbContext<ApplicationUserEntity>
+    public class LoyaltyContext : IdentityDbContext<ApplicationUser>
     {
         public LoyaltyContext(DbContextOptions<LoyaltyContext> options)
         : base(options)
@@ -14,35 +13,36 @@ namespace PapasCRM_API.Context
 
         //public DbSet<PhoneEntity> Phones { get; set; } = null!;
 
-        public DbSet<YearcardEntity> Yearcards { get; set; } = null!;
+        public DbSet<Yearcard> Yearcards { get; set; } = null!;
 
-        public DbSet<ValidityIntervalEntity> ValidityIntervalEntities { get; set; } = null!;
+        public DbSet<ValidityInterval> ValidityInterval { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+            modelBuilder.ApplyConfigurationsFromAssembly(typeof(LoyaltyContext).Assembly);
 
-            modelBuilder.Entity<ApplicationUserEntity>()
+            modelBuilder.Entity<ApplicationUser>()
                 .HasIndex(y => y.Email)
                 .IsUnique();
 
-            modelBuilder.Entity<ApplicationUserEntity>()
+            modelBuilder.Entity<ApplicationUser>()
                 .HasIndex(y => y.PhoneNumber)
                 .IsUnique();
 
-            modelBuilder.Entity<YearcardEntity>()
+            modelBuilder.Entity<ApplicationUser>()
+                .HasOne(a => a.Yearcard)
+                .WithOne(y => y.User)
+                .HasForeignKey<Yearcard>(y => y.UserId)
+                .IsRequired();
+
+            modelBuilder.Entity<Yearcard>()
                 .HasIndex(y => y.CardId)
                 .IsUnique();
 
-            modelBuilder.Entity<ApplicationUserEntity>()
-                .HasOne(a => a.Yearcard)
-                .WithOne(y => y.User)
-                .HasForeignKey<YearcardEntity>(y => y.UserId)
-                .IsRequired();
-
-            modelBuilder.Entity<YearcardEntity>()
+            modelBuilder.Entity<Yearcard>()
                 .HasMany(y => y.ValidityIntervals)
-                .WithOne(v => v.YearcardEntity)
+                .WithOne(v => v.Yearcard)
                 .HasForeignKey(v => v.YearcardEntityId)
                 .OnDelete(DeleteBehavior.Cascade);
         }

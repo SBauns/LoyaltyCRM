@@ -3,8 +3,8 @@ using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.Extensions.Configuration;
-using PapasCRM_API.Services.Interfaces;
 
 public class MailchimpService : IMailService
 {

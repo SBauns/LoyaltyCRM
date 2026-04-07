@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PapasCRM_API.Requests.PropertyInterfaces
+namespace LoyaltyCRM.DTOs.Requests.PropertyInterfaces
 {
     public interface IHasId
     {

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace PapasCRM_API.DomainPrimitives
+namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class EndDate
     {

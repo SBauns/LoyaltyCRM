@@ -3,40 +3,34 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
+using AutoMapper;
+using LoyaltyCRM.Authorization;
+using LoyaltyCRM.Domain.DomainPrimitives;
+using LoyaltyCRM.Domain.Enums;
+using LoyaltyCRM.Domain.Exceptions;
+using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.DTOs.Requests.Yearcard;
+using LoyaltyCRM.Services.Repositories.Interfaces;
+using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using PapasCRM_API.Authorization;
-using PapasCRM_API.Context;
-using PapasCRM_API.DomainPrimitives;
-using PapasCRM_API.Requests;
-using PapasCRM_API.Requests.Yearcard;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Enums;
-using PapasCRM_API.Exceptions;
-using PapasCRM_API.Mappers;
-using PapasCRM_API.Models;
-using PapasCRM_API.Repositories;
-using PapasCRM_API.Repositories.Interfaces;
-using static PapasCRM_API.Services.TranslationService;
 
-namespace PapasCRM_API.Controllers
+namespace LoyaltyCRM.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class YearcardsController : ControllerBase
     {
-        private readonly IYearcardRepo _yearcardRepo;
-        private readonly ICustomerRepo _customerRepo;
+        private readonly IYearcardService _yearcardService;
 
-        private readonly IBarMapper _mapper;
+        private readonly IMapper _mapper;
 
-        public YearcardsController(IYearcardRepo yearcardRepo, IBarMapper mapper, ICustomerRepo customerRepo)
+        public YearcardsController(IYearcardService yearcardService, IMapper mapper)
         {
-            _yearcardRepo = yearcardRepo;
-            _customerRepo = customerRepo;
+            _yearcardService = yearcardService;
             _mapper = mapper;
         }
 
@@ -46,39 +40,10 @@ namespace PapasCRM_API.Controllers
         [RequireRole(Role.Papa)]
         public async Task<ActionResult<IEnumerable<YearcardGetResponse>>> GetYearcards()
         {
-            List<YearcardGetResponse> yearcards = new List<YearcardGetResponse>();
-            IEnumerable<YearcardEntity> yearcardsEntities = await _yearcardRepo.GetYearcards();
-            foreach (var yearcardEntity in yearcardsEntities)
-            {
-                YearcardGetResponse response = _mapper.ReflectTo<YearcardEntity, YearcardGetResponse>(yearcardEntity);
-                response = _mapper.ReflectTo(yearcardEntity.User, response);
-                response.ValidTo = yearcardEntity.ValidityIntervals.Any()
-                    ? yearcardEntity.ValidityIntervals.Max(v => v.EndDate)
-                    : new DateTime();
-                foreach (ValidityIntervalEntity validityIntervalEntity in yearcardEntity.ValidityIntervals)
-                {
-                    ValidityIntervalResponseAndRequest validityIntervalResponse = _mapper.ReflectTo<ValidityIntervalEntity, ValidityIntervalResponseAndRequest>(validityIntervalEntity);
-                    response.ValidityIntervals.Add(validityIntervalResponse);
-                }
-                yearcards.Add(response);
-            }
-            return Ok(yearcards);
-        }
+            IEnumerable<Yearcard> yearcards = await _yearcardService.GetYearcards();
 
-        //GET ALL UNCONFIRMED YEARCARDS
-        [HttpGet("unconfirmed")]
-        [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<IEnumerable<YearcardGetUnconfirmedResponse>>> GetUnconfirmedYearcards()
-        {
-            List<YearcardGetUnconfirmedResponse> yearcards = new List<YearcardGetUnconfirmedResponse>();
-            IEnumerable<YearcardEntity> yearcardsEntities = await _yearcardRepo.GetUnconfirmedYearcards();
-            foreach (var yearcardEntity in yearcardsEntities)
-            {
-                YearcardGetUnconfirmedResponse yearcard = _mapper.ReflectTo<YearcardEntity, YearcardGetUnconfirmedResponse>(yearcardEntity);
-                yearcard = _mapper.ReflectTo(yearcardEntity.User, yearcard);
-                yearcards.Add(yearcard);
-            }
-            return Ok(yearcards);
+            var response = _mapper.Map<IEnumerable<YearcardGetResponse>>(yearcards);
+            return Ok(response);
         }
 
         //GET SPECIFIC YEARCARD
@@ -89,9 +54,9 @@ namespace PapasCRM_API.Controllers
         {
             try
             {
-                YearcardEntity yearcardEntity = await _yearcardRepo.GetYearcard(id);
-                YearcardGetResponse response = _mapper.ReflectTo<YearcardEntity, YearcardGetResponse>(yearcardEntity);
-                response = _mapper.ReflectTo(yearcardEntity.User, response);
+                Yearcard yearcard = await _yearcardService.GetYearcard(id);
+
+                var response = _mapper.Map<YearcardGetResponse>(yearcard);
 
                 return response;   
             }
@@ -115,9 +80,9 @@ namespace PapasCRM_API.Controllers
             }
             try
             {
-                YearcardEntity updatedYearcard = _mapper.ReflectTo<YearcardUpdateRequest, YearcardEntity>(yearcard);
-                updatedYearcard.User = _mapper.ReflectTo<YearcardUpdateRequest, ApplicationUserEntity>(yearcard);
-                YearcardEntity updated = await _yearcardRepo.UpdateYearcard(id, updatedYearcard);
+                Yearcard updatedYearcard = _mapper.Map<Yearcard>(yearcard);
+
+                Yearcard updated = await _yearcardService.UpdateYearcard(id, updatedYearcard);
 
                 if (updated == null)
                 {
@@ -138,32 +103,16 @@ namespace PapasCRM_API.Controllers
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
         [Authorize]
-        public async Task<ActionResult<YearcardCreateResponse>> PostYearcard(YearcardCreateRequest yearcard)
+        public async Task<ActionResult<YearcardCreateResponse>> PostYearcard(YearcardCreateRequest request)
         {
             try
             {
-                ApplicationUserEntity newCustomer = _mapper.ReflectTo<YearcardCreateRequest, ApplicationUserEntity>(yearcard);
-                ApplicationUserEntity Customer = await _customerRepo.CreateOrReturnFirstCustomer(newCustomer);
+                Yearcard yearcard = _mapper.Map<Yearcard>(request);
+                Yearcard createdYearcard = await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(request.StartDate));
 
-                if (Customer.Yearcard == null)
-                {
-                    YearcardEntity newYearcard = _mapper.ReflectTo<YearcardCreateRequest, YearcardEntity>(yearcard);
-                    YearcardEntity NewYearCard = await _yearcardRepo.CreateYearcard(newYearcard, Customer.Id);
+                var response = _mapper.Map<YearcardCreateRequest>(createdYearcard);
 
-                    YearcardCreateResponse response = _mapper.ReflectTo<YearcardEntity, YearcardCreateResponse>(NewYearCard);
-                    response = _mapper.ReflectTo(Customer, response);
-
-                    return CreatedAtAction("GetYearcard", new { id = NewYearCard.Id }, response);
-                }
-                else
-                {
-                    Customer.Yearcard.StartDate = yearcard.StartDate;
-                    await _yearcardRepo.AddValidityToCurrentYearcard(Customer.Yearcard);
-                    YearcardCreateResponse response = _mapper.ReflectTo<YearcardEntity, YearcardCreateResponse>(Customer.Yearcard);
-                    response = _mapper.ReflectTo(Customer, response);
-
-                    return CreatedAtAction("GetYearcard", new { id = Customer.Yearcard.Id }, response);
-                }
+                return CreatedAtAction("PostYearcard", new { id = createdYearcard.Id }, response);
             }
             catch (ArgumentException ex)
             {
@@ -173,73 +122,14 @@ namespace PapasCRM_API.Controllers
             catch (DbUpdateException ex)
             {
                 // Conflict for database-related issues
-                return Conflict(new { message = Translate("A database error occurred while creating the yearcard."), details = ex.Message });
+                return Conflict(new { message = "A database error occurred while creating the yearcard.", details = ex.Message }); //TRANSLATE
             }
             catch (Exception ex)
             {
                 // Internal Server Error for any other unhandled exceptions
-                return StatusCode(500, new { message = Translate("An unexpected error occurred."), details = ex.Message });
+                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message }); //TRANSLATE
             }
 
-        }
-
-        //CONFIRM UNCONFIRMED YEARCARD
-        // PUT: api/Yearcards/5
-        //TODO Only Bartenders or Admins should be allowed to do this.
-        [HttpPut("confirm/{id}")]
-        [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<IActionResult> ConfirmYearcard(Guid id)
-        {
-            try
-            {
-                bool isUpdated = await _yearcardRepo.ConfirmYearcard(id);
-
-                if (!isUpdated)
-                {
-                    return NotFound();
-                }
-
-                return NoContent();
-            }
-            catch (EntityNotFoundException notFound)
-            {
-                return NotFound(notFound.Message);
-            }
-            catch (DbUpdateException dbEx)
-            {
-                return Conflict(new { message = Translate("Database update error occurred."), details = dbEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
-        }
-
-        //REJECT UNCONFIRMED YEARCARD
-        // PUT: api/Yearcards/5
-        //TODO Only Bartenders or Admins should be allowed to do this.
-        [HttpPut("reject/{id}")]
-        [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<IActionResult> RejectYearcard(Guid id)
-        {
-            try
-            {
-                bool isUpdated = await _yearcardRepo.RejectYearcard(id);
-
-                return NoContent();
-            }
-            catch (EntityNotFoundException notFound)
-            {
-                return NotFound(notFound.Message);
-            }
-            catch (DbUpdateException dbEx)
-            {
-                return Conflict(new { message = Translate("Database update error occurred."), details = dbEx.Message });
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(new { message = ex.Message });
-            }
         }
 
         //DELETE YEARCARD
@@ -248,7 +138,7 @@ namespace PapasCRM_API.Controllers
         [RequireRole(Role.Papa)]
         public async Task<IActionResult> DeleteYearcard(Guid id)
         {
-            bool isDeleted = await _yearcardRepo.DeleteYearcard(id);
+            bool isDeleted = await _yearcardService.DeleteYearcard(id);
             if (!isDeleted)
             {
                 return NotFound();
@@ -264,7 +154,7 @@ namespace PapasCRM_API.Controllers
         [RequireRole(Role.Papa, Role.Bartender)]
         public async Task<ActionResult<bool>> CheckInWithYearcard(Guid id)
         {
-            return await _yearcardRepo.CheckInWithYearcards(id);
+            return await _yearcardService.CheckInWithYearcards(id);
         }
 
         //CHECK IF YEARCARD IS VALID WITH PHONE
@@ -275,7 +165,7 @@ namespace PapasCRM_API.Controllers
             try
             {
                 PhoneNumber validatedNumber = new PhoneNumber(phone.phone!);
-                return await _yearcardRepo.CheckInWithPhone(validatedNumber);      
+                return await _yearcardService.CheckInWithPhone(validatedNumber);      
             }
             catch (Exception ex)
             {
@@ -291,7 +181,7 @@ namespace PapasCRM_API.Controllers
             try
             {
                 Email validatedEmail = new Email(email.email!);
-                return await _yearcardRepo.CheckInWithEmail(validatedEmail);      
+                return await _yearcardService.CheckInWithEmail(validatedEmail);      
             }
             catch (Exception ex)
             {
@@ -307,7 +197,7 @@ namespace PapasCRM_API.Controllers
             try
             {
                 UserName validatedUserName = new UserName(userName.userName!);
-                return await _yearcardRepo.CheckInWithUserName(validatedUserName);      
+                return await _yearcardService.CheckInWithUserName(validatedUserName);      
             }
             catch (Exception ex)
             {
@@ -318,12 +208,12 @@ namespace PapasCRM_API.Controllers
         //CHECK IF YEARCARD IS VALID WITH NAME
         [HttpPost("checkinname")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<IEnumerable<YearcardEntity>>> CheckInWithName(NameRequest name)
+        public async Task<ActionResult<IEnumerable<Yearcard>>> CheckInWithName(NameRequest name)
         {
             try
             {
                 Name validatedName = new Name(name.name!);
-                return Ok(await _yearcardRepo.CheckInWithName(validatedName.GetValue())); 
+                return Ok(await _yearcardService.CheckInWithName(validatedName.GetValue())); //TODO CREATE A PROPER DTO HERE
             }
             catch (Exception ex)
             {

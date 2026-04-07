@@ -62,7 +62,7 @@ dotnet add LoyaltyCRM.Infrastructure package Microsoft.Extensions.Configuration.
 
 # Authentication & Authorization (JWT)
 dotnet add LoyaltyCRM.Api package Microsoft.AspNetCore.Authentication.JwtBearer
-dotnet add LoyaltyCRM.Domain package Microsoft.AspNet.Identity.EntityFramework
+dotnet add LoyaltyCRM.Domain package Microsoft.AspNetCore.Identity.EntityFrameworkCore
 
 # FluentValidation (optional but recommended)
 # dotnet add LoyaltyCRM.Services package FluentValidation

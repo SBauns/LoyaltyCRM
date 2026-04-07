@@ -1,36 +1,29 @@
+using LoyaltyCRM.Api.Middleware;
+using LoyaltyCRM.Domain.Enums;
+using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.Infrastructure.Context;
+using LoyaltyCRM.Infrastructure.Seeders;
+using LoyaltyCRM.Services.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.IdentityModel.Tokens;
-using PapasCRM_API.Context;
-using PapasCRM_API.Requests;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Enums;
-using PapasCRM_API.Mappers;
-using PapasCRM_API.Middleware;
-using PapasCRM_API.Repositories;
-using PapasCRM_API.Repositories.Interfaces;
-using PapasCRM_API.Seeders;
-using PapasCRM_API.Services.Interfaces;
-using System.Configuration;
-using System.Data.SqlClient;
-using System.Text;
-using PapasCRM_API.Services;
+using LoyaltyCRM.Infrastructure.Database;
+using LoyaltyCRM.Infrastructure.Security;
+using LoyaltyCRM.Services;
+using Microsoft.AspNetCore.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddSecurity(builder.Configuration);
 
 // Configure Identity
-builder.Services.AddIdentity<ApplicationUserEntity, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = false; // No digit required
     options.Password.RequiredLength = 1; // Minimum length of 8 characters
@@ -41,16 +34,16 @@ builder.Services.AddIdentity<ApplicationUserEntity, IdentityRole>(options =>
     options.User.RequireUniqueEmail = false;
     options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ æøåÆØÅ"; // Allow letters, digits, and specific special characters
 })
-    .AddEntityFrameworkStores<BarContext>()
+    .AddEntityFrameworkStores<LoyaltyContext>()
     .AddDefaultTokenProviders();
 
 //Role Policies
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("OnlyBartendersOrAdmins", policy =>
-        policy.RequireRole(Role.Bartender.ToString(), Role.Papa.ToString()));
+        policy.RequireRole(nameof(Role.Bartender), nameof(Role.Papa)));
     options.AddPolicy("OnlyAdmins", policy =>
-        policy.RequireRole(Role.Papa.ToString()));
+        policy.RequireRole(nameof(Role.Papa)));
 });
 
 //CORS POLICY
@@ -69,10 +62,10 @@ builder.Services.AddCors(options =>
     });
 });
 
+builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+
 // Use DefaultConnection by default, override with env variable in Docker
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-builder.Services.AddDbContext<BarContext>(options =>
-    options.UseSqlServer(connectionString));
+builder.Services.AddDatabase(builder.Configuration);
 
 //Add Yearcard cleaner that will remove invalid yearcards
 builder.Services.AddHostedService<YearcardCleanupService>();
@@ -135,14 +128,7 @@ builder.Services.AddAuthentication(options =>
 
 builder.Services.AddAuthorization();
 
-
-//Add Repos
-builder.Services.AddScoped<ICustomerRepo, CustomerRepo>();
-builder.Services.AddScoped<IYearcardRepo, YearcardRepo>();
-
-//Add extra Services
-builder.Services.AddHttpClient<IMailService, MailchimpService>();
-builder.Services.AddSingleton<IBarMapper, BarMapper>();
+builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
@@ -151,8 +137,8 @@ TranslationService.HttpContextAccessor = app.Services.GetRequiredService<IHttpCo
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    // app.UseSwagger();
+    // app.UseSwaggerUI();
     // In development, do NOT redirect HTTP to HTTPS (to avoid CORS preflight redirect issues)
 }
 else
@@ -173,7 +159,7 @@ app.MapControllers();
 
 using (var scope = app.Services.CreateScope())
 {
-    var context = scope.ServiceProvider.GetRequiredService<BarContext>();
+    var context = scope.ServiceProvider.GetRequiredService<LoyaltyContext>();
 
     // Retry logic for DB connection using EF Core
     var maxRetries = 5;
@@ -222,7 +208,7 @@ using (var scope = app.Services.CreateScope())
 
     //Seed Roles and base users if not already there
     var services = scope.ServiceProvider;
-    await DataSeeder.SeedUsersAsync(services, builder, logger);
+    await DataSeeder.SeedUsersAsync(services, builder.Configuration, logger);
 
     // if(services.GetRequiredService<IHostEnvironment>().IsDevelopment())
     //     await DataSeeder.SeedTestData(services, context);

@@ -4,10 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using PapasCRM_API.Requests.PropertyInterfaces;
 using System.ComponentModel.DataAnnotations.Schema;
+using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
-namespace PapasCRM_API.Requests.Yearcard
+namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
     public class YearcardGetUnconfirmedResponse : IHasId, IHasCardId, IHasIsValidForDiscount, IHasExposedIdentification
     {

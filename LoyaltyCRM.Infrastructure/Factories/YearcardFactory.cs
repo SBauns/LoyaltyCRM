@@ -2,26 +2,25 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Models;
 using Bogus;
 using Bogus.DataSets;
+using LoyaltyCRM.Domain.Models;
 
-namespace PapasCRM_API.Factories
+namespace LoyaltyCRM.Services.Factories
 {
 
 public static class YearcardEntityFactory
 {
-        private static readonly Faker<YearcardEntity> Faker = new Faker<YearcardEntity>()
+        private static readonly Faker<Yearcard> Faker = new Faker<Yearcard>()
             .RuleFor(y => y.Id, f => f.Random.Guid())
-            .RuleFor(y => y.CardId, f => f.Random.Int(1, 100000))
+            .RuleFor(y => y.CardId!.GetValue(), f => f.Random.Int(1, 100000))
             // .RuleFor(y => y.Phone, f => f.Phone.PhoneNumber("########"))
-            .RuleFor(y => y.Name, f => f.Name.FirstName());
+            .RuleFor(y => y.Name!.GetValue(), f => f.Name.FirstName());
             // .RuleFor(y => y.ValidTo, f => f.Date.Future(2, DateTime.Today.AddYears(-1))); // One year from now
             // .RuleFor(y => y.Email, f => f.Internet.Email())
             // .RuleFor(y => y.IsConfirmed, f => f.Random.Bool());
 
-    public static YearcardEntity Create(ApplicationUserEntity user, Action<YearcardEntity>? customizer = null)
+    public static Yearcard Create(ApplicationUser user, Action<Yearcard>? customizer = null)
     {
         // Create YearcardEntity with default fake data
         var yearcard = Faker.Clone()
@@ -35,7 +34,7 @@ public static class YearcardEntityFactory
         return yearcard;
     }
 
-    public static List<YearcardEntity> CreateMany(int count, ApplicationUserEntity user, Action<YearcardEntity>? customizer = null)
+    public static List<Yearcard> CreateMany(int count, ApplicationUser user, Action<Yearcard>? customizer = null)
     {
         var yearcards = Enumerable.Range(0, count)
             .Select(_ => Create(user, customizer))

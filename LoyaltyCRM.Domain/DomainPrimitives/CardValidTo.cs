@@ -1,4 +1,4 @@
-﻿namespace PapasCRM_API.DomainPrimitives
+﻿namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class CardValidTo
     {

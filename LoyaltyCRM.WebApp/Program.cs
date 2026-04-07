@@ -1,9 +1,10 @@
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
-using papacrm_web;
+using LoyaltyCRM;
 using System.Globalization;
 using Microsoft.JSInterop;
+using LoyaltyCRM.WebApp;
 
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);

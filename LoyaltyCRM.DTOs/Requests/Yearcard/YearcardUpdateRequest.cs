@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Requests.PropertyInterfaces;
+using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
-namespace PapasCRM_API.Requests.Yearcard
+namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
     public class YearcardUpdateRequest : Request, IHasId, IHasCardId, IHasEmail, IHasPhoneNumber, IHasName, IHasUserName, IHasValidTo
     {
@@ -32,6 +31,6 @@ namespace PapasCRM_API.Requests.Yearcard
         [Required]
         public DateTime ValidTo { get; set; }
         
-        public List<ValidityIntervalEntity> ValidityIntervals { get; set; } = new List<ValidityIntervalEntity>();
+        public List<ValidityIntervalResponseAndRequest> ValidityIntervals { get; set; } = new List<ValidityIntervalResponseAndRequest>();
     }
 }

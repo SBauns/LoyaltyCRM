@@ -1,15 +1,12 @@
+using LoyaltyCRM.Authorization;
+using LoyaltyCRM.Domain.Enums;
+using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using PapasCRM_API.Authorization;
-using PapasCRM_API.Requests;
-using PapasCRM_API.Enums;
-using PapasCRM_API.Models;
-using PapasCRM_API.Repositories;
-using PapasCRM_API.Services.Interfaces;
 using System.Security.Claims;
 
-namespace PapasCRM_API.Controllers
+namespace LoyaltyCRM.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
@@ -49,11 +46,11 @@ namespace PapasCRM_API.Controllers
         }
 
         public class MailDTO{
-            public string ToMail {get; set;}
+            public required string ToMail {get; set;}
 
-            public string Subject {get; set;}
+            public required string Subject {get; set;}
 
-            public string HtmlContent {get; set;}
+            public required string HtmlContent {get; set;}
         }
     }
 }

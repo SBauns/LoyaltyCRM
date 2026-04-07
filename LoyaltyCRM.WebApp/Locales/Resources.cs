@@ -1,7 +1,7 @@
 using System.Resources;
 using System.Globalization;
 
-namespace papacrm_web.Locales
+namespace LoyaltyCRM.WebApp.Locales
 {
     public class Resources
     {

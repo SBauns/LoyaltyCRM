@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PapasCRM_API.DomainPrimitives;
+using LoyaltyCRM.Domain.DomainPrimitives;
 
-namespace PapasCRM_API.Models
+namespace LoyaltyCRM.Domain.Models
 {
     public class ValidityInterval
     {
@@ -12,7 +12,11 @@ namespace PapasCRM_API.Models
         public StartDate StartDate { get; set; }
         public EndDate EndDate { get; set; }
 
-        public ValidityInterval(Guid? id, StartDate startDate, EndDate? endDate)
+        //Relationship
+        public Guid YearcardEntityId { get; set; }
+        public Yearcard Yearcard { get; set; } 
+
+        public ValidityInterval(StartDate startDate, EndDate? endDate, Guid? id)
         {
             Id = id;
             StartDate = startDate;

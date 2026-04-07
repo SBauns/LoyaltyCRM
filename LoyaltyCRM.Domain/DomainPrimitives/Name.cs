@@ -1,10 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.IdentityModel.Protocols.OpenIdConnect;
-using System.Text.RegularExpressions;
-using static PapasCRM_API.Services.TranslationService;
+﻿using System.Text.RegularExpressions;
 
-
-namespace PapasCRM_API.DomainPrimitives
+namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class Name
     {
@@ -18,18 +14,18 @@ namespace PapasCRM_API.DomainPrimitives
 
         public string GetValue()
         {
-            return this.value;
+            return value;
         }
         private void ValidateName(string value)
         {
             if(value.Length > 50)
-                throw new ArgumentException(Translate("Name is too long."));
+                throw new ArgumentException("Name is too long."); //TRANSLATE
 
             //Allows only letters of all kinds and the special characters ( '-.,~)
             string pattern = @"^[a-zA-ZÀ-ÖØ-öø-ÿ]+([ '-.,~][a-zA-ZÀ-ÖØ-öø-ÿ]+)*$";
 
             if (!Regex.IsMatch(value, pattern) && !string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException(Translate("Name is invalid."));
+                throw new ArgumentException("Name is invalid.");
 
         }
 

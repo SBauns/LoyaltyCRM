@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static PapasCRM_API.Services.TranslationService;
+using static LoyaltyCRM.Services.Services.TranslationService;
 
-namespace PapasCRM_API.Middleware
+namespace LoyaltyCRM.Api.Middleware
 {
     public class ExceptionHandlingMiddleware
     {

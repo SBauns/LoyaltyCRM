@@ -1,20 +1,21 @@
-﻿using PapasCRM_API.DomainPrimitives;
-using PapasCRM_API.Requests;
-using PapasCRM_API.Entities;
+﻿using LoyaltyCRM.Domain.DomainPrimitives;
 
-namespace PapasCRM_API.Models
+namespace LoyaltyCRM.Domain.Models
 {
-    public class Yearcard
+    public class Yearcard : WithTimestamps
     {
         public Guid? Id { get; }
         public Name? Name { get; }
-        public CardNumber CardId { get; }
+        public CardNumber? CardId { get; }
         // public CardValidTo ValidTo { get; }
         private int discountValidityMonths = 3;
 
-        public List<ValidityInterval> ValidityIntervals { get; } = new List<ValidityInterval>();
+        //Relationships
+        public string UserId { get; set; }
+        public ApplicationUser User { get; set; }
+        public List<ValidityInterval> ValidityIntervals { get; set; } = new List<ValidityInterval>();
 
-        public Yearcard(Guid? id, CardNumber cardId)
+        public Yearcard(Guid? id, CardNumber? cardId)
         {
             Id = id;
             CardId = cardId;

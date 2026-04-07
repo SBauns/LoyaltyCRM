@@ -1,15 +1,9 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Requests.PropertyInterfaces;
+using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
-namespace PapasCRM_API.Requests.Yearcard
+namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
-    public class YearcardGetResponse : IHasId, IHasPhoneNumber, IHasCardId, IHasFirstName, IHasName, IHasValidTo, IHasEmail, IHasIsValidForDiscount
+    public class YearcardGetResponse : IHasId, IHasPhoneNumber, IHasCardId, IHasName, IHasValidTo, IHasEmail, IHasIsValidForDiscount
     {
         public Guid? Id { get; set; }
 
@@ -20,8 +14,8 @@ namespace PapasCRM_API.Requests.Yearcard
         [MaxLength(50)]
         public string? PhoneNumber { get; set; }
 
-        [MaxLength(50)]
-        public string? FirstName {get; set;}
+        // [MaxLength(50)]
+        // public string? FirstName {get; set;}
 
         [MaxLength(50)]
         public string? UserName {get; set;}

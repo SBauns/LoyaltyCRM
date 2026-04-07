@@ -1,10 +1,10 @@
 using System.IO;
 using System.Threading.Tasks;
+using LoyaltyCRM.Authorization;
+using LoyaltyCRM.Domain.Enums;
 using Microsoft.AspNetCore.Mvc;
-using PapasCRM_API.Authorization;
-using PapasCRM_API.Enums;
 
-namespace PapasCRM_API.Controllers
+namespace LoyaltyCRM.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]

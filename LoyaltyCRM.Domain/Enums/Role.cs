@@ -1,4 +1,4 @@
-﻿namespace PapasCRM_API.Enums
+﻿namespace LoyaltyCRM.Domain.Enums
 {
     public enum Role
     {

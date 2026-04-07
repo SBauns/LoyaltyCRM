@@ -1,27 +1,30 @@
 ﻿using System.Transactions;
+using LoyaltyCRM.Domain.Enums;
+using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.Infrastructure.Context;
+using LoyaltyCRM.Services.Factories;
 using Microsoft.AspNetCore.Identity;
-using PapasCRM_API.Context;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Enums;
-using PapasCRM_API.Factories;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 
-namespace PapasCRM_API.Seeders
+namespace LoyaltyCRM.Infrastructure.Seeders
 {
     public static class DataSeeder
     {
-        public static async Task SeedUsersAsync(IServiceProvider serviceProvider, WebApplicationBuilder builder, ILogger logger)
+        public static async Task SeedUsersAsync(IServiceProvider serviceProvider, IConfiguration configuration, ILogger logger)
         {
 
-            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUserEntity>>();
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
             // Ensure roles exist
-            await EnsureRoleAsync(roleManager, Role.Papa.ToString());
-            await EnsureRoleAsync(roleManager, Role.Bartender.ToString());
-            await EnsureRoleAsync(roleManager, Role.Customer.ToString());
+            await EnsureRoleAsync(roleManager, nameof(Role.Papa));
+            await EnsureRoleAsync(roleManager, nameof(Role.Bartender));
+            await EnsureRoleAsync(roleManager, nameof(Role.Customer));
 
-            string papauser = builder.Configuration["Users:PapaUser"] ?? Environment.GetEnvironmentVariable("USERS_PAPAUSER");
-            string papapassword = builder.Configuration["Users:PapaPassword"] ?? Environment.GetEnvironmentVariable("USERS_PAPAPASSWORD");
+            string papauser = configuration["Users:PapaUser"] ?? Environment.GetEnvironmentVariable("USERS_PAPAUSER");
+            string papapassword = configuration["Users:PapaPassword"] ?? Environment.GetEnvironmentVariable("USERS_PAPAPASSWORD");
 
             // Seed Admin user
             await EnsureUserAsync(
@@ -35,11 +38,11 @@ namespace PapasCRM_API.Seeders
             // Seed Bartender user
             await EnsureUserAsync(
                 userManager,
-                builder.Configuration["Users:BartenderUser"] ?? Environment.GetEnvironmentVariable("USERS_BARTENDERUSER"),
-                builder.Configuration["Users:BartenderPassword"] ?? Environment.GetEnvironmentVariable("USERS_PAPAPASSWORD"),
+                configuration["Users:BartenderUser"] ?? Environment.GetEnvironmentVariable("USERS_BARTENDERUSER"),
+                configuration["Users:BartenderPassword"] ?? Environment.GetEnvironmentVariable("USERS_PAPAPASSWORD"),
                 Role.Bartender.ToString());
 
-            LoggerExtensions.LogInformation(logger, "Bartender user seeded with username: {UserName}", builder.Configuration["Users:BartenderUser"] ?? Environment.GetEnvironmentVariable("USERS_BARTENDERUSER"));
+            LoggerExtensions.LogInformation(logger, "Bartender user seeded with username: {UserName}", configuration["Users:BartenderUser"] ?? Environment.GetEnvironmentVariable("USERS_BARTENDERUSER"));
 
             // Seed Customer user
             // await EnsureUserAsync(
@@ -57,11 +60,11 @@ namespace PapasCRM_API.Seeders
             }
         }
 
-        private static async Task EnsureUserAsync(UserManager<ApplicationUserEntity> userManager, string userName, string password, string role)
+        private static async Task EnsureUserAsync(UserManager<ApplicationUser> userManager, string userName, string password, string role)
         {
             if (await userManager.FindByNameAsync(userName) == null)
             {
-                var user = new ApplicationUserEntity
+                var user = new ApplicationUser
                 {
                     UserName = userName,
                     EmailConfirmed = true // You can set this to true if you don't need email confirmation
@@ -79,7 +82,7 @@ namespace PapasCRM_API.Seeders
             }
         }
 
-        public static async Task SeedTestData(IServiceProvider serviceProvider, BarContext context)
+        public static async Task SeedTestData(IServiceProvider serviceProvider, LoyaltyContext context)
         {
             if(context.Yearcards.Count() > 0){
                 return;
@@ -91,7 +94,7 @@ namespace PapasCRM_API.Seeders
             {
                 // var users = ApplicationUserFactory.CreateMany(10000); //TODO USE FOR STRESS TESTING
                 var users = ApplicationUserFactory.CreateMany(10);
-                var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUserEntity>>();
+                var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
                 var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
 
                 int counter = 1;
@@ -104,9 +107,9 @@ namespace PapasCRM_API.Seeders
                     {
                         await userManager.AddToRoleAsync(user, Role.Customer.ToString());
                         // Create a YearcardEntity for the user after successful creation
-                        YearcardEntity yearcard = YearcardEntityFactory.Create(user);
+                        Yearcard yearcard = YearcardEntityFactory.Create(user);
 
-                        yearcard.CardId = counter;
+                        yearcard.CardId!.SetValue(counter);
                         // Add the YearcardEntity to the context
                         await context.Yearcards.AddAsync(yearcard);
                     }

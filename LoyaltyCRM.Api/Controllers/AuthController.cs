@@ -6,24 +6,23 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Configuration;
-using PapasCRM_API.Requests;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Authorization;
-using PapasCRM_API.Enums;
-using static PapasCRM_API.Services.TranslationService;
+using static LoyaltyCRM.Services.Services.TranslationService;
+using LoyaltyCRM.Authorization;
+using LoyaltyCRM.Domain.Enums;
+using LoyaltyCRM.Domain.Models;
 
 
-namespace PapasCRM_API.Controllers
+namespace LoyaltyCRM.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly UserManager<ApplicationUserEntity> _userManager;
-        private readonly SignInManager<ApplicationUserEntity> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<ApplicationUserEntity> userManager, SignInManager<ApplicationUserEntity> signInManager, IConfiguration configuration)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _signInManager = signInManager;
@@ -54,7 +53,7 @@ namespace PapasCRM_API.Controllers
             if (result.Succeeded)
             {
                 // _logger.LogInformation("User {UserName} logged in successfully.", request.UserName);
-                ApplicationUserEntity? user = await _userManager.FindByNameAsync(request.UserName);
+                ApplicationUser? user = await _userManager.FindByNameAsync(request.UserName);
                 if (user != null)
                 {
                     string token = GenerateJwtToken(user);
@@ -66,7 +65,7 @@ namespace PapasCRM_API.Controllers
             return Unauthorized(new { Message = Translate("Invalid login attempt") });
         }
 
-        private string GenerateJwtToken(ApplicationUserEntity user)
+        private string GenerateJwtToken(ApplicationUser user)
         {
             string secretKey = _configuration["JwtSettings:SecretKey"] ?? throw new InvalidOperationException("Secret key is not configured.");
             var keyBytes = Convert.FromBase64String(secretKey); // Decode from Base64
@@ -126,14 +125,14 @@ namespace PapasCRM_API.Controllers
 
     public class ChangePasswordRequest
     {
-        public string UserName { get; set; }
-        public string CurrentPassword { get; set; }
-        public string NewPassword { get; set; }
+        public required string UserName { get; set; }
+        public required string CurrentPassword { get; set; }
+        public required string NewPassword { get; set; }
     }
 
     public class LoginRequest
     {
-        public string UserName { get; set; }
-        public string Password { get; set; }
+        public required string UserName { get; set; }
+        public required string Password { get; set; }
     }
 }

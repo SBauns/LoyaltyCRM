@@ -4,17 +4,16 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.DependencyInjection;
-using PapasCRM_API.Context;
 using Microsoft.EntityFrameworkCore;
-using PapasCRM_API.Services.Interfaces;
-using PapasCRM_API.Entities;
-using PapasCRM_API.Mappers;
-using PapasCRM_API.Models; // Add this
+using LoyaltyCRM.Services.Services.Interfaces;
+using LoyaltyCRM.Infrastructure.Context;
+using LoyaltyCRM.Domain.Models;
+
+
 
 public class YearcardCleanupService : IHostedService, IDisposable, IYearcardCleanupService
 {
     private readonly ILogger<YearcardCleanupService> _logger;
-    private readonly IBarMapper _mapper;
     private readonly IServiceScopeFactory _scopeFactory; // Add this
     private Timer? _timer;
 
@@ -25,11 +24,10 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
     // Set your timezone here (e.g., "Central European Standard Time")
     private readonly TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
 
-    public YearcardCleanupService(ILogger<YearcardCleanupService> logger, IServiceScopeFactory scopeFactory, IBarMapper mapper) // Update constructor
+    public YearcardCleanupService(ILogger<YearcardCleanupService> logger, IServiceScopeFactory scopeFactory) // Update constructor
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "ILogger cannot be null.");
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory), "IServiceScopeFactory cannot be null.");
-        _mapper = mapper ?? throw new ArgumentNullException(nameof(mapper), "IBarMapper cannot be null.");
     }
 
     public Task StartAsync(CancellationToken cancellationToken)
@@ -66,24 +64,23 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
 
         using (var scope = _scopeFactory.CreateScope()) // Create a new scope
         {
-            var context = scope.ServiceProvider.GetRequiredService<BarContext>(); // Get BarContext from the scope
+            var context = scope.ServiceProvider.GetRequiredService<LoyaltyContext>(); // Get BarContext from the scope
 
-            List<YearcardEntity> expiredYearcards = new List<YearcardEntity>();
+            List<Yearcard> expiredYearcards = new List<Yearcard>();
             //Delete Yearcards one month after they invalidate
-            List<YearcardEntity> yearcardsEntities = await context.Yearcards
+            List<Yearcard> yearcards = await context.Yearcards
                 .Include(y => y.ValidityIntervals)
                 .ToListAsync();
 
-            foreach (YearcardEntity yearcardEntity in yearcardsEntities)
+            foreach (Yearcard yearcard in yearcards)
             {
-                Yearcard yearcard = _mapper.EntityToYearcard(yearcardEntity);
                 if (yearcard.IsYearcardValidForDiscount() == false)
                 {
-                    expiredYearcards.Add(yearcardEntity);
+                    expiredYearcards.Add(yearcard);
                 }
                 else
                 {
-                    _logger.LogInformation($"Yearcard {yearcardEntity.CardId} is still valid.");
+                    _logger.LogInformation($"Yearcard {yearcard.CardId} is still valid.");
                 }
             }
 

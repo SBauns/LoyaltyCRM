@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
 
-namespace PapasCRM_API.Services
+namespace LoyaltyCRM.Services.Services
 {
     public static class TranslationService
     {

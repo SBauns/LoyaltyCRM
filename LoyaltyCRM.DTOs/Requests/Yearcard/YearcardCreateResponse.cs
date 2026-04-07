@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using PapasCRM_API.Requests.PropertyInterfaces;
+using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
-namespace PapasCRM_API.Requests.Yearcard
+namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
     public class YearcardCreateResponse : IHasId, IHasCardId, IHasName, IHasEmail, IHasPhoneNumber, IHasUserName
     {

@@ -1,7 +1,6 @@
 ﻿using System.Text.RegularExpressions;
-using static PapasCRM_API.Services.TranslationService;
 
-namespace PapasCRM_API.DomainPrimitives
+namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class Email
     {
@@ -22,7 +21,7 @@ namespace PapasCRM_API.DomainPrimitives
         {
             if (string.IsNullOrWhiteSpace(value))
             {
-                throw new ArgumentException(Translate("Email cannot be empty."));
+                throw new ArgumentException("Email cannot be empty."); //TRANSLATE
             }
 
             //Allows only letters of all kinds and the special characters ( '-.,~)
