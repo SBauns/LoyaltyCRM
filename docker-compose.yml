@@ -14,7 +14,7 @@ services:
       - papanet
   papascrm-web:
     build:
-      context: ../papacrm-web
+      context: ./LoyaltyCRM.WebApp
       dockerfile: Dockerfile
     # ports:
     #   - "445:445"
@@ -31,7 +31,7 @@ services:
 
   papascrm-api:
     build:
-      context: .
+      context: ./LoyaltyCRM.Api
       dockerfile: Dockerfile
     # volumes:
     #   # Only mount the cert if using HTTPS in production

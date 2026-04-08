@@ -23,8 +23,8 @@ namespace LoyaltyCRM.Infrastructure.Seeders
             await EnsureRoleAsync(roleManager, nameof(Role.Bartender));
             await EnsureRoleAsync(roleManager, nameof(Role.Customer));
 
-            string papauser = configuration["Users:PapaUser"] ?? Environment.GetEnvironmentVariable("USERS_PAPAUSER");
-            string papapassword = configuration["Users:PapaPassword"] ?? Environment.GetEnvironmentVariable("USERS_PAPAPASSWORD");
+            string papauser = configuration["Users:AdminUser"] ?? Environment.GetEnvironmentVariable("USERS_ADMINUSER");
+            string papapassword = configuration["Users:AdminPassword"] ?? Environment.GetEnvironmentVariable("USERS_ADMINPASSWORD");
 
             // Seed Admin user
             await EnsureUserAsync(
@@ -38,11 +38,11 @@ namespace LoyaltyCRM.Infrastructure.Seeders
             // Seed Bartender user
             await EnsureUserAsync(
                 userManager,
-                configuration["Users:BartenderUser"] ?? Environment.GetEnvironmentVariable("USERS_BARTENDERUSER"),
-                configuration["Users:BartenderPassword"] ?? Environment.GetEnvironmentVariable("USERS_PAPAPASSWORD"),
+                configuration["Users:EmployeeUser"] ?? Environment.GetEnvironmentVariable("USERS_EMPLOYEEUSER"),
+                configuration["Users:EmployeePassword"] ?? Environment.GetEnvironmentVariable("USERS_EMPLOYEEPASSWORD"),
                 Role.Bartender.ToString());
 
-            LoggerExtensions.LogInformation(logger, "Bartender user seeded with username: {UserName}", configuration["Users:BartenderUser"] ?? Environment.GetEnvironmentVariable("USERS_BARTENDERUSER"));
+            LoggerExtensions.LogInformation(logger, "Bartender user seeded with username: {UserName}", configuration["Users:EmployeeUser"] ?? Environment.GetEnvironmentVariable("USERS_EMPLOYEEUSER"));
 
             // Seed Customer user
             // await EnsureUserAsync(

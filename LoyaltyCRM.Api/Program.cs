@@ -179,6 +179,7 @@ using (var scope = app.Services.CreateScope())
 
     while (retries < maxRetries && !dbReady)
     {
+        logger.LogInformation("Attempts with connectionstring: {connection}.", context.Database.GetConnectionString());
         try
         {
             dbReady = await context.Database.CanConnectAsync();

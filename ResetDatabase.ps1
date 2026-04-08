@@ -1,4 +1,13 @@
-﻿# PowerShell script to reset the EF Core database and migrations
+﻿# Path to the Infrastructure project
+$projectPath = "./LoyaltyCRM.Infrastructure"
+
+# Save current directory
+$originalPath = Get-Location
+
+# Move into the Infrastructure project directory
+Set-Location $projectPath
+
+Write-Host "Running EF Core reset inside $projectPath"
 
 # Step 1: Drop the database forcefully
 Write-Host "Dropping the database..."
@@ -22,3 +31,6 @@ Write-Host "Updating the database..."
 dotnet ef database update
 
 Write-Host "Database reset and migration completed."
+
+# Return to original directory
+Set-Location $originalPath
