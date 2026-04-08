@@ -1,0 +1,19 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "build-api",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/LoyaltyCRM.Api"],
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "build-app",
+      "command": "dotnet",
+      "type": "process",
+      "args": ["build", "${workspaceFolder}/LoyaltyCRM.WebApp"],
+      "problemMatcher": "$msCompile"
+    }
+  ]
+}
