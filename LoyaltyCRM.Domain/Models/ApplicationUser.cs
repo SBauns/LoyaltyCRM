@@ -4,6 +4,9 @@ namespace LoyaltyCRM.Domain.Models
 {
     public class ApplicationUser : IdentityUser
     {
+        public Yearcard Yearcard { get; set; }
+    }
+}
         // public string? Id { get; }
         // public PhoneNumber PhoneNumber { get; }
         // public Email Email { get; }
@@ -16,7 +19,3 @@ namespace LoyaltyCRM.Domain.Models
         //     Email = email;
         //     UserName = userName;
         // }
-
-        public Yearcard Yearcard { get; set; }
-    }
-}

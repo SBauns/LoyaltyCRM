@@ -4,22 +4,17 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class Email
     {
-        private string value;
+        public string Value {get; private set; }
 
-        public Email(string value)
+        public Email(string Value)
         {
-            ValidateEmail(value);
-            this.value = value;
+            ValidateEmail(Value);
+            this.Value = Value;
         }
 
-        public string GetValue()
+        private void ValidateEmail(string Value)
         {
-            return this.value;
-        }
-
-        private void ValidateEmail(string value)
-        {
-            if (string.IsNullOrWhiteSpace(value))
+            if (string.IsNullOrWhiteSpace(Value))
             {
                 throw new ArgumentException("Email cannot be empty."); //TRANSLATE
             }
@@ -27,10 +22,10 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             //Allows only letters of all kinds and the special characters ( '-.,~)
             string pattern = @"^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$";
 
-            bool isValid = Regex.IsMatch(value, pattern);
+            bool isValid = Regex.IsMatch(Value, pattern);
 
             if (!isValid)
-                throw new ArgumentException($"{value} is invalid.");
+                throw new ArgumentException($"{Value} is invalid.");
 
         }
     }

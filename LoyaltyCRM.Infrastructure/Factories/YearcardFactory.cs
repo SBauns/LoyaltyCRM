@@ -13,9 +13,9 @@ public static class YearcardEntityFactory
 {
         private static readonly Faker<Yearcard> Faker = new Faker<Yearcard>()
             .RuleFor(y => y.Id, f => f.Random.Guid())
-            .RuleFor(y => y.CardId!.GetValue(), f => f.Random.Int(1, 100000))
+            .RuleFor(y => y.CardId!.Value, f => f.Random.Int(1, 100000))
             // .RuleFor(y => y.Phone, f => f.Phone.PhoneNumber("########"))
-            .RuleFor(y => y.Name!.GetValue(), f => f.Name.FirstName());
+            .RuleFor(y => y.Name!.Value, f => f.Name.FirstName());
             // .RuleFor(y => y.ValidTo, f => f.Date.Future(2, DateTime.Today.AddYears(-1))); // One year from now
             // .RuleFor(y => y.Email, f => f.Internet.Email())
             // .RuleFor(y => y.IsConfirmed, f => f.Random.Bool());

@@ -35,6 +35,7 @@ namespace LoyaltyCRM.Services.Repositories
         {
             Yearcard? yearcard = await _context.Yearcards
                 .Include(y => y.User)
+                .Include(y => y.ValidityIntervals)
                 .FirstOrDefaultAsync(y => y.Id == id);
 
             if (yearcard == null)
@@ -122,7 +123,12 @@ namespace LoyaltyCRM.Services.Repositories
         {
             try
             {
-                return _context.Yearcards.Max(y => y.CardId!.GetValue()) + 1;
+                var latest = _context.Yearcards
+                    .OrderByDescending(y => y.CardId)
+                    .Select(y => y.CardId)
+                    .FirstOrDefault();
+
+                return (latest.Value) + 1;
             }
             catch (Exception e)
             {

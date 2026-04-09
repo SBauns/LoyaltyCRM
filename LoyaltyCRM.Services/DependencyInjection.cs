@@ -1,6 +1,7 @@
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories;
 using LoyaltyCRM.Services.Repositories.Interfaces;
+using LoyaltyCRM.Services.Services;
 using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -17,6 +18,7 @@ public static class DependencyInjection
         //Add Repos
         services.AddScoped<ICustomerRepo, CustomerRepo>();
         services.AddScoped<IYearcardRepo, YearcardRepo>();
+        services.AddScoped<IYearcardService, YearcardService>();
 
         services.AddHostedService<YearcardCleanupService>();
 

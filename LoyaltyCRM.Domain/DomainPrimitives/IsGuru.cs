@@ -2,16 +2,11 @@
 {
     public class IsGuru
     {
-        private bool value;
+        public bool Value { get; }
 
-        public IsGuru(bool value)
+        public IsGuru(bool Value)
         {
-            this.value = value;
-        }
-
-        public bool GetValue()
-        {
-            return this.value;
+            this.Value = Value;
         }
     }
 }

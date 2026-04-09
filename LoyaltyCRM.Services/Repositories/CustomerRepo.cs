@@ -24,7 +24,7 @@ namespace LoyaltyCRM.Services.Repositories
         public async Task<ApplicationUser> GetUserByPhone(PhoneNumber phoneNumber)
         {
             return await _context.Users
-                .Where(y => y.PhoneNumber == phoneNumber.GetValue())
+                .Where(y => y.PhoneNumber == phoneNumber.Value)
                 .Include(y => y.Yearcard!.ValidityIntervals)
                 .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("User with this phone number not found"); //TRANSLATE
         }
@@ -32,7 +32,7 @@ namespace LoyaltyCRM.Services.Repositories
         public async Task<ApplicationUser> GetUserByEmail(Email email)
         {
             return await _context.Users
-                .Where(y => y.Email == StringNormalizationExtensions.Normalize(email.GetValue()))
+                .Where(y => y.Email == StringNormalizationExtensions.Normalize(email.Value))
                 .Include(y => y.Yearcard!.ValidityIntervals)
                 .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("User with this email not found"); //TRANSLATE
         }
@@ -40,7 +40,7 @@ namespace LoyaltyCRM.Services.Repositories
         public async Task<ApplicationUser> GetUserByUserName(UserName userName)
         {
             return await _context.Users
-                .Where(y => y.UserName == StringNormalizationExtensions.Normalize(userName.GetValue()))
+                .Where(y => y.UserName == StringNormalizationExtensions.Normalize(userName.Value))
                 .Include(y => y.Yearcard!.ValidityIntervals)
                 .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("User with this username not found"); //TRANSLATE
         }

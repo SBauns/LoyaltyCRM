@@ -4,23 +4,18 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class UserName
     {
-        private string value;
+        public string Value { get; }
 
-        public UserName(string value = "")
+        public UserName(string Value = "")
         {
-            ValidateName(value);
-            this.value = value;
+            ValidateName(Value);
+            this.Value = Value;
         }
 
-        public string GetValue()
-        {
-            return this.value;
-        }
-
-        private bool ValidateName(string value)
+        private bool ValidateName(string Value)
         {
             //Check if name is empty
-            // if (string.IsNullOrWhiteSpace(value))
+            // if (string.IsNullOrWhiteSpace(Value))
             // {
             //     throw new ArgumentException("UserName cannot be empty.");
             // }
@@ -28,7 +23,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             //Allows only letters of all kinds and the special characters ( '-.,~)
             string pattern = @"^[a-zA-ZÀ-ÖØ-öø-ÿ]+([@.-][a-zA-ZÀ-ÖØ-öø-ÿ]+)*$";
 
-            if (!Regex.IsMatch(value, pattern) && !string.IsNullOrWhiteSpace(value))
+            if (!Regex.IsMatch(Value, pattern) && !string.IsNullOrWhiteSpace(Value))
                 return false;
 
             return true;

@@ -13,12 +13,12 @@ namespace LoyaltyCRM.Infrastructure.Database
 
             builder.Property(x => x.StartDate)
                 .HasConversion(
-                    v => v!.GetValue(),
+                    v => v!.Value,
                     v => new StartDate(v));
 
             builder.Property(x => x.EndDate)
                 .HasConversion(
-                    v => v!.GetValue(),
+                    v => v!.Value,
                     v => new EndDate(v));
         }
     }

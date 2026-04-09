@@ -2,7 +2,7 @@
 {
     public class LastName : Name
     {
-        public LastName(string value) : base(value) { }
+        public LastName(string Value) : base(Value) { }
 
     }
 }

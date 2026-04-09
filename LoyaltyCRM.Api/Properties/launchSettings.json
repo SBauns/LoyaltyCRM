@@ -42,7 +42,7 @@
     },
     "Docker Compose": {
       "commandName": "DockerCompose",
-      "CommandVersion": "1.0",
+      "CommandVersion": "1.0"
     }
 
   },

@@ -7,7 +7,7 @@ using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
 namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
-    public class YearcardUpdateRequest : Request, IHasId, IHasCardId, IHasEmail, IHasPhoneNumber, IHasName, IHasUserName, IHasValidTo
+    public class YearcardUpdateRequest : Request, IHasId, IHasCardId, IHasEmail, IHasPhoneNumber, IHasName, IHasUserName
     {
         public Guid? Id { get; set; }
 
@@ -27,9 +27,6 @@ namespace LoyaltyCRM.DTOs.Requests.Yearcard
         public string? Name { get; set; }
 
         public string? UserName { get; set; }
-
-        [Required]
-        public DateTime ValidTo { get; set; }
         
         public List<ValidityIntervalResponseAndRequest> ValidityIntervals { get; set; } = new List<ValidityIntervalResponseAndRequest>();
     }

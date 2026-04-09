@@ -7,22 +7,17 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class StartDate
     {
-        private DateTime value;
+        public DateTime Value { get; }
 
-        public StartDate(DateTime value)
+        public StartDate(DateTime Value)
         {
-            ValidateDate(value);
-            this.value = value;
+            ValidateDate(Value);
+            this.Value = Value;
         }
 
-        public DateTime GetValue()
+        private void ValidateDate(DateTime Value)
         {
-            return this.value;
-        }
-
-        private void ValidateDate(DateTime value)
-        {
-            // if (DateTime.Now.Date > value.Date)
+            // if (DateTime.Now.Date > Value.Date)
             // {
             //     throw new ArgumentException("Valid date must be later than today");
             // }

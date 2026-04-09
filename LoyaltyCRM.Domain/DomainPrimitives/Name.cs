@@ -4,27 +4,23 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class Name
     {
-        private string value;
+        public string Value { get; }
 
-        public Name(string value = "")
+        public Name(string Value = "")
         {
-            ValidateName(value);
-            this.value = value;
+            ValidateName(Value);
+            this.Value = Value;
         }
 
-        public string GetValue()
+        private void ValidateName(string Value)
         {
-            return value;
-        }
-        private void ValidateName(string value)
-        {
-            if(value.Length > 50)
+            if(Value.Length > 50)
                 throw new ArgumentException("Name is too long."); //TRANSLATE
 
             //Allows only letters of all kinds and the special characters ( '-.,~)
             string pattern = @"^[a-zA-ZÀ-ÖØ-öø-ÿ]+([ '-.,~][a-zA-ZÀ-ÖØ-öø-ÿ]+)*$";
 
-            if (!Regex.IsMatch(value, pattern) && !string.IsNullOrWhiteSpace(value))
+            if (!Regex.IsMatch(Value, pattern) && !string.IsNullOrWhiteSpace(Value))
                 throw new ArgumentException("Name is invalid.");
 
         }

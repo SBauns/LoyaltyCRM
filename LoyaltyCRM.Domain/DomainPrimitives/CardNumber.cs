@@ -2,33 +2,32 @@
 {
     public class CardNumber
     {
-        private int value;
+        public int Value { get; }
 
-        public CardNumber(int value)
+        public CardNumber()
         {
-            SetValue(value);
-            this.value = value;
+            //EF CORE
         }
-
-        public int GetValue()
+        public CardNumber(int Value)
         {
-            return value;
+            SetValue(Value);
+            this.Value = Value;
         }
 
         public int SetValue(int newValue)
         {
             ValidateNumber(newValue);
-            return value ;
+            return Value ;
         }
 
-        private void ValidateNumber(int value)
+        private void ValidateNumber(int Value)
         {
-            if (value < 1)
+            if (Value < 1)
             {
                 throw new ArgumentException("Card Number is not allowed to be less than 1"); //Translate
             }
 
-            if (value > 100000)
+            if (Value > 100000)
             {
                 throw new ArgumentException("Card Number is not allowed to be more than 100000"); //Translate
             }

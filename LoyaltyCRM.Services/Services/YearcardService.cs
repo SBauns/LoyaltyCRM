@@ -9,8 +9,8 @@ using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories.Interfaces;
 using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Microsoft.IdentityModel.Tokens;
 
 namespace LoyaltyCRM.Services.Services
 {
@@ -24,9 +24,9 @@ namespace LoyaltyCRM.Services.Services
         private readonly LoyaltyContext _context;
 
         private readonly UserManager<ApplicationUser> _userManager;
-        private readonly ILogger _logger;
+        private readonly ILogger<YearcardService> _logger;
 
-        public YearcardService(IYearcardRepo yearcardRepo, ICustomerRepo customerRepo,LoyaltyContext context, UserManager<ApplicationUser> userManager, ILogger logger)
+        public YearcardService(IYearcardRepo yearcardRepo, ICustomerRepo customerRepo,LoyaltyContext context, UserManager<ApplicationUser> userManager, ILogger<YearcardService> logger)
         {
             _yearcardRepo = yearcardRepo;
             _customerRepo = customerRepo;
@@ -46,8 +46,23 @@ namespace LoyaltyCRM.Services.Services
         }
 
         public async Task<Yearcard> UpdateYearcard(Guid Id, Yearcard yearcard)
-        {
-            return await _yearcardRepo.UpdateYearcard(Id, yearcard);
+        {           
+            using (var transaction = await _context.Database.BeginTransactionAsync())
+            {
+                try
+                {
+                    Yearcard updatedCard = await _yearcardRepo.UpdateYearcard(Id, yearcard);
+                    await _userManager.UpdateAsync(yearcard.User);
+                    // await transaction.CommitAsync();
+                    return updatedCard;
+
+                }
+                catch (Exception exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception($"Data invalid. {exception.Message}");
+                }
+            }
         }
 
         public async Task<bool> DeleteYearcard(Guid Id)
@@ -65,16 +80,20 @@ namespace LoyaltyCRM.Services.Services
                     
                     ApplicationUser Customer = await _customerRepo.CreateOrReturnFirstCustomer(NewYearCard.User);
                     
-                    if (Customer.Yearcard != null)
-                        NewYearCard = Customer.Yearcard;
+                    if (Customer.Yearcard != null) //Means we found a existing customer
+                    {
+                        NewYearCard = await AddValidityToCurrentYearcard(Customer.Yearcard, startDate);
+                    }
                     else
-                        NewYearCard.CardId!.SetValue(_yearcardRepo.GetNewestCardId());
+                    {
+                        NewYearCard.CardId = new CardNumber(_yearcardRepo.GetNewestCardId());
+                        NewYearCard.UserId = Customer.Id;
+                        NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.Value));
+                        NewYearCard.UpdateTimestamps();
+                        await _yearcardRepo.CreateYearcard(NewYearCard);
+                    }
     
-                    NewYearCard.UserId = Customer.Id;
-                    NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.GetValue()));
-                    NewYearCard.UpdateTimestamps();
-            
-                    await _yearcardRepo.CreateYearcard(NewYearCard);
+                    await transaction.CommitAsync();
                     return NewYearCard;
                 }
                 catch (Exception exception)
@@ -87,26 +106,26 @@ namespace LoyaltyCRM.Services.Services
 
         public async Task<Yearcard> AddValidityToCurrentYearcard(Yearcard NewYearCard, StartDate startDate)
         {
-            NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.GetValue()));
+            NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.Value));
 
             NewYearCard.ValidityIntervals = NewYearCard.ValidityIntervals
-                .OrderByDescending(v => v.StartDate)
-                .Reverse()
+                .OrderBy(v => v.StartDate.Value)
                 .ToList();
 
             DateTime LastEndDate = new DateTime();
 
             foreach (ValidityInterval interval in NewYearCard.ValidityIntervals)
             {
-                TimeSpan timeSpan = interval.EndDate.GetValue() - interval.StartDate.GetValue();
-                if (interval.StartDate.GetValue() < LastEndDate)
+                TimeSpan timeSpan = interval.EndDate.Value - interval.StartDate.Value;
+                if (interval.StartDate.Value < LastEndDate)
                 {
                     interval.StartDate = new StartDate(LastEndDate);
                     interval.EndDate = new EndDate(LastEndDate.Add(timeSpan)); // Assuming a 1-year validity interval
                 }
-                LastEndDate = interval.EndDate.GetValue();
+                LastEndDate = interval.EndDate.Value;
             }
 
+            NewYearCard.UpdateTimestamps();
             await _yearcardRepo.UpdateYearcard((Guid)NewYearCard.Id!, NewYearCard);
 
             return NewYearCard;
@@ -114,8 +133,7 @@ namespace LoyaltyCRM.Services.Services
 
         public async Task<bool> CheckInWithYearcards(Guid id)
         {
-            Yearcard? yearcard = await _context.Yearcards
-                .FindAsync(id);
+            Yearcard? yearcard = await _yearcardRepo.GetYearcard(id);
 
             return ConfirmValidityOfYearcard(yearcard);
         }
@@ -157,7 +175,7 @@ namespace LoyaltyCRM.Services.Services
             // Find matches based on similarity
             var matchingYearcards = yearcards.Where(y =>
             {
-                var fullNameFromEntity = y.Name!.GetValue().ToLower();
+                var fullNameFromEntity = y.Name!.Value.ToLower();
                 return Fuzz.Ratio(normalizedInput, fullNameFromEntity) >= similarityThreshold;
             });
 
@@ -182,7 +200,7 @@ namespace LoyaltyCRM.Services.Services
 
             foreach (ValidityInterval interval in yearcard.ValidityIntervals)
             {
-                if (interval.StartDate.GetValue() <= DateTime.Now && interval.EndDate.GetValue() >= DateTime.Now)
+                if (interval.StartDate.Value <= DateTime.Now && interval.EndDate.Value >= DateTime.Now)
                 {
                     _logger.LogInformation($"Yearcard with ID {yearcard.Id} is valid."); //TRANSLATE
                     return true;
@@ -212,7 +230,7 @@ namespace LoyaltyCRM.Services.Services
         private ApplicationUser SetUsername(ApplicationUser user)
         {
             
-            if (user.UserName.IsNullOrEmpty())
+            if (String.IsNullOrEmpty(user.UserName))
             {
                 user.UserName = user.Email ?? user.PhoneNumber;
             }

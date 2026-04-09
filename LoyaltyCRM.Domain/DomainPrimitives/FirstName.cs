@@ -2,6 +2,6 @@
 {
     public class FirstName : Name
     {
-        public FirstName(string value) : base(value) { }
+        public FirstName(string Value) : base(Value) { }
     }
 }

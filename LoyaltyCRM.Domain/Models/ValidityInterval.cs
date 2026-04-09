@@ -20,7 +20,7 @@ namespace LoyaltyCRM.Domain.Models
         {
             Id = id;
             StartDate = startDate;
-            EndDate = endDate ?? new EndDate(startDate.GetValue().AddYears(1)); // Default to one year validity from start date
+            EndDate = endDate ?? new EndDate(startDate.Value.AddYears(1)); // Default to one year validity from start date
         }
     }
 }

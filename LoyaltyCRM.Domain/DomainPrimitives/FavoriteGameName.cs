@@ -2,7 +2,7 @@
 {
     public class FavoriteGameName : Name
     {
-        public FavoriteGameName(string value) : base(value) { }
+        public FavoriteGameName(string Value) : base(Value) { }
 
     }
 }

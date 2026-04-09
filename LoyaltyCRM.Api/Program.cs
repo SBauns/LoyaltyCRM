@@ -103,12 +103,10 @@ builder.Services.AddAuthentication(options =>
         ValidAudience = jwtSettings["Audience"],
         IssuerSigningKey = securityKey
     };
-
     options.Events = new JwtBearerEvents
     {
         OnChallenge = context =>
         {
-            // Skip the default logic (which sets 401 and adds headers)
             context.HandleResponse();
 
             context.Response.StatusCode = StatusCodes.Status401Unauthorized;
@@ -116,14 +114,45 @@ builder.Services.AddAuthentication(options =>
 
             string message = "Unauthorized";
 
-            if (context.AuthenticateFailure is SecurityTokenExpiredException)
+            if (context.AuthenticateFailure != null)
             {
-                message = "Token expired";
+                var ex = context.AuthenticateFailure;
+
+                if (ex is SecurityTokenExpiredException)
+                {
+                    message = "Token expired";
+                }
+                else if (ex is SecurityTokenInvalidSignatureException)
+                {
+                    message = "Invalid token signature";
+                }
+                else if (ex is SecurityTokenInvalidIssuerException)
+                {
+                    message = "Invalid token issuer";
+                }
+                else if (ex is SecurityTokenInvalidAudienceException)
+                {
+                    message = "Invalid token audience";
+                }
+                else if (ex is SecurityTokenNoExpirationException)
+                {
+                    message = "Token has no expiration";
+                }
+                else if (ex is SecurityTokenInvalidLifetimeException)
+                {
+                    message = "Invalid token lifetime";
+                }
+                else
+                {
+                    // Fallback: use the exception message but sanitize if needed
+                    message = ex.Message;
+                }
             }
 
             return context.Response.WriteAsync($"{{\"error\": \"{message}\"}}");
         }
     };
+
 });
 
 builder.Services.AddAuthorization();
@@ -147,12 +176,12 @@ else
     // app.UseHttpsRedirection();
 }
 
+app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("AllowBlazorClient");
 app.UseAuthentication();
 app.UseAuthorization();
 //Middleware
 app.UseMiddleware<ExceptionHandlingMiddleware>();
-app.UseMiddleware<RequestLoggingMiddleware>();
 
 app.MapControllers();
 

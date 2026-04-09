@@ -6,7 +6,7 @@ namespace LoyaltyCRM.Domain.Models
     {
         public Guid? Id { get; }
         public Name? Name { get; }
-        public CardNumber? CardId { get; }
+        public CardNumber? CardId { get; set; }
         // public CardValidTo ValidTo { get; }
         private int discountValidityMonths = 3;
 
@@ -40,7 +40,7 @@ namespace LoyaltyCRM.Domain.Models
         {
             foreach (ValidityInterval interval in ValidityIntervals)
             {
-                if (interval.EndDate.GetValue().AddMonths(discountValidityMonths) >= DateTime.Now)
+                if (interval.EndDate.Value.AddMonths(discountValidityMonths) >= DateTime.Now)
                 {
                     return true;
                 }
@@ -51,7 +51,7 @@ namespace LoyaltyCRM.Domain.Models
         public bool IsYearcardValid(){
             foreach (ValidityInterval interval in ValidityIntervals)
             {
-                if (interval.EndDate.GetValue() <= DateTime.Now)
+                if (interval.EndDate.Value <= DateTime.Now)
                 {
                     return true;
                 }

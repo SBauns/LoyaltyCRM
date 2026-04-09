@@ -110,7 +110,7 @@ namespace LoyaltyCRM.Api.Controllers
                 Yearcard yearcard = _mapper.Map<Yearcard>(request);
                 Yearcard createdYearcard = await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(request.StartDate));
 
-                var response = _mapper.Map<YearcardCreateRequest>(createdYearcard);
+                var response = _mapper.Map<YearcardCreateResponse>(createdYearcard);
 
                 return CreatedAtAction("PostYearcard", new { id = createdYearcard.Id }, response);
             }
@@ -213,7 +213,7 @@ namespace LoyaltyCRM.Api.Controllers
             try
             {
                 Name validatedName = new Name(name.name!);
-                return Ok(await _yearcardService.CheckInWithName(validatedName.GetValue())); //TODO CREATE A PROPER DTO HERE
+                return Ok(await _yearcardService.CheckInWithName(validatedName.Value)); //TODO CREATE A PROPER DTO HERE
             }
             catch (Exception ex)
             {

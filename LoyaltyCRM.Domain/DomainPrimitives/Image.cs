@@ -2,25 +2,20 @@
 {
     public class Image
     {
-        private string value;
+        public string Value { get; }
 
-        public Image(string value)
+        public Image(string Value)
         {
-            ValidateImage(value);
-            this.value = value;
+            ValidateImage(Value);
+            this.Value = Value;
         }
 
-        public string GetValue()
-        {
-            return this.value;
-        }
-
-        private void ValidateImage(string value)
+        private void ValidateImage(string Value)
         {
             // Updated Regex pattern to allow image URLs, including cloud storage URLs like Amazon S3
             string pattern = @"^(https?:\/\/[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}(\/[^\s]+)*\.(jpg|jpeg|png|gif|bmp|webp)|data:image\/(jpeg|png|gif|bmp|webp);base64,[a-zA-Z0-9+/]+={0,2})$";
 
-            if (!System.Text.RegularExpressions.Regex.IsMatch(value, pattern))
+            if (!System.Text.RegularExpressions.Regex.IsMatch(Value, pattern))
             {
                 throw new ArgumentException("Invalid image format. Only valid URLs or base64 encoded images are allowed.");
             }

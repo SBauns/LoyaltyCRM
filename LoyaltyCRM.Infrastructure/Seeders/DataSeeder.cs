@@ -109,7 +109,7 @@ namespace LoyaltyCRM.Infrastructure.Seeders
                         // Create a YearcardEntity for the user after successful creation
                         Yearcard yearcard = YearcardEntityFactory.Create(user);
 
-                        yearcard.CardId!.SetValue(counter);
+                        // yearcard.CardId!.Create(counter);
                         // Add the YearcardEntity to the context
                         await context.Yearcards.AddAsync(yearcard);
                     }

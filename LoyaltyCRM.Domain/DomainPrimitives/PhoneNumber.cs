@@ -4,37 +4,32 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class PhoneNumber
     {
-        private string value;
+        public string Value { get; }
 
-        public PhoneNumber(string value)
+        public PhoneNumber(string Value)
         {
-            ValidateNumber(value);
-            this.value = value;
+            ValidateNumber(Value);
+            this.Value = Value;
         }
 
-        public string GetValue()
-        {
-            return this.value;
-        }
-
-        private void ValidateNumber(string value)
+        private void ValidateNumber(string Value)
         {
             string pattern = @"^(\+\d{1,3}-)?\d+$";
 
-            if (string.IsNullOrEmpty(value))
+            if (string.IsNullOrEmpty(Value))
             {
                 throw new ArgumentException("Phone number cannot be null or empty."); //TRANSLATE
             }
 
-            if(value.Length > 21){
+            if(Value.Length > 21){
                 throw new ArgumentException("Phone number is too long"); //TRANSLATE
             }
 
-            if(value.Length < 5){
+            if(Value.Length < 5){
                 throw new ArgumentException("Phone number is too short"); //TRANSLATE
             }
 
-            if (!Regex.IsMatch(value, pattern))
+            if (!Regex.IsMatch(Value, pattern))
             {
                 throw new ArgumentException("Phone number must be only numbers"); //TRANSLATE
             }

@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LoyaltyCRM.Infrastructure.Database
 {
-    public class AddressConfiguration : IEntityTypeConfiguration<Yearcard>
+    public class YearcardConfiguration : IEntityTypeConfiguration<Yearcard>
     {
         public void Configure(EntityTypeBuilder<Yearcard> builder)
         {
@@ -17,12 +17,12 @@ namespace LoyaltyCRM.Infrastructure.Database
 
             builder.Property(x => x.Name)
                 .HasConversion(
-                    v => v!.GetValue(),
+                    v => v!.Value,
                     v => new Name(v));
 
             builder.Property(x => x.CardId)
                 .HasConversion(
-                    v => v!.GetValue(),
+                    v => v!.Value,
                     v => new CardNumber(v));
         }
     }
