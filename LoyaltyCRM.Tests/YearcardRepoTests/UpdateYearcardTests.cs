@@ -11,7 +11,7 @@ using Xunit;
 
 namespace LoyaltyCRM.Tests.YearcardRepoTests
 {
-    public class UpdateYearcardTests : YearcardRepoTestBase
+    public class UpdateYearcardTests : WithInMemoryDatabase
     {
         [Fact]
         public async Task UpdateYearcard_ShouldDiffIntervals_Correctly()

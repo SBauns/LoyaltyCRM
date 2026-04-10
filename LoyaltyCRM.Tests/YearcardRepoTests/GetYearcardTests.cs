@@ -12,7 +12,7 @@ using Xunit;
 
 namespace LoyaltyCRM.Tests.YearcardRepoTests
 {
-    public class GetYearcardTests : YearcardRepoTestBase
+    public class GetYearcardTests : WithInMemoryDatabase
     {
         [Fact]
         public async Task GetYearcard_ShouldInclude_User_And_Intervals()

@@ -2,7 +2,7 @@ using LoyaltyCRM.Infrastructure.Context;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
 
-public abstract class YearcardRepoTestBase : IDisposable
+public abstract class WithInMemoryDatabase : IDisposable
 {
     public (LoyaltyContext context, SqliteConnection connection) CreateSqliteContext()
     {

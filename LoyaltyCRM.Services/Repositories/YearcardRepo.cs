@@ -140,30 +140,19 @@ namespace LoyaltyCRM.Services.Repositories
 
         public async Task<bool> DeleteYearcard(Guid id)
         {
-            var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            var yearcard = await _context.Yearcards
+                .Include(yearcard => yearcard.User)
+                .FirstOrDefaultAsync(yearcard => yearcard.Id == id);
+
+            if (yearcard == null)
             {
-                var yearcard = await _context.Yearcards
-                    .Include(yearcard => yearcard.User)
-                    .FirstOrDefaultAsync(yearcard => yearcard.Id == id);
-
-                if (yearcard == null)
-                {
-                    return false;
-                }
-
-                _context.Yearcards.Remove(yearcard);
-                _context.Users.Remove(yearcard.User);
-                await _context.SaveChangesAsync();
-                transaction.Commit();
-
-                return true;
-            }
-            catch (System.Exception)
-            {
-                transaction.Rollback();
                 return false;
             }
+
+            _context.Users.Remove(yearcard.User);
+            await _context.SaveChangesAsync();
+
+            return true;
         }
     }
 }

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoyaltyCRM.Infrastructure.Migrations
 {
     [DbContext(typeof(LoyaltyContext))]
-    [Migration("20260408091106_InitialCreate")]
+    [Migration("20260410120102_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />

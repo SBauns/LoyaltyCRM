@@ -11,6 +11,7 @@ using Microsoft.Extensions.Logging;
 
 namespace LoyaltyCRM.Infrastructure.Seeders
 {
+    [ExcludeFromCodeCoverage]
     public static class DataSeeder
     {
         public static async Task SeedUsersAsync(IServiceProvider serviceProvider, IConfiguration configuration, ILogger logger)
@@ -83,7 +84,6 @@ namespace LoyaltyCRM.Infrastructure.Seeders
             }
         }
 
-        [ExcludeFromCodeCoverage]
         public static async Task SeedTestData(IServiceProvider serviceProvider, LoyaltyContext context)
         {
             if(context.Yearcards.Count() > 0){

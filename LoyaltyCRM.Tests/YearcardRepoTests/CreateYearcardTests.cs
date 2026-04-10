@@ -13,7 +13,7 @@ using Xunit;
 
 namespace LoyaltyCRM.Tests.YearcardRepoTests
 {
-    public class CreateYearcardTests : YearcardRepoTestBase
+    public class CreateYearcardTests : WithInMemoryDatabase
     {
         [Fact]
         public async Task CreateYearcard_ShouldThrow_OnDuplicateCardId()

@@ -11,7 +11,7 @@ using Xunit;
 
 namespace LoyaltyCRM.Tests.YearcardRepoTests
 {
-    public class DeleteYearcardTests : YearcardRepoTestBase
+    public class DeleteYearcardTests : WithInMemoryDatabase
     {
         [Fact]
         public async Task DeleteYearcard_ShouldRollback_OnFailure()

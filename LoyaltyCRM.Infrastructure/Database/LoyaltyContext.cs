@@ -38,6 +38,7 @@ namespace LoyaltyCRM.Infrastructure.Context
                 .HasOne(a => a.Yearcard)
                 .WithOne(y => y.User)
                 .HasForeignKey<Yearcard>(y => y.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
 
             modelBuilder.Entity<Yearcard>()

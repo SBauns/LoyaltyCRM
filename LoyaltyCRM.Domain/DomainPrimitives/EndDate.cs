@@ -17,15 +17,6 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             this.Value = Value;
         }
 
-        public bool DetermineIfEligibleForDiscount()
-        {
-            // Define the threshold date 30 days before the validTo date
-            DateTime thresholdDate = Value.AddDays(thresholdDays);
-
-            // Check if today is within the 30-day window
-            return DateTime.Now <= thresholdDate;
-        }
-
         private void ValidateDate(DateTime Value)
         {
             //TODO Validation rules: Format

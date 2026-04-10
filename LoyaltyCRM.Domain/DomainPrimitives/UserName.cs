@@ -12,21 +12,15 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             this.Value = Value;
         }
 
-        private bool ValidateName(string Value)
+        private void ValidateName(string Value)
         {
-            //Check if name is empty
-            // if (string.IsNullOrWhiteSpace(Value))
-            // {
-            //     throw new ArgumentException("UserName cannot be empty.");
-            // }
+            if (string.IsNullOrWhiteSpace(Value))
+                return;
 
-            //Allows only letters of all kinds and the special characters ( '-.,~)
             string pattern = @"^[a-zA-ZÀ-ÖØ-öø-ÿ]+([@.-][a-zA-ZÀ-ÖØ-öø-ÿ]+)*$";
 
-            if (!Regex.IsMatch(Value, pattern) && !string.IsNullOrWhiteSpace(Value))
-                return false;
-
-            return true;
+            if (!Regex.IsMatch(Value, pattern))
+                throw new ArgumentException("UserName is invalid.");
         }
     }
 }

@@ -1,23 +1,20 @@
-﻿namespace LoyaltyCRM.Domain.DomainPrimitives
+﻿using System.Diagnostics.CodeAnalysis;
+
+namespace LoyaltyCRM.Domain.DomainPrimitives
 {
     public class CardNumber
     {
         public int Value { get; }
 
+        [ExcludeFromCodeCoverage]
         public CardNumber()
         {
             //EF CORE
         }
         public CardNumber(int Value)
         {
-            SetValue(Value);
+            ValidateNumber(Value);
             this.Value = Value;
-        }
-
-        public int SetValue(int newValue)
-        {
-            ValidateNumber(newValue);
-            return Value ;
         }
 
         private void ValidateNumber(int Value)

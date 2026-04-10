@@ -51,16 +51,5 @@ namespace LoyaltyCRM.Domain.Models
             }
             return false;
         }
-
-        public bool IsYearcardValid(){
-            foreach (ValidityInterval interval in ValidityIntervals)
-            {
-                if (interval.EndDate.Value <= DateTime.Now)
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
     }
 }
