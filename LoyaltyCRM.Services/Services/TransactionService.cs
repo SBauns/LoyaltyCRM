@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using LoyaltyCRM.Infrastructure.Context;
@@ -9,6 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage;
 
 namespace LoyaltyCRM.Services.Services
 {
+    [ExcludeFromCodeCoverage]
     public class TransactionService : ITransactionService
     {
             private readonly LoyaltyContext _context;

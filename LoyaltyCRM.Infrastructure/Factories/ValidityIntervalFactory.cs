@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 using LoyaltyCRM.Domain.DomainPrimitives;
@@ -25,6 +26,7 @@ namespace LoyaltyCRM.Infrastructure.Factories
                 null);
         }
 
+        [ExcludeFromCodeCoverage]
         public static List<ValidityInterval> CreateMany(int count, bool valid = true)
         {
             List<ValidityInterval> returnList = new List<ValidityInterval>();

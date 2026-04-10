@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories;
 using LoyaltyCRM.Services.Repositories.Interfaces;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace LoyaltyCRM.Services;
 
+[ExcludeFromCodeCoverage]
 public static class DependencyInjection
 {
     public static IServiceCollection AddInfrastructure(

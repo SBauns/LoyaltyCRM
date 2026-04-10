@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace LoyaltyCRM.Api.Database
 {
+    [ExcludeFromCodeCoverage]
     public class LoyaltyDbContextFactory : IDesignTimeDbContextFactory<LoyaltyContext>
     {
         public LoyaltyContext CreateDbContext(string[] args)

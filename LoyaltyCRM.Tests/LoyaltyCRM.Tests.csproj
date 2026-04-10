@@ -5,9 +5,18 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <IsPackable>false</IsPackable>
+    <Exclude>[LoyaltyCRM.Tests]*</Exclude>
+    <ExcludeByFile>**/LoyaltyCRM.Tests/*.cs;**/*Designer.cs;**/*Generated*.cs;**/Migrations/**/*.cs;**/*AssemblyInfo.cs</ExcludeByFile>
+    <ExcludeByAttribute>^System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute$;^CompilerGeneratedAttribute$</ExcludeByAttribute>
+    <IncludeTestAssembly>false</IncludeTestAssembly>
   </PropertyGroup>
 
   <ItemGroup>
+    <AssemblyAttribute Include="System.Diagnostics.CodeAnalysis.ExcludeFromCodeCoverageAttribute" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.msbuild" Version="3.1.2" />
     <PackageReference Include="coverlet.collector" Version="6.0.4" />
     <PackageReference Include="FluentAssertions" Version="8.9.0" />
     <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.5" />

@@ -1,8 +1,10 @@
 using Microsoft.AspNetCore.Http;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 
 namespace LoyaltyCRM.Services.Services
 {
+    [ExcludeFromCodeCoverage]
     public static class TranslationService
     {
         private static readonly Dictionary<string, Dictionary<string, string>> _cache = new();

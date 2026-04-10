@@ -1,4 +1,5 @@
-﻿using System.Transactions;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Transactions;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
@@ -82,6 +83,7 @@ namespace LoyaltyCRM.Infrastructure.Seeders
             }
         }
 
+        [ExcludeFromCodeCoverage]
         public static async Task SeedTestData(IServiceProvider serviceProvider, LoyaltyContext context)
         {
             if(context.Yearcards.Count() > 0){

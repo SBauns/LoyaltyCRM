@@ -11,6 +11,9 @@ using LoyaltyCRM.Infrastructure.Database;
 using LoyaltyCRM.Infrastructure.Security;
 using LoyaltyCRM.Services;
 using Microsoft.AspNetCore.Identity;
+using LoyaltyCRM.Api.Settings;
+using LoyaltyCRM.Api.Services.Interfaces;
+using LoyaltyCRM.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +24,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddSecurity(builder.Configuration);
+
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
 
 // Configure Identity
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>

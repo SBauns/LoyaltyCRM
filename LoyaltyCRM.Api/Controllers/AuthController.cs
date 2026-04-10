@@ -10,6 +10,7 @@ using static LoyaltyCRM.Services.Services.TranslationService;
 using LoyaltyCRM.Authorization;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.Api.Services.Interfaces;
 
 
 namespace LoyaltyCRM.Api.Controllers
@@ -22,11 +23,19 @@ namespace LoyaltyCRM.Api.Controllers
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IConfiguration _configuration;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration)
+        private readonly IJwtTokenService _jwtTokenService;
+
+        public AuthController(
+            UserManager<ApplicationUser> userManager, 
+            SignInManager<ApplicationUser> signInManager, 
+            IConfiguration configuration,
+            IJwtTokenService jwtTokenService
+            )
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
+            _jwtTokenService = jwtTokenService;
         }
 
         //TODO For now Register is disabled as customers register by creating/buying a yearcard 
@@ -56,7 +65,8 @@ namespace LoyaltyCRM.Api.Controllers
                 ApplicationUser? user = await _userManager.FindByNameAsync(request.UserName);
                 if (user != null)
                 {
-                    string token = GenerateJwtToken(user);
+                    string token = await _jwtTokenService.GenerateTokenAsync(user);
+                    // string token = GenerateJwtToken(user);
                     return Ok(new { Token = token });
                 }
             }
