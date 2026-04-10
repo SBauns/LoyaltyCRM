@@ -6,6 +6,10 @@ namespace LoyaltyCRM.Infrastructure.Context
 {
     public class LoyaltyContext : IdentityDbContext<ApplicationUser>
     {
+        public LoyaltyContext()
+        {
+            
+        }
         public LoyaltyContext(DbContextOptions<LoyaltyContext> options)
         : base(options)
         {

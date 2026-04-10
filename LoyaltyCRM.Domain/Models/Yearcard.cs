@@ -5,7 +5,7 @@ namespace LoyaltyCRM.Domain.Models
     public class Yearcard : WithTimestamps
     {
         public Guid? Id { get; }
-        public Name? Name { get; }
+        public Name? Name { get; set; }
         public CardNumber? CardId { get; set; }
         // public CardValidTo ValidTo { get; }
         private int discountValidityMonths = 3;
@@ -15,6 +15,10 @@ namespace LoyaltyCRM.Domain.Models
         public ApplicationUser User { get; set; }
         public List<ValidityInterval> ValidityIntervals { get; set; } = new List<ValidityInterval>();
 
+        public Yearcard()
+        {
+            //EF CORE
+        }
         public Yearcard(Guid? id, CardNumber? cardId)
         {
             Id = id;

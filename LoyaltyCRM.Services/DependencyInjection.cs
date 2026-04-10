@@ -19,6 +19,7 @@ public static class DependencyInjection
         services.AddScoped<ICustomerRepo, CustomerRepo>();
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddScoped<IYearcardService, YearcardService>();
+        services.AddScoped<ITransactionService, TransactionService>();
 
         services.AddHostedService<YearcardCleanupService>();
 

@@ -2,7 +2,7 @@
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
-using LoyaltyCRM.Services.Factories;
+using LoyaltyCRM.Infrastructure.Factories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -107,7 +107,7 @@ namespace LoyaltyCRM.Infrastructure.Seeders
                     {
                         await userManager.AddToRoleAsync(user, Role.Customer.ToString());
                         // Create a YearcardEntity for the user after successful creation
-                        Yearcard yearcard = YearcardEntityFactory.Create(user);
+                        Yearcard yearcard = YearcardFactory.Create(user);
 
                         // yearcard.CardId!.Create(counter);
                         // Add the YearcardEntity to the context
@@ -161,7 +161,7 @@ namespace LoyaltyCRM.Infrastructure.Seeders
         //                 {
         //                     await userManager.AddToRoleAsync(user, Role.Customer.ToString());
 
-        //                     var yearcard = YearcardEntityFactory.Create(user);
+        //                     var yearcard = YearcardFactory.Create(user);
         //                     yearcard.CardId = Interlocked.Increment(ref counter);
         //                     await context.Yearcards.AddAsync(yearcard);
         //                 }
