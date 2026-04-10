@@ -24,7 +24,9 @@ public static class YearcardFactory
         // Create YearcardEntity with default fake data
         var yearcard = Faker.Clone()
             .RuleFor(y => y.UserId, _ => user.Id)
+            .RuleFor(y => y.User, _ => user)
             .Generate();
+
 
         // Apply customizations if any
         customizer?.Invoke(yearcard);

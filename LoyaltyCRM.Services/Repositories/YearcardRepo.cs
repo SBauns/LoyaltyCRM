@@ -1,12 +1,9 @@
-﻿using FuzzySharp;
-using LoyaltyCRM.Domain.DomainPrimitives;
-using LoyaltyCRM.Domain.Exceptions;
+﻿using LoyaltyCRM.Domain.Exceptions;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using System;
 
 namespace LoyaltyCRM.Services.Repositories
 {
@@ -49,35 +46,40 @@ namespace LoyaltyCRM.Services.Repositories
         public async Task<Yearcard> UpdateYearcard(Guid id, Yearcard updated)
         {
             Yearcard? existing = await _context.Yearcards
+                .Include(y => y.User)
                 .Include(y => y.ValidityIntervals)
                 .FirstOrDefaultAsync(y => y.Id == id);
 
             if (existing == null)
                 throw new ArgumentException("Could not find old Yearcard"); //TRANSLATE
 
-            // Update scalar properties
+            // Update scalar properties on the yearcard
             _context.Entry(existing).CurrentValues.SetValues(updated);
 
-            // --- Update ValidityIntervals (diff-based) ---
+            if (updated.User != null)
+            {
+                _context.Entry(existing.User).CurrentValues.SetValues(updated.User);
+                existing.User!.Yearcard = existing;
+            }
 
-            // 1. Remove intervals that no longer exist
+            var updatedValidityIntervals = updated.ValidityIntervals ?? new List<ValidityInterval>();
+
+            // --- Update ValidityIntervals (diff-based) ---
             foreach (var oldInterval in existing.ValidityIntervals.ToList())
             {
-                if (!updated.ValidityIntervals.Any(u => u.Id == oldInterval.Id))
+                if (!updatedValidityIntervals.Any(u => u.Id == oldInterval.Id))
                 {
                     _context.ValidityInterval.Remove(oldInterval);
                 }
             }
 
-            // 2. Add or update intervals
-            foreach (var newInterval in updated.ValidityIntervals)
+            foreach (var newInterval in updatedValidityIntervals)
             {
                 var existingInterval = existing.ValidityIntervals
                     .FirstOrDefault(v => v.Id == newInterval.Id);
 
                 if (existingInterval == null)
                 {
-                    // New interval → add it
                     existing.ValidityIntervals.Add(new ValidityInterval(
                         newInterval.StartDate,
                         newInterval.EndDate,
@@ -86,7 +88,6 @@ namespace LoyaltyCRM.Services.Repositories
                 }
                 else
                 {
-                    // Existing interval → update it
                     _context.Entry(existingInterval).CurrentValues.SetValues(newInterval);
                 }
             }

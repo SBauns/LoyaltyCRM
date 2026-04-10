@@ -21,8 +21,6 @@ namespace LoyaltyCRM.Services.Services
 
         private readonly ICustomerRepo _customerRepo;
 
-        private readonly LoyaltyContext _context;
-
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<YearcardService> _logger;
         private readonly ITransactionService _transactionService;
@@ -37,7 +35,6 @@ namespace LoyaltyCRM.Services.Services
         {
             _yearcardRepo = yearcardRepo;
             _customerRepo = customerRepo;
-            _context = context;
             _userManager = userManager;
             _logger = logger;
             _transactionService = transactionService;
@@ -54,21 +51,101 @@ namespace LoyaltyCRM.Services.Services
         }
 
         public async Task<Yearcard> UpdateYearcard(Guid Id, Yearcard yearcard)
-        {           
+        {
             using (var transaction = await _transactionService.BeginTransactionAsync())
             {
                 try
                 {
-                    Yearcard updatedCard = await _yearcardRepo.UpdateYearcard(Id, yearcard);
-                    await _userManager.UpdateAsync(yearcard.User);
-                    // await transaction.CommitAsync();
-                    return updatedCard;
+                    Yearcard existingYearcard = await _yearcardRepo.GetYearcard(Id);
 
+                    UpdateYearcardGraph(existingYearcard, yearcard);
+
+                    var result = await _userManager.UpdateAsync(existingYearcard.User);
+                    if (!result.Succeeded)
+                    {
+                        throw new InvalidOperationException(
+                            $"Failed to update yearcard and user: {string.Join(", ", result.Errors.Select(e => e.Description))}");
+                    }
+
+                    await transaction.CommitAsync();
+                    return existingYearcard;
                 }
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
                     throw new Exception($"Data invalid. {exception.Message}");
+                }
+            }
+        }
+
+        private static void UpdateYearcardGraph(Yearcard existing, Yearcard updated)
+        {
+            if (updated.Name != null)
+            {
+                existing.Name = updated.Name;
+            }
+
+            if (updated.CardId != null)
+            {
+                existing.CardId = updated.CardId;
+            }
+
+            if (updated.User != null)
+            {
+                UpdateUser(existing.User, updated.User);
+                existing.User.Yearcard = existing;
+            }
+
+            UpdateValidityIntervals(existing, updated.ValidityIntervals);
+        }
+
+        private static void UpdateUser(ApplicationUser existingUser, ApplicationUser updatedUser)
+        {
+            existingUser.UserName = updatedUser.UserName;
+            existingUser.NormalizedUserName = updatedUser.NormalizedUserName;
+            existingUser.Email = updatedUser.Email;
+            existingUser.NormalizedEmail = updatedUser.NormalizedEmail;
+            existingUser.PhoneNumber = updatedUser.PhoneNumber;
+            existingUser.EmailConfirmed = updatedUser.EmailConfirmed;
+            existingUser.PhoneNumberConfirmed = updatedUser.PhoneNumberConfirmed;
+            existingUser.LockoutEnabled = updatedUser.LockoutEnabled;
+            existingUser.LockoutEnd = updatedUser.LockoutEnd;
+            existingUser.AccessFailedCount = updatedUser.AccessFailedCount;
+            existingUser.TwoFactorEnabled = updatedUser.TwoFactorEnabled;
+            existingUser.PasswordHash = updatedUser.PasswordHash;
+            existingUser.SecurityStamp = updatedUser.SecurityStamp;
+            existingUser.ConcurrencyStamp = updatedUser.ConcurrencyStamp;
+        }
+
+        private static void UpdateValidityIntervals(Yearcard existing, List<ValidityInterval> updatedIntervals)
+        {
+            updatedIntervals ??= new List<ValidityInterval>();
+
+            foreach (var oldInterval in existing.ValidityIntervals.ToList())
+            {
+                if (!updatedIntervals.Any(u => u.Id == oldInterval.Id))
+                {
+                    existing.ValidityIntervals.Remove(oldInterval);
+                }
+            }
+
+            foreach (var newInterval in updatedIntervals)
+            {
+                var existingInterval = existing.ValidityIntervals
+                    .FirstOrDefault(v => v.Id == newInterval.Id);
+
+                if (existingInterval == null)
+                {
+                    existing.ValidityIntervals.Add(new ValidityInterval(
+                        newInterval.StartDate,
+                        newInterval.EndDate,
+                        newInterval.Id
+                    ));
+                }
+                else
+                {
+                    existingInterval.StartDate = newInterval.StartDate;
+                    existingInterval.EndDate = newInterval.EndDate;
                 }
             }
         }
