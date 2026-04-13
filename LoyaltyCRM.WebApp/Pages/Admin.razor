@@ -11,7 +11,6 @@
 <div class="create-wrapper d-flex flex-column align-items-center justify-content-center min-vh-100">
     <div class="card shadow-sm p-4 w-100" style="max-width: 820px;">
         <h3 class="text-center mb-3">@L["Admin Panel"]</h3>
-
         <div class="btn-group w-100 mb-4" role="group">
             <button class="btn @GetTabClass(AdminSection.PasswordSettings)" @onclick="() => ChangeSection(AdminSection.PasswordSettings)">@L["Password settings"]</button>
             <button class="btn @GetTabClass(AdminSection.TermsSetting)" @onclick="() => ChangeSection(AdminSection.TermsSetting)">@L["Terms setting"]</button>
@@ -178,6 +177,12 @@
         {
             await LoadAppSettings();
         }
+        if (section == AdminSection.TermsSetting)
+        {
+            await InvokeAsync(StateHasChanged);
+            await Task.Yield();
+            await GetTermsAsync();
+        }
     }
 
     private string FormatSettingLabel(string key)
@@ -328,54 +333,30 @@
         }
     }
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    private string html = "";
+
+    protected async Task GetTermsAsync()
     {
-        if (firstRender && !editorInitialized)
+        try
         {
-            editorInitialized = true;
-            try
+            if (string.IsNullOrEmpty(html))
             {
-                try
+                var resp = await Http.GetAsync("/api/terms");
+                if (resp.IsSuccessStatusCode)
                 {
-                    var resp = await Http.GetAsync("/api/terms");
-                    if (resp.IsSuccessStatusCode)
-                    {
-                        var html = await resp.Content.ReadAsStringAsync();
-                        if (!string.IsNullOrWhiteSpace(html))
-                        {
-                            await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", html);
-                        }
-                    }
-                    else
-                    {
-                        var staticHtml = await Http.GetStringAsync("/papaterms.html");
-                        if (!string.IsNullOrWhiteSpace(staticHtml))
-                        {
-                            await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", staticHtml);
-                        }
-                    }
-                }
-                catch
-                {
-                    try
-                    {
-                        var staticHtml = await Http.GetStringAsync("/papaterms.html");
-                        if (!string.IsNullOrWhiteSpace(staticHtml))
-                        {
-                            await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", staticHtml);
-                        }
-                    }
-                    catch
-                    {
-                        // ignore
-                    }
+                    html = await resp.Content.ReadAsStringAsync();
                 }
             }
-            catch
+
+            if (!string.IsNullOrWhiteSpace(html))
             {
-                // ignore; editor will remain empty
+                await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", html);
             }
-            StateHasChanged();
         }
+        catch
+        {
+        }
+
+        StateHasChanged();
     }
 }
