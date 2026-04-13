@@ -39,10 +39,8 @@
                     <div class="col-12 col-md-6">
                         <div class="mb-3">
                             <label for="PhoneNumber" class="form-label">@L["Phone"]*</label>
-                            <div class="input-group">
-                                <CountryCodeSelector @bind-SelectedCountryCode="SelectedCountryCode"></CountryCodeSelector>
-                                <InputText id="PhoneNumber" class="form-control" @bind-Value="PhoneNumberInput" oninput="this.value=this.value.replace(/[^0-9]/g,'')" inputmode="numeric" pattern="[0-9]*" />
-                            </div>
+                            <PhoneNumberInput @bind-Value="Yearcard.PhoneNumber" InputId="PhoneNumber" />
+                            <ValidationMessage For="@(() => Yearcard.PhoneNumber)" />
                         </div>
                         <div class="mb-3">
                             <label for="Email" class="form-label">@L["Email"]*</label>
@@ -106,11 +104,6 @@
     private string TermsHtml { get; set; } = string.Empty;
     private string TodayString => DateTime.Today.ToString("yyyy-MM-dd");
 
-    // Country code selector
-
-    private string PhoneNumberInput = string.Empty;
-    private string SelectedCountryCode { get; set; } = "+45";
-
     protected override void OnInitialized()
     {
         Navigation.LocationChanged += OnLocationChanged;
@@ -135,21 +128,17 @@
 
     private async Task HandleSubmit(EditContext context)
     {
-        // Combine country code and phone number
         try
         {
-            Yearcard.PhoneNumber = PhoneNumberInput;
             if (context.Validate() && EverythingIsValid())
             {
-                // Combine country code and phone number
-                Yearcard.PhoneNumber = SelectedCountryCode + "-" + PhoneNumberInput;
                 CreatedYearcard = await yearcards.CreateYearcardAsync(Yearcard);
                 Message = ("Yearcard created successfully!");
                 ErrorMessage = string.Empty;
-                // ResetForm();
             }
-            else{
-                ErrorMessage = context.GetValidationMessages().ToList().First();
+            else
+            {
+                ErrorMessage = context.GetValidationMessages().ToList().FirstOrDefault() ?? "Validation failed";
             }
         }
         catch (UnauthorizedAccessException ex)
@@ -165,20 +154,18 @@
 
     private bool EverythingIsValid()
     {
-        return (!string.IsNullOrEmpty(PhoneNumberInput) &&
-               !string.IsNullOrEmpty(Yearcard.Email) &&
-               !string.IsNullOrEmpty(Yearcard.Name)) &&
+        return !string.IsNullOrWhiteSpace(Yearcard.PhoneNumber) &&
+               !string.IsNullOrWhiteSpace(Yearcard.Email) &&
+               !string.IsNullOrWhiteSpace(Yearcard.Name) &&
                AcceptedTerms;
     }
 
     private void ResetForm()
     {
         CreatedYearcard = null;
-        PhoneNumberInput = string.Empty;
         Yearcard = new YearcardDTO(); // Reset the form data
         Message = string.Empty;
         ErrorMessage = string.Empty;
-        SelectedCountryCode = "+45";
     }
 
     private async Task ShowTermsModal()

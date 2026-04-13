@@ -1,5 +1,4 @@
 @using LoyaltyCRM.WebApp.Locales
-@using System.Text.RegularExpressions
 @inject YearcardService yearcards
 @inject IStringLocalizer<Resources> L
 
@@ -29,11 +28,7 @@
                 <div class="col-12 col-md-6">
                     <div class="mb-3">
                         <label for="Phone" class="form-label">@L["Phone"]</label>
-                        <div class="input-group">
-                            <CountryCodeSelector @bind-SelectedCountryCode="SelectedCountryCode"></CountryCodeSelector>
-                            <InputText id="PhoneNumber" class="form-control" @bind-Value="PhoneNumberInput" oninput="this.value=this.value.replace(/[^0-9]/g,'')" inputmode="numeric" pattern="[0-9]*" />
-                            <!-- dotnet-watch-test -->
-                        </div>
+                        <PhoneNumberInput @bind-Value="Yearcard.PhoneNumber" InputId="PhoneNumber" />
                         <ValidationMessage For="@(() => Yearcard.PhoneNumber)" />
                     </div>
                     <div class="mb-3">
@@ -80,30 +75,27 @@
 
 @code {
     [Parameter]
-    public YearcardDTO? Yearcard { get; set; }
+    public YearcardDTO Yearcard { get; set; } = new YearcardDTO();
 
     private YearcardDTO? OriginalYearcard { get; set; }
     public string Message { get; set; } = string.Empty;
-
     public string ErrorMessage { get; set; } = string.Empty;
-
-    private string PhoneNumberInput = string.Empty;
-    private string SelectedCountryCode { get; set; } = "+45";
 
     protected override void OnInitialized()
     {
-        if (Yearcard != null && Yearcard.ValidityIntervals == null)
+        var yearcard = Yearcard;
+        if (yearcard == null)
         {
-            Yearcard.ValidityIntervals = new List<ValidityIntervalDTO>();
+            ErrorMessage = "Yearcard data is not available.";
+            return;
         }
 
-        var (countryCode, number) = SplitPhoneNumber(Yearcard?.PhoneNumber ?? "");
+        if (yearcard.ValidityIntervals == null)
+        {
+            yearcard.ValidityIntervals = new List<ValidityIntervalDTO>();
+        }
 
-        SelectedCountryCode = countryCode;
-        PhoneNumberInput = number;
-        Yearcard.PhoneNumber = number;
-
-        OriginalYearcard = CloneYearcard(Yearcard!);
+        OriginalYearcard = CloneYearcard(yearcard);
     }
 
     private async Task HandleSubmit(EditContext context)
@@ -111,14 +103,20 @@
         ResetMessages();
         try
         {
-            Yearcard.PhoneNumber = PhoneNumberInput;
-            if(!context.Validate()){
+            var yearcard = Yearcard;
+            if (yearcard == null)
+            {
+                ErrorMessage = "Yearcard data is not available.";
+                return;
+            }
+
+            if (!context.Validate())
+            {
                 ErrorMessage = "Validation Failed!";
                 return;
             }
 
-            Yearcard.PhoneNumber = SelectedCountryCode + "-" + PhoneNumberInput;
-            if (await yearcards.UpdateYearcardAsync(Yearcard!))
+            if (await yearcards.UpdateYearcardAsync(yearcard))
             {
                 Message = "Yearcard Updated successfully!";
             }
@@ -164,13 +162,20 @@
     {
         ResetMessages();
 
-        Yearcard!.CardId = OriginalYearcard!.CardId;
-        Yearcard!.ValidTo = OriginalYearcard!.ValidTo;
-        Yearcard!.PhoneNumber = OriginalYearcard!.PhoneNumber;
-        Yearcard!.Email = OriginalYearcard!.Email;
-        Yearcard!.Name = OriginalYearcard!.Name;
-        Yearcard!.UserName = OriginalYearcard!.UserName;
-        Yearcard!.ValidityIntervals = OriginalYearcard!.ValidityIntervals.Select(v => new ValidityIntervalDTO
+        var yearcard = Yearcard;
+        var originalYearcard = OriginalYearcard;
+        if (yearcard == null || originalYearcard == null)
+        {
+            return;
+        }
+
+        yearcard.CardId = originalYearcard.CardId;
+        yearcard.ValidTo = originalYearcard.ValidTo;
+        yearcard.PhoneNumber = originalYearcard.PhoneNumber;
+        yearcard.Email = originalYearcard.Email;
+        yearcard.Name = originalYearcard.Name;
+        yearcard.UserName = originalYearcard.UserName;
+        yearcard.ValidityIntervals = originalYearcard.ValidityIntervals.Select(v => new ValidityIntervalDTO
         {
             Id = v.Id,
             StartDate = v.StartDate,
@@ -180,68 +185,34 @@
 
     private void AddInterval()
     {
-        if (Yearcard != null)
+        var yearcard = Yearcard;
+        if (yearcard == null)
         {
-            DateTime newStart = DateTime.Today;
-            if (Yearcard.ValidityIntervals != null && Yearcard.ValidityIntervals.Count > 0)
-            {
-                newStart = Yearcard.ValidityIntervals.Max(i => i.EndDate);
-            }
-            Yearcard.ValidityIntervals.Add(new ValidityIntervalDTO
-            {
-                StartDate = newStart,
-                EndDate = newStart.AddYears(1)
-            });
+            return;
         }
+
+        yearcard.ValidityIntervals ??= new List<ValidityIntervalDTO>();
+
+        DateTime newStart = DateTime.Today;
+        if (yearcard.ValidityIntervals.Count > 0)
+        {
+            newStart = yearcard.ValidityIntervals.Max(i => i.EndDate);
+        }
+        yearcard.ValidityIntervals.Add(new ValidityIntervalDTO
+        {
+            StartDate = newStart,
+            EndDate = newStart.AddYears(1)
+        });
     }
 
     private void RemoveInterval(int index)
     {
-        if (Yearcard != null && index >= 0 && index < Yearcard.ValidityIntervals.Count)
+        var yearcard = Yearcard;
+        if (yearcard == null || yearcard.ValidityIntervals == null || index < 0 || index >= yearcard.ValidityIntervals.Count)
         {
-            Yearcard.ValidityIntervals.RemoveAt(index);
-        }
-    }
-
-    private (string countryCode, string number) SplitPhoneNumber(string phone)
-    {
-        if (string.IsNullOrWhiteSpace(phone))
-            return ("", "");
-
-        phone = phone.Trim();
-
-        string countryCode = "";
-        string number = "";
-
-        // Handle + prefix (e.g. +45...)
-        if (phone.StartsWith("+"))
-        {
-            var match = Regex.Match(phone, @"^\+\d{1,3}");
-            if (match.Success)
-            {
-                countryCode = match.Value;
-                number = phone.Substring(match.Length);
-            }
-        }
-        // Handle 00 prefix (e.g. 0045...)
-        else if (phone.StartsWith("00"))
-        {
-            var match = Regex.Match(phone, @"^00\d{1,3}");
-            if (match.Success)
-            {
-                countryCode = "+" + match.Value.Substring(2);
-                number = phone.Substring(match.Length);
-            }
-        }
-        else
-        {
-            // No country code, treat everything as number
-            number = phone;
+            return;
         }
 
-        // Keep only digits in number
-        number = Regex.Replace(number, "[^0-9]", "");
-
-        return (countryCode, number);
+        yearcard.ValidityIntervals.RemoveAt(index);
     }
 }

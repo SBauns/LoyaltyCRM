@@ -1,0 +1,91 @@
+@using System.Text.RegularExpressions
+
+<div class="input-group">
+    <CountryCodeSelector SelectedCountryCode="@SelectedCountryCode" SelectedCountryCodeChanged="OnCountryCodeChanged"></CountryCodeSelector>
+    <input id="@InputId"
+           class="form-control"
+           value="@phoneNumberInput"
+           @oninput="OnPhoneNumberChanged"
+           inputmode="numeric"
+           pattern="[0-9-]*" />
+</div>
+
+@code {
+    [Parameter]
+    public string Value { get; set; } = string.Empty;
+
+    [Parameter]
+    public EventCallback<string> ValueChanged { get; set; }
+
+    [Parameter]
+    public string InputId { get; set; } = "phoneNumber";
+
+    private string SelectedCountryCode { get; set; } = "+45";
+    private string phoneNumberInput { get; set; } = string.Empty;
+
+    protected override void OnParametersSet()
+    {
+        var (countryCode, number) = SplitPhoneNumber(Value);
+        SelectedCountryCode = string.IsNullOrEmpty(countryCode) ? "+45" : countryCode;
+        phoneNumberInput = number;
+    }
+
+    private async Task OnCountryCodeChanged(string code)
+    {
+        SelectedCountryCode = code;
+        await UpdateValueAsync();
+    }
+
+    private async Task OnPhoneNumberChanged(ChangeEventArgs args)
+    {
+        phoneNumberInput = NormalizeInput(args?.Value?.ToString() ?? string.Empty);
+        await UpdateValueAsync();
+    }
+
+    private async Task UpdateValueAsync()
+    {
+        var combined = string.IsNullOrWhiteSpace(phoneNumberInput)
+            ? string.Empty
+            : $"{SelectedCountryCode}-{phoneNumberInput}";
+
+        await ValueChanged.InvokeAsync(combined);
+    }
+
+    private static string NormalizeInput(string input)
+        => Regex.Replace(input ?? string.Empty, "[^0-9-]", string.Empty);
+
+    private static (string countryCode, string number) SplitPhoneNumber(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+            return ("+45", string.Empty);
+
+        phone = phone.Trim();
+        string countryCode = string.Empty;
+        string number = phone;
+
+        if (phone.StartsWith("+"))
+        {
+            var match = Regex.Match(phone, @"^\+\d{1,3}");
+            if (match.Success)
+            {
+                countryCode = match.Value;
+                number = phone.Substring(match.Length);
+            }
+        }
+        else if (phone.StartsWith("00"))
+        {
+            var match = Regex.Match(phone, @"^00\d{1,3}");
+            if (match.Success)
+            {
+                countryCode = "+" + match.Value.Substring(2);
+                number = phone.Substring(match.Length);
+            }
+        }
+
+        number = Regex.Replace(number, "[^0-9-]", string.Empty);
+        if (number.StartsWith("-"))
+            number = number.Substring(1);
+
+        return (string.IsNullOrEmpty(countryCode) ? "+45" : countryCode, number);
+    }
+}

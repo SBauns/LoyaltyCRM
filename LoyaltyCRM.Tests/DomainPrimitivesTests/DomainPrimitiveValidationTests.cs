@@ -85,7 +85,7 @@ namespace LoyaltyCRM.Tests.DomainPrimitivesTests
 
         [Theory]
         [InlineData("+1-5551234567")]
-        [InlineData("1234567890")]
+        [InlineData("+45-1234567890")]
         [InlineData("+44-2071234567")]
         public void PhoneNumber_ValidValue_DoesNotThrow(string value)
         {

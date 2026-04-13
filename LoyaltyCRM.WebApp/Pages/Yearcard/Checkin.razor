@@ -16,10 +16,7 @@
             <ValidationSummary />
             <div class="mb-3 text-center">
                 <label for="phoneNumber" class="form-label mb-2">@L["Phone Number:"]</label>
-                <div class="input-group">
-                    <CountryCodeSelector @bind-SelectedCountryCode="SelectedCountryCode"></CountryCodeSelector>
-                    <input type="text" id="phoneNumber" @bind="PhoneNumber.Phone" class="form-control text-center" inputmode="numeric" style="min-width: 150px; max-width: 100%;" />
-                </div>
+                <PhoneNumberInput @bind-Value="PhoneNumber.Phone" InputId="phoneNumber" />
             </div>
             <div class="mb-3 text-center">
                 <label for="email" class="form-label mb-2">@L["Email:"]</label>
@@ -55,8 +52,6 @@
     private CancellationTokenSource? CountdownCts;
     private bool CardIsValid { get; set; } = false;
 
-    private string SelectedCountryCode { get; set; } = "+45";
-
     private async Task CheckYearcard()
     {
         // Reset animation and message
@@ -71,7 +66,6 @@
         try{
             // Call the API with the entered phone number
             if(PhoneNumber.Phone != null && !string.IsNullOrWhiteSpace(PhoneNumber.Phone)){
-                PhoneNumber.Phone = SelectedCountryCode + "-" + PhoneNumber.Phone;
                 CardIsValid = await _yearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
                 LastChecked = PhoneNumber.Phone;
             }

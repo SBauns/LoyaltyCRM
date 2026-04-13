@@ -15,7 +15,7 @@ public class YearcardDTO
     public DateTime StartDate { get; set; } = DateTime.Today;
 
     [Required(ErrorMessage = "Phone number is required")]
-    [RegularExpression(@"^\d{3,17}$", ErrorMessage = "Phone number must be 3-17 digits")]
+    [RegularExpression(@"^\+\d{1,3}-(\d+(-\d+)*)$", ErrorMessage = "Phone number must follow +<country code>-<number>, digits and hyphens only")]
     public string? PhoneNumber { get; set; }
 
     [Required(ErrorMessage = "Email is required")]
