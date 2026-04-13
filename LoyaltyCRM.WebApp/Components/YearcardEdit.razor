@@ -96,12 +96,13 @@
         {
             Yearcard.ValidityIntervals = new List<ValidityIntervalDTO>();
         }
-        if(Yearcard.PhoneNumber.Contains("-")){
-            var splitIndex = Yearcard.PhoneNumber.IndexOf('-') + 1;
-            SelectedCountryCode = Yearcard.PhoneNumber.Substring(0, splitIndex).Replace("-", "");
-        }
-        PhoneNumberInput = Regex.Replace(Yearcard.PhoneNumber, "[^0-9]", "");
-        Yearcard.PhoneNumber = PhoneNumberInput;
+
+        var (countryCode, number) = SplitPhoneNumber(Yearcard?.PhoneNumber ?? "");
+
+        SelectedCountryCode = countryCode;
+        PhoneNumberInput = number;
+        Yearcard.PhoneNumber = number;
+
         OriginalYearcard = CloneYearcard(Yearcard!);
     }
 
@@ -200,5 +201,47 @@
         {
             Yearcard.ValidityIntervals.RemoveAt(index);
         }
+    }
+
+    private (string countryCode, string number) SplitPhoneNumber(string phone)
+    {
+        if (string.IsNullOrWhiteSpace(phone))
+            return ("", "");
+
+        phone = phone.Trim();
+
+        string countryCode = "";
+        string number = "";
+
+        // Handle + prefix (e.g. +45...)
+        if (phone.StartsWith("+"))
+        {
+            var match = Regex.Match(phone, @"^\+\d{1,3}");
+            if (match.Success)
+            {
+                countryCode = match.Value;
+                number = phone.Substring(match.Length);
+            }
+        }
+        // Handle 00 prefix (e.g. 0045...)
+        else if (phone.StartsWith("00"))
+        {
+            var match = Regex.Match(phone, @"^00\d{1,3}");
+            if (match.Success)
+            {
+                countryCode = "+" + match.Value.Substring(2);
+                number = phone.Substring(match.Length);
+            }
+        }
+        else
+        {
+            // No country code, treat everything as number
+            number = phone;
+        }
+
+        // Keep only digits in number
+        number = Regex.Replace(number, "[^0-9]", "");
+
+        return (countryCode, number);
     }
 }
