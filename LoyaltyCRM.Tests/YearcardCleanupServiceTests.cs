@@ -7,9 +7,11 @@ using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Infrastructure.Factories;
+using LoyaltyCRM.Services;
 using LoyaltyCRM.Services.Repositories;
 using LoyaltyCRM.Services.Repositories.Interfaces;
 using LoyaltyCRM.Services.Services;
+using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -34,11 +36,17 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
             .Setup(x => x.DeleteAsync(It.IsAny<ApplicationUser>()))
             .ReturnsAsync(IdentityResult.Success);
 
+        var settingsMock = new Mock<IAppSettingsProvider>();
+        settingsMock
+            .Setup(s => s.Current)
+            .Returns(new AppSettings());
+
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddScoped(_ => new LoyaltyContext(options));
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddSingleton(userManagerMock.Object);
+        services.AddSingleton(settingsMock.Object);
 
         var serviceProvider = services.BuildServiceProvider();
         var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -56,7 +64,7 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
         context.Yearcards.Add(expiredYearcard);
         await context.SaveChangesAsync();
 
-        var cleanupService = new YearcardCleanupService(logger, scopeFactory);
+        var cleanupService = new YearcardCleanupService(logger, scopeFactory, settingsMock.Object);
 
         await cleanupService.CleanupExpiredYearcardsAsync();
 
@@ -78,11 +86,17 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
             .Setup(x => x.DeleteAsync(It.IsAny<ApplicationUser>()))
             .ReturnsAsync(IdentityResult.Success);
 
+        var settingsMock = new Mock<IAppSettingsProvider>();
+        settingsMock
+            .Setup(s => s.Current)
+            .Returns(new AppSettings());
+
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddScoped(_ => new LoyaltyContext(options));
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddSingleton(userManagerMock.Object);
+        services.AddSingleton(settingsMock.Object);
 
         var serviceProvider = services.BuildServiceProvider();
         var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -100,7 +114,7 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
         context.Yearcards.Add(validYearcard);
         await context.SaveChangesAsync();
 
-        var cleanupService = new YearcardCleanupService(logger, scopeFactory);
+        var cleanupService = new YearcardCleanupService(logger, scopeFactory, settingsMock.Object);
 
         await cleanupService.CleanupExpiredYearcardsAsync();
 

@@ -90,7 +90,7 @@
         else if (CurrentSection == AdminSection.AppSettings)
         {
             <div class="mb-3 text-center text-muted">
-                @L["Configure app settings using only numeric values. These are validated before saving."]
+                @L["Configure app settings using numeric values or a time value where appropriate. These are validated before saving."]
             </div>
             @if (!string.IsNullOrEmpty(appSettingsMessage))
             {
@@ -99,9 +99,13 @@
             <div class="row g-3">
                 @foreach (var setting in appSettings)
                 {
+                    var inputType = setting.Key.Equals("TimeToCleanUpCards", StringComparison.OrdinalIgnoreCase)
+                        ? "time"
+                        : "number";
+
                     <div class="col-12 col-md-4">
                         <label class="form-label">@FormatSettingLabel(setting.Key)</label>
-                        <InputText class="form-control" @bind-Value="setting.Value" />
+                        <InputText class="form-control" @bind-Value="setting.Value" type="@inputType" />
                     </div>
                 }
             </div>

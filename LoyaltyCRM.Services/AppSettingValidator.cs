@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -13,10 +14,9 @@ namespace LoyaltyCRM.Services
 
         private static readonly IReadOnlyDictionary<string, SettingDefinition> Definitions = typeof(AppSettings)
             .GetProperties(BindingFlags.Public | BindingFlags.Instance)
-            .Where(prop => prop.PropertyType == typeof(int))
             .ToDictionary(
                 prop => prop.Name,
-                prop => new SettingDefinition(prop.Name, $"Positive integer value for {prop.Name}.", TryParsePositiveInt),
+                prop => new SettingDefinition(prop.Name, $"Typed value for {prop.Name}.", GetParser(prop.PropertyType)),
                 StringComparer.OrdinalIgnoreCase);
 
         public static bool TryValidateSetting(string key, string value, out object? parsedValue, out string? errorMessage)
@@ -51,6 +51,22 @@ namespace LoyaltyCRM.Services
             return definition.TryParse(value, out parsedValue, out errorMessage);
         }
 
+        private static TryParseDelegate GetParser(Type propertyType)
+        {
+            return propertyType == typeof(int)
+                ? TryParsePositiveInt
+                : propertyType == typeof(TimeOnly)
+                    ? TryParseTimeOnly
+                    : TryParseString;
+        }
+
+        private static bool TryParseString(string rawValue, out object? parsedValue, out string? errorMessage)
+        {
+            parsedValue = rawValue?.Trim();
+            errorMessage = null;
+            return true;
+        }
+
         private static bool TryParsePositiveInt(string rawValue, out object? parsedValue, out string? errorMessage)
         {
             parsedValue = null;
@@ -72,6 +88,22 @@ namespace LoyaltyCRM.Services
             if (result <= 0)
             {
                 errorMessage = "Value must be greater than zero.";
+                return false;
+            }
+
+            parsedValue = result;
+            return true;
+        }
+
+        private static bool TryParseTimeOnly(string rawValue, out object? parsedValue, out string? errorMessage)
+        {
+            parsedValue = null;
+            errorMessage = null;
+
+            var trimmedValue = rawValue.Trim();
+            if (!TimeOnly.TryParse(trimmedValue, CultureInfo.InvariantCulture, out var result))
+            {
+                errorMessage = "Value must be a valid time of day, for example 02:00.";
                 return false;
             }
 

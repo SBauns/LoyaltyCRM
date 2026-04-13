@@ -1,5 +1,6 @@
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
+using LoyaltyCRM.Services;
 using LoyaltyCRM.Services.Repositories.Interfaces;
 using LoyaltyCRM.Services.Services;
 using LoyaltyCRM.Services.Services.Interfaces;
@@ -16,6 +17,8 @@ public abstract class YearcardServiceTestBase : IDisposable
     protected readonly Mock<LoyaltyContext> _contextMock;
     protected readonly Mock<ITransactionService> _transactionMock;
 
+    protected readonly Mock<IAppSettingsProvider> _settingsMock;
+
     protected readonly YearcardService _sut;
 
     protected YearcardServiceTestBase()
@@ -30,13 +33,18 @@ public abstract class YearcardServiceTestBase : IDisposable
 
         _contextMock = new Mock<LoyaltyContext>();
         _transactionMock = new Mock<ITransactionService>();
+        _settingsMock = new Mock<IAppSettingsProvider>();
+        _settingsMock
+            .Setup(s => s.Current)
+            .Returns(new AppSettings());
 
         _sut = new YearcardService(
             _yearcardRepoMock.Object,
             _customerRepoMock.Object,
             _userManagerMock.Object,
             _loggerMock.Object,
-            _transactionMock.Object
+            _transactionMock.Object,
+            _settingsMock.Object
         );
     }
 

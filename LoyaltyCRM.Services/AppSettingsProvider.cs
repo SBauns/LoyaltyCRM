@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -101,16 +102,29 @@ namespace LoyaltyCRM.Services
                 return false;
             }
 
+            var trimmedValue = rawValue.Trim();
+
             if (propertyType == typeof(string))
             {
-                converted = rawValue.Trim();
+                converted = trimmedValue;
                 return true;
             }
 
-            var converter = TypeDescriptor.GetConverter(propertyType);
-            if (converter != null && converter.IsValid(rawValue))
+            if (propertyType == typeof(TimeOnly))
             {
-                converted = converter.ConvertFromString(rawValue);
+                if (TimeOnly.TryParse(trimmedValue, CultureInfo.InvariantCulture, out var timeValue))
+                {
+                    converted = timeValue;
+                    return true;
+                }
+
+                return false;
+            }
+
+            var converter = TypeDescriptor.GetConverter(propertyType);
+            if (converter != null && converter.IsValid(trimmedValue))
+            {
+                converted = converter.ConvertFromString(trimmedValue);
                 return true;
             }
 
@@ -118,7 +132,7 @@ namespace LoyaltyCRM.Services
             {
                 try
                 {
-                    converted = Enum.Parse(propertyType, rawValue, ignoreCase: true);
+                    converted = Enum.Parse(propertyType, trimmedValue, ignoreCase: true);
                     return true;
                 }
                 catch

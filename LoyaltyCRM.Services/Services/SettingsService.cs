@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
@@ -54,14 +55,27 @@ namespace LoyaltyCRM.Services.Services
 
         public async Task<AppSetting> UpsertSettingAsync(string key, string value)
         {
-            if (!AppSettingValidator.TryValidateSetting(key, value, out _, out var errorMessage))
+            if (!AppSettingValidator.TryValidateSetting(key, value, out var parsedValue, out var errorMessage))
             {
                 throw new ArgumentException(errorMessage ?? "Invalid setting.");
             }
 
+            if (parsedValue is TimeOnly timeValue)
+            {
+                value = timeValue.ToString("HH:mm", CultureInfo.InvariantCulture);
+            }
+            else if (parsedValue is int intValue)
+            {
+                value = intValue.ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                value = value.Trim();
+            }
+
             var existing = await _settingsRepo.GetByKeyAsync(key);
             var setting = existing ?? new AppSetting { Key = key.Trim() };
-            setting.Value = value.Trim();
+            setting.Value = value;
 
             var result = await _settingsRepo.UpsertAsync(setting);
             await _appSettingsProvider.ReloadAsync();
