@@ -34,7 +34,6 @@ public abstract class YearcardServiceTestBase : IDisposable
         _sut = new YearcardService(
             _yearcardRepoMock.Object,
             _customerRepoMock.Object,
-            _contextMock.Object,
             _userManagerMock.Object,
             _loggerMock.Object,
             _transactionMock.Object

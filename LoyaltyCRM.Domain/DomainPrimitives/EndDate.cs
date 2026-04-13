@@ -9,8 +9,6 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
     {
         public DateTime Value { get; }
 
-        private int thresholdDays = 30;
-
         public EndDate(DateTime Value)
         {
             ValidateDate(Value);
@@ -19,7 +17,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 
         private void ValidateDate(DateTime Value)
         {
-            //TODO Validation rules: Format
+            
         }
     }
 }

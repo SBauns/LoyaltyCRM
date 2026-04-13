@@ -11,16 +11,16 @@ using LoyaltyCRM.Services.Services.Interfaces;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Services.Repositories.Interfaces;
 using System.Diagnostics.CodeAnalysis;
+using LoyaltyCRM.Services;
+using System.ComponentModel;
 
 public class YearcardCleanupService : IHostedService, IDisposable, IYearcardCleanupService
 {
     private readonly ILogger<YearcardCleanupService> _logger;
     private readonly IServiceScopeFactory _scopeFactory;
-    private Timer? _timer;
+    private readonly IAppSettingsProvider _settings;
 
-    // Hardcoded variable for scheduled cleanup time (hour and minute)
-    private readonly int _cleanupHour = 2; // Set this to the desired hour (24-hour format)
-    private readonly int _cleanupMinute = 0; // Set this to the desired minute
+    private Timer? _timer;
 
     // Set your timezone here (e.g., "Central European Standard Time")
     private readonly TimeZoneInfo _timeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
@@ -28,11 +28,13 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
     [ExcludeFromCodeCoverage]
     public YearcardCleanupService(
         ILogger<YearcardCleanupService> logger,
-        IServiceScopeFactory scopeFactory
+        IServiceScopeFactory scopeFactory,
+        IAppSettingsProvider settings
         )
     {
         _logger = logger ?? throw new ArgumentNullException(nameof(logger), "ILogger cannot be null.");
         _scopeFactory = scopeFactory ?? throw new ArgumentNullException(nameof(scopeFactory), "IServiceScopeFactory cannot be null.");
+        _settings = settings;
     }
 
     [ExcludeFromCodeCoverage]
@@ -47,7 +49,9 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
     {
         // Calculate next run time based on local time zone
         var now = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, _timeZone);
-        var nextRunTime = new DateTime(now.Year, now.Month, now.Day, _cleanupHour, _cleanupMinute, 0);
+
+        // Combine today's date with the TimeOnly
+        var nextRunTime = now.Date.Add(_settings.Current.TimeToCleanUpCards.ToTimeSpan());
 
         // If it's already past the scheduled time today, schedule for tomorrow
         if (now > nextRunTime)
@@ -62,7 +66,7 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
         // var initialDelay = TimeSpan.FromMinutes(0);
         // _timer = new Timer(CleanupExpiredYearcards, null, initialDelay, TimeSpan.FromSeconds(10)); // Run every Minute Uncomment and comment above when checking for activity in development
 
-        _logger.LogInformation($"Scheduled cleanup for {nextRunTime} (daily at {_cleanupHour}:{_cleanupMinute} in local time).");
+        _logger.LogInformation($"Scheduled cleanup for {nextRunTime} (daily at {_settings.Current.TimeToCleanUpCards.Hour}:{_settings.Current.TimeToCleanUpCards.Minute} in local time).");
     }
 
     public async Task CleanupExpiredYearcardsAsync()
@@ -77,7 +81,7 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
         var yearcards = await yearcardRepo.GetYearcards();
 
         var expiredUsers = yearcards
-            .Where(yearcard => !yearcard.IsYearcardValidForDiscount())
+            .Where(yearcard => !yearcard.IsYearcardSetForDeletion(_settings.Current.TimeBeforeDeleteInvalidYearcard))
             .Select(yearcard => yearcard.User)
             .Where(user => user != null)
             .DistinctBy(user => user.Id)

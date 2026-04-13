@@ -14,11 +14,7 @@
 
         private void ValidateDate(DateTime Value)
         {
-            //if (DateTime.Now.Date > Value.Date)
-            //{
-            //    throw new ArgumentException("Valid date must be later than today");
-            //}
-            //TODO Validation rules: Format
+
         }
     }
 }

@@ -51,8 +51,8 @@ public class YearcardProfile : Profile
                 src.ValidityIntervals.Any()
                     ? src.ValidityIntervals.Max(v => v.EndDate.Value)
                     : DateTime.MinValue
-            ))
-            .ForMember(dest => dest.IsValidForDiscount, opt => opt.MapFrom(src => src.IsYearcardValidForDiscount()));
+            ));
+            // .ForMember(dest => dest.IsValidForDiscount, opt => opt.MapFrom(src => src.IsYearcardSetForDeletion())); //TODO Find way to reimplement
 
         //UPDATE MAPPING
         CreateMap<YearcardUpdateRequest, Yearcard>()

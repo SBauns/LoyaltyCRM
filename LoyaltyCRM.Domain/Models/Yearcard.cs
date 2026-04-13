@@ -8,7 +8,6 @@ namespace LoyaltyCRM.Domain.Models
         public Name? Name { get; set; }
         public CardNumber? CardId { get; set; }
         // public CardValidTo ValidTo { get; }
-        private int discountValidityMonths = 3;
 
         //Relationships
         public string UserId { get; set; }
@@ -40,11 +39,11 @@ namespace LoyaltyCRM.Domain.Models
             ValidityIntervals.Add(validityInterval);
         }
 
-        public bool IsYearcardValidForDiscount()
+        public bool IsYearcardSetForDeletion(int gracePeriodDays)
         {
             foreach (ValidityInterval interval in ValidityIntervals)
             {
-                if (interval.EndDate.Value.AddMonths(discountValidityMonths) >= DateTime.Now)
+                if (interval.EndDate.Value.AddDays(gracePeriodDays) >= DateTime.Now)
                 {
                     return true;
                 }

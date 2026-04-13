@@ -24,7 +24,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
                 throw new ArgumentException("Card Number is not allowed to be less than 1"); //Translate
             }
 
-            if (Value > 100000)
+            if (Value > 1000000)
             {
                 throw new ArgumentException("Card Number is not allowed to be more than 100000"); //Translate
             }

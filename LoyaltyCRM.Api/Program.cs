@@ -4,6 +4,7 @@ using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Infrastructure.Seeders;
 using LoyaltyCRM.Services.Services;
+using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -245,6 +246,9 @@ using (var scope = app.Services.CreateScope())
     //Seed Roles and base users if not already there
     var services = scope.ServiceProvider;
     await DataSeeder.SeedUsersAsync(services, builder.Configuration, logger);
+
+    var settingsProvider = app.Services.GetRequiredService<IAppSettingsProvider>();
+    await settingsProvider.InitializeAsync();
 
     // if(services.GetRequiredService<IHostEnvironment>().IsDevelopment())
     //     await DataSeeder.SeedTestData(services, context);

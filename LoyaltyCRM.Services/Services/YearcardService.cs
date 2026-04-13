@@ -24,20 +24,22 @@ namespace LoyaltyCRM.Services.Services
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<YearcardService> _logger;
         private readonly ITransactionService _transactionService;
+        private readonly IAppSettingsProvider _appSettingsProvider;
 
         public YearcardService(
             IYearcardRepo yearcardRepo, 
             ICustomerRepo customerRepo,
-            LoyaltyContext context, 
             UserManager<ApplicationUser> userManager, 
             ILogger<YearcardService> logger,
-            ITransactionService transactionService)
+            ITransactionService transactionService,
+            IAppSettingsProvider appSettingsProvider)
         {
             _yearcardRepo = yearcardRepo;
             _customerRepo = customerRepo;
             _userManager = userManager;
             _logger = logger;
             _transactionService = transactionService;
+            _appSettingsProvider = appSettingsProvider;
         }
 
         public async Task<IEnumerable<Yearcard>> GetYearcards()
@@ -206,7 +208,7 @@ namespace LoyaltyCRM.Services.Services
                 if (interval.StartDate.Value < LastEndDate)
                 {
                     interval.StartDate = new StartDate(LastEndDate);
-                    interval.EndDate = new EndDate(LastEndDate.Add(timeSpan)); // Assuming a 1-year validity interval
+                    interval.EndDate = new EndDate(LastEndDate.Add(timeSpan));
                 }
                 LastEndDate = interval.EndDate.Value;
             }
@@ -306,9 +308,11 @@ namespace LoyaltyCRM.Services.Services
                 startDate = DateTime.UtcNow.Date;
                 _logger.LogWarning("Start date was in the past, setting it to current UTC time.");
             }
+
+            var validityDays = _appSettingsProvider.Current.LengthOfYearcardInDays;
             return new ValidityInterval(
                 new StartDate(startDate),
-                new EndDate(startDate.AddYears(1)), //TODO MAKE ABLE TO SET
+                new EndDate(startDate.AddDays(validityDays)),
                 null
             );
         }

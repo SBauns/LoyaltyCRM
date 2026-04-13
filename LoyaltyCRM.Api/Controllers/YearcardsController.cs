@@ -149,6 +149,8 @@ namespace LoyaltyCRM.Api.Controllers
             }
         }
 
+        //TODO Consider endpoint for seeing if card is valid for discount (remember to use settings)
+
         //CHECK IF YEARCARD IS VALID
         [HttpPost("checkin/{id}")]
         [RequireRole(Role.Papa, Role.Bartender)]

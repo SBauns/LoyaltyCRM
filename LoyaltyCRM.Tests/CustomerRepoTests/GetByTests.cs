@@ -21,15 +21,15 @@ namespace LoyaltyCRM.Tests.CustomerRepoTests
             CustomerRepo _repo = new CustomerRepo(context, _userManagerMock.Object);
             
             var user = ApplicationUserFactory.Create();
-            user.PhoneNumber = "12345678";
+            user.PhoneNumber = "+45-12345678";
 
             context.Users.Add(user);
             await context.SaveChangesAsync();
 
-            var result = await _repo.GetUserByPhone(new PhoneNumber("12345678"));
+            var result = await _repo.GetUserByPhone(new PhoneNumber(user.PhoneNumber));
 
             Assert.NotNull(result);
-            Assert.Equal("12345678", result.PhoneNumber);
+            Assert.Equal(user.PhoneNumber, result.PhoneNumber);
         }
 
         [Fact]
@@ -39,7 +39,7 @@ namespace LoyaltyCRM.Tests.CustomerRepoTests
             CustomerRepo _repo = new CustomerRepo(context, _userManagerMock.Object);
 
             await Assert.ThrowsAsync<EntityNotFoundException>(() =>
-                _repo.GetUserByPhone(new PhoneNumber("99999999")));
+                _repo.GetUserByPhone(new PhoneNumber("+45-99999999")));
         }
 
         // -------------------------

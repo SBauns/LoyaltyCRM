@@ -81,7 +81,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(user);
 
             // Act
-            var result = await _sut.CheckInWithPhone(new PhoneNumber("12345678"));
+            var result = await _sut.CheckInWithPhone(new PhoneNumber("+45-12345678"));
 
             // Assert
             Assert.True(result);
@@ -106,7 +106,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(user);
 
             // Act
-            var result = await _sut.CheckInWithPhone(new PhoneNumber("12345678"));
+            var result = await _sut.CheckInWithPhone(new PhoneNumber("+45-12345678"));
 
             // Assert
             Assert.False(result);

@@ -20,6 +20,9 @@ public static class DependencyInjection
         //Add Repos
         services.AddScoped<ICustomerRepo, CustomerRepo>();
         services.AddScoped<IYearcardRepo, YearcardRepo>();
+        services.AddScoped<ISettingsRepo, SettingsRepo>();
+        services.AddScoped<ISettingsService, SettingsService>();
+        services.AddSingleton<IAppSettingsProvider, AppSettingsProvider>();
         services.AddScoped<IYearcardService, YearcardService>();
         services.AddScoped<ITransactionService, TransactionService>();
 

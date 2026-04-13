@@ -20,7 +20,7 @@ namespace LoyaltyCRM.Tests.DomainPrimitivesTests
         [Theory]
         [InlineData(0)]
         [InlineData(-1)]
-        [InlineData(100001)]
+        [InlineData(1000001)]
         [InlineData(int.MaxValue)]
         public void CardNumber_InvalidValue_ThrowsArgumentException(int invalidValue)
         {
@@ -114,6 +114,7 @@ namespace LoyaltyCRM.Tests.DomainPrimitivesTests
         [InlineData("Alice")]
         [InlineData("Jean-Luc")]
         [InlineData("Mary Jane")]
+        [InlineData("Søren Åge")]
         public void Name_ValidValue_DoesNotThrow(string value)
         {
             Action act = () => new Name(value);
