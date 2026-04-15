@@ -71,12 +71,23 @@ window.authHelpers = (function () {
         const el = document.getElementById(id);
         if (el) el.innerHTML = html;
     }
+
+    function downloadBase64File(fileName, base64Content) {
+        const link = document.createElement('a');
+        link.href = 'data:application/octet-stream;base64,' + base64Content;
+        link.download = fileName;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    }
+
     return {
         editorCommand: editorCommand,
         getEditorContent: getEditorContent,
         setEditorContent: setEditorContent,
         queryCommandState: queryCommandState,
-        execAndGetState: execAndGetState
+        execAndGetState: execAndGetState,
+        downloadBase64File: downloadBase64File
     };
 })();
 

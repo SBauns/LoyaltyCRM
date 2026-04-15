@@ -294,4 +294,7 @@
   <data name="Email is required" xml:space="preserve">
     <value>Email er påkrævet</value>
   </data>
+  <data name="Select a header" xml:space="preserve">
+    <value>Vælg en header</value>
+  </data>
 </root>

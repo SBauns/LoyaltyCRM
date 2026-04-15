@@ -157,7 +157,7 @@ namespace LoyaltyCRM.Services.Services
             return await _yearcardRepo.DeleteYearcard(Id);
         }
 
-        public async Task<Yearcard> CreateOrExtendYearcard(Yearcard NewYearCard, StartDate startDate)
+        public async Task<Yearcard> CreateOrExtendYearcard(Yearcard NewYearCard, StartDate startDate, bool ShouldExtend = true)
         {
             using (var transaction = await _transactionService.BeginTransactionAsync())
             {
@@ -168,7 +168,7 @@ namespace LoyaltyCRM.Services.Services
                     ApplicationUser Customer = await _customerRepo.CreateOrReturnFirstCustomer(NewYearCard.User);
                     Yearcard createdYearcard;
                     
-                    if (Customer.Yearcard != null) //Means we found a existing customer
+                    if (Customer.Yearcard != null && ShouldExtend) //Means we found a existing customer
                     {
                         createdYearcard = await AddValidityToCurrentYearcard(Customer.Yearcard, startDate);
                     }

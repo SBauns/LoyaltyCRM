@@ -16,11 +16,16 @@ namespace LoyaltyCRM.Domain.Models
         public Guid YearcardEntityId { get; set; }
         public Yearcard Yearcard { get; set; } 
 
-        public ValidityInterval(StartDate startDate, EndDate? endDate, Guid? id)
+        public ValidityInterval(StartDate startDate, EndDate endDate, Guid? id)
         {
+            if (endDate.Value < startDate.Value)
+            {
+                throw new InvalidOperationException("ValidTo must be later than the import start date.");
+            }
+
             Id = id;
             StartDate = startDate;
-            EndDate = endDate ?? new EndDate(startDate.Value.AddYears(1)); // Default to one year validity from start date
+            EndDate = endDate;
         }
     }
 }

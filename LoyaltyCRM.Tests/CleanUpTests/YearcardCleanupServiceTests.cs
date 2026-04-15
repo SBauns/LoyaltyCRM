@@ -19,7 +19,7 @@ using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
 
-namespace LoyaltyCRM.Tests;
+namespace LoyaltyCRM.Tests.CleanUpTests;
 
 public class YearcardCleanupServiceTests : WithInMemoryDatabase
 {

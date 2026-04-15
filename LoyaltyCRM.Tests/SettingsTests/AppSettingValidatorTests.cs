@@ -1,7 +1,7 @@
 using FluentAssertions;
 using LoyaltyCRM.Services;
 
-namespace LoyaltyCRM.Tests;
+namespace LoyaltyCRM.Tests.SettingsTests;
 
 public class AppSettingValidatorTests
 {

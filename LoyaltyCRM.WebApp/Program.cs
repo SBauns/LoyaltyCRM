@@ -40,6 +40,7 @@ builder.Services.AddScoped(sp =>
 builder.Services.AddScoped<StorageService>();
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<SettingsService>();
+builder.Services.AddScoped<FileImportService>();
 // builder.Services.AddScoped<SetupService>();
 builder.Services.AddScoped<YearcardService>();
 builder.Services.AddLocalization();

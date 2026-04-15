@@ -1,4 +1,5 @@
 using AutoMapper;
+using LoyaltyCRM.DTOs.Dtos.FileImport;
 using LoyaltyCRM.DTOs.Requests.Yearcard;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Domain.DomainPrimitives;
@@ -7,6 +8,23 @@ public class YearcardProfile : Profile
 {
     public YearcardProfile()
     {
+
+        CreateMap<ImportRowDto, ApplicationUser>()
+            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
+            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name))
+            .ForMember(dest => dest.Yearcard, opt => opt.Ignore());
+
+        CreateMap<ImportRowDto, Yearcard>()
+            .ConstructUsing(src => new Yearcard(
+                id: null,
+                cardId: string.IsNullOrWhiteSpace(src.CardId) ? null : new CardNumber(int.Parse(src.CardId!))
+            ))
+            .ForMember(dest => dest.CardId, opt => opt.Ignore())
+            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.Name) ? null : new Name(src.Name!)))
+            .ForMember(dest => dest.ValidityIntervals, opt => opt.Ignore())
+            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
+            .ForMember(dest => dest.UserId, opt => opt.Ignore());
 
         //CREATE MAPPING
         CreateMap<YearcardCreateRequest, Yearcard>()
@@ -21,7 +39,7 @@ public class YearcardProfile : Profile
         CreateMap<YearcardCreateRequest, ApplicationUser>()
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name));
 
         CreateMap<Yearcard, YearcardCreateResponse>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
@@ -71,7 +89,7 @@ public class YearcardProfile : Profile
         CreateMap<YearcardUpdateRequest, ApplicationUser>()
             .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
             .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email));
+            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name));
 
         // Map ValidityInterval → ValidityIntervalResponseAndRequest
         CreateMap<ValidityInterval, ValidityIntervalResponseAndRequest>()

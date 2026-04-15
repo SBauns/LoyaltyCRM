@@ -25,6 +25,8 @@ public static class DependencyInjection
         services.AddSingleton<IAppSettingsProvider, AppSettingsProvider>();
         services.AddScoped<IYearcardService, YearcardService>();
         services.AddScoped<ITransactionService, TransactionService>();
+        services.AddScoped<IFileReaderService, FileReaderService>();
+        services.AddScoped<IFileImportService, FileImportService>();
 
         services.AddHostedService<YearcardCleanupService>();
 

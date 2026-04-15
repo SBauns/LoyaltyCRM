@@ -8,6 +8,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
 
         public Name(string Value = "")
         {
+            Value = Value.Trim();
             ValidateName(Value);
             this.Value = Value;
         }
