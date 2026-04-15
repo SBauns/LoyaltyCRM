@@ -1,5 +1,6 @@
 
 using System.Net.Http.Json;
+using LoyaltyCRM.DTOs.Requests.Auth;
 
 public class AuthService
 {
@@ -17,7 +18,7 @@ public class AuthService
         SetLoginStateAsync();
     }
 
-    public async Task<(bool Success, string ErrorMessage)> LoginAsync(LoginDto loginDto)
+    public async Task<(bool Success, string ErrorMessage)> LoginAsync(LoginRequest loginDto)
     {
         try
         {

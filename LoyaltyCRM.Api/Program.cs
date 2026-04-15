@@ -1,3 +1,4 @@
+using Mapster;
 using LoyaltyCRM.Api.Middleware;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
@@ -11,6 +12,7 @@ using Microsoft.IdentityModel.Tokens;
 using LoyaltyCRM.Infrastructure.Database;
 using LoyaltyCRM.Infrastructure.Security;
 using LoyaltyCRM.Services;
+using LoyaltyCRM.Api.Mapping;
 using Microsoft.AspNetCore.Identity;
 using LoyaltyCRM.Api.Settings;
 using LoyaltyCRM.Api.Services.Interfaces;
@@ -69,7 +71,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+MapsterConfig.RegisterMappings();
 
 // Use DefaultConnection by default, override with env variable in Docker
 builder.Services.AddDatabase(builder.Configuration);

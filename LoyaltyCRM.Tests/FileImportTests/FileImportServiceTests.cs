@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using AutoMapper;
 using FluentAssertions;
+using LoyaltyCRM.Api.Mapping;
+using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.DTOs.Dtos.FileImport;
-using LoyaltyCRM.Services.Repositories.Interfaces;
 using LoyaltyCRM.Services.Services;
 using LoyaltyCRM.Services.Services.Interfaces;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Moq;
@@ -20,18 +21,15 @@ namespace LoyaltyCRM.Tests.FileImportTests;
 public class FileImportServiceTests
 {
     private readonly Mock<IFileReaderService> _fileReaderServiceMock;
-    private readonly Mock<ICustomerRepo> _customerRepoMock;
-    private readonly Mock<IYearcardRepo> _yearcardRepoMock;
+    private readonly Mock<IYearcardService> _yearcardServiceMock;
     private readonly Mock<UserManager<ApplicationUser>> _userManagerMock;
     private readonly Mock<ILogger<FileImportService>> _loggerMock;
-    private readonly IMapper _mapper;
     private readonly FileImportService _sut;
 
     public FileImportServiceTests()
     {
         _fileReaderServiceMock = new Mock<IFileReaderService>();
-        _customerRepoMock = new Mock<ICustomerRepo>();
-        _yearcardRepoMock = new Mock<IYearcardRepo>();
+        _yearcardServiceMock = new Mock<IYearcardService>();
         _loggerMock = new Mock<ILogger<FileImportService>>();
 
         var store = new Mock<IUserStore<ApplicationUser>>();
@@ -40,14 +38,11 @@ public class FileImportServiceTests
             .Setup(x => x.UpdateAsync(It.IsAny<ApplicationUser>()))
             .ReturnsAsync(IdentityResult.Success);
 
-        var configuration = new MapperConfiguration(cfg => cfg.AddProfile(new YearcardProfile()));
-        _mapper = configuration.CreateMapper();
+        MapsterConfig.RegisterMappings();
 
         _sut = new FileImportService(
             _fileReaderServiceMock.Object,
-            _mapper,
-            _customerRepoMock.Object,
-            _yearcardRepoMock.Object,
+            _yearcardServiceMock.Object,
             _userManagerMock.Object,
             _loggerMock.Object
         );
@@ -69,25 +64,9 @@ public class FileImportServiceTests
             .Setup(x => x.ReadRowsAsync(It.IsAny<Stream>(), It.IsAny<string>()))
             .ReturnsAsync(new[] { row });
 
-        var customer = new ApplicationUser
-        {
-            Id = Guid.NewGuid().ToString(),
-            Email = "test@example.com",
-            UserName = "test@example.com",
-            PhoneNumber = "+45-12345678"
-        };
-
-        _customerRepoMock
-            .Setup(x => x.CreateOrReturnFirstCustomer(It.IsAny<ApplicationUser>()))
-            .ReturnsAsync(customer);
-
-        _yearcardRepoMock
-            .Setup(x => x.GetNewestCardId())
-            .Returns(101);
-
-        _yearcardRepoMock
-            .Setup(x => x.CreateYearcard(It.IsAny<Yearcard>()))
-            .ReturnsAsync((Yearcard y) => y);
+        _yearcardServiceMock
+            .Setup(x => x.CreateOrExtendYearcard(It.IsAny<Yearcard>(), It.IsAny<StartDate>(), false))
+            .ReturnsAsync((Yearcard y, StartDate s, bool b) => y);
 
         var mapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {

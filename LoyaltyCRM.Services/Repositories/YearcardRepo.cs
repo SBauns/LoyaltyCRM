@@ -108,9 +108,24 @@ namespace LoyaltyCRM.Services.Repositories
             catch (DbUpdateException ex)
             {
                 // Check if it's a unique constraint violation
-                if (ex.InnerException != null && ex.InnerException.Message.Contains("unique index"))
+                if (ex.InnerException?.Message.Contains("unique index") == true)
                 {
-                    throw new DbUpdateException("A duplicate entry exists", ex); //Translate
+                    var message = ex.InnerException.Message;
+
+                    string indexName = null;
+                    string duplicateValue = null;
+
+                    var indexMatch = System.Text.RegularExpressions.Regex.Match(message, @"index '(.+?)'");
+                    if (indexMatch.Success)
+                        indexName = indexMatch.Groups[1].Value;
+
+                    var valueMatch = System.Text.RegularExpressions.Regex.Match(message, @"\((.*?)\)");
+                    if (valueMatch.Success)
+                        duplicateValue = valueMatch.Groups[1].Value;
+
+                    throw new DbUpdateException(
+                        $"Duplicate entry detected. Index: {indexName}, Value: {duplicateValue}",
+                        ex);
                 }
 
                 // Re-throw other DbUpdateExceptions

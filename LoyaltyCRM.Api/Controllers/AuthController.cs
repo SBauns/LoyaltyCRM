@@ -11,6 +11,7 @@ using LoyaltyCRM.Authorization;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Api.Services.Interfaces;
+using LoyaltyCRM.DTOs.Requests.Auth;
 
 
 namespace LoyaltyCRM.Api.Controllers
@@ -138,11 +139,5 @@ namespace LoyaltyCRM.Api.Controllers
         public required string UserName { get; set; }
         public required string CurrentPassword { get; set; }
         public required string NewPassword { get; set; }
-    }
-
-    public class LoginRequest
-    {
-        public required string UserName { get; set; }
-        public required string Password { get; set; }
     }
 }

@@ -1,9 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
 namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
-    public class YearcardGetResponse : IHasId, IHasPhoneNumber, IHasCardId, IHasName, IHasValidTo, IHasEmail, IHasIsValidForDiscount
+    public class YearcardGetResponse
     {
         public Guid? Id { get; set; }
 

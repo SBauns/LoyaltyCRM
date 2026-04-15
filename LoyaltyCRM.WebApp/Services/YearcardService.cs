@@ -2,6 +2,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading.Tasks;
+using LoyaltyCRM.DTOs.Requests.Checkin;
 using Microsoft.JSInterop;
 
 public class YearcardService
@@ -130,7 +131,7 @@ public class YearcardService
         }
     }
 
-    public async Task<bool> CheckinWithPhonenumberAsync(PhoneNumberDTO phone)
+    public async Task<bool> CheckinWithPhonenumberAsync(PhoneNumberCheckInRequest phone)
     {
         if (phone == null || string.IsNullOrWhiteSpace(phone.Phone))
         {
@@ -163,7 +164,7 @@ public class YearcardService
         }
     }
 
-    public async Task<bool> CheckinWithEmailAsync(EmailDTO email)
+    public async Task<bool> CheckinWithEmailAsync(EmailCheckInRequest email)
     {
         if (email == null || string.IsNullOrWhiteSpace(email.Email))
         {
@@ -196,7 +197,7 @@ public class YearcardService
         }
     }
 
-    public async Task<bool> CheckinWithUsernameAsync(UserNameDTO username)
+    public async Task<bool> CheckinWithUsernameAsync(UsernameCheckInRequest username)
     {
         if (username == null || string.IsNullOrWhiteSpace(username.UserName))
         {

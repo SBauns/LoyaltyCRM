@@ -4,11 +4,10 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
 namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
-    public class YearcardCreateRequest : Request, IHasEmail, IHasPhoneNumber, IHasName, IHasUserName, IHasStartDate
+    public class YearcardCreateRequest
     {
 
         [MaxLength(50)]

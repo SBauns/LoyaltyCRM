@@ -1,110 +1,97 @@
-using AutoMapper;
+using System;
+using System.Linq;
+using Mapster;
 using LoyaltyCRM.DTOs.Dtos.FileImport;
 using LoyaltyCRM.DTOs.Requests.Yearcard;
-using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Domain.DomainPrimitives;
+using LoyaltyCRM.Domain.Models;
 
-public class YearcardProfile : Profile
+namespace LoyaltyCRM.Api.Mapping
 {
-    public YearcardProfile()
+    public class YearcardMapping : IRegister
     {
+        public void Register(TypeAdapterConfig config)
+        {
+            config.NewConfig<ImportRowDto, ApplicationUser>()
+                .Map(dest => dest.Email, src => src.Email)
+                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.UserName, src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name)
+                .Ignore(dest => dest.Yearcard);
 
-        CreateMap<ImportRowDto, ApplicationUser>()
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name))
-            .ForMember(dest => dest.Yearcard, opt => opt.Ignore());
-
-        CreateMap<ImportRowDto, Yearcard>()
-            .ConstructUsing(src => new Yearcard(
-                id: null,
-                cardId: string.IsNullOrWhiteSpace(src.CardId) ? null : new CardNumber(int.Parse(src.CardId!))
-            ))
-            .ForMember(dest => dest.CardId, opt => opt.Ignore())
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => string.IsNullOrWhiteSpace(src.Name) ? null : new Name(src.Name!)))
-            .ForMember(dest => dest.ValidityIntervals, opt => opt.Ignore())
-            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
-            .ForMember(dest => dest.UserId, opt => opt.Ignore());
-
-        //CREATE MAPPING
-        CreateMap<YearcardCreateRequest, Yearcard>()
-            .ConstructUsing(request =>
-                new Yearcard(
+            config.NewConfig<ImportRowDto, Yearcard>()
+                .ConstructUsing(src => new Yearcard(
                     id: null,
-                    cardId: null
-                )
-            )
-            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src));
+                    cardId: string.IsNullOrWhiteSpace(src.CardId) ? null : new CardNumber(int.Parse(src.CardId!))
+                ))
+                .Ignore(dest => dest.CardId)
+                .Map(dest => dest.Name, src => string.IsNullOrWhiteSpace(src.Name) ? null : new Name(src.Name!))
+                .Ignore(dest => dest.ValidityIntervals)
+                .Map(dest => dest.User, src => src.Adapt<ApplicationUser>())
+                .Ignore(dest => dest.UserId);
 
-        CreateMap<YearcardCreateRequest, ApplicationUser>()
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name));
+            config.NewConfig<YearcardCreateRequest, Yearcard>()
+                .ConstructUsing(_ => new Yearcard(id: null, cardId: null))
+                .Map(dest => dest.User, src => src.Adapt<ApplicationUser>());
 
-        CreateMap<Yearcard, YearcardCreateResponse>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.CardId, opt => opt.MapFrom(src => src.CardId!.Value))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name != null ? src.Name.Value : null))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.User.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName));
+            config.NewConfig<YearcardCreateRequest, ApplicationUser>()
+                .Map(dest => dest.Email, src => src.Email)
+                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.UserName, src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name);
 
-        //GET MAPPING
-        CreateMap<Yearcard, YearcardGetResponse>()
-            // Simple properties
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.CardId, opt => opt.MapFrom(src => src.CardId!.Value))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Name != null ? src.Name.Value : null))
+            config.NewConfig<Yearcard, YearcardCreateResponse>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.CardId, src => src.CardId!.Value)
+                .Map(dest => dest.Name, src => src.Name != null ? src.Name.Value : null)
+                .Map(dest => dest.Email, src => src.User.Email)
+                .Map(dest => dest.PhoneNumber, src => src.User.PhoneNumber)
+                .Map(dest => dest.UserName, src => src.User.UserName);
 
-            // User-related fields
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.User.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.User.UserName))
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.User.Email))
+            config.NewConfig<Yearcard, YearcardGetResponse>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.CardId, src => src.CardId!.Value)
+                .Map(dest => dest.Name, src => src.Name != null ? src.Name.Value : null)
+                .Map(dest => dest.PhoneNumber, src => src.User.PhoneNumber)
+                .Map(dest => dest.UserName, src => src.User.UserName)
+                .Map(dest => dest.Email, src => src.User.Email)
+                .Map(dest => dest.ValidityIntervals, src => src.ValidityIntervals)
+                .Map(dest => dest.ValidTo, src =>
+                    src.ValidityIntervals.Any()
+                        ? src.ValidityIntervals.Max(v => v.EndDate.Value)
+                        : DateTime.MinValue
+                );
 
-            // Validity intervals
-            .ForMember(dest => dest.ValidityIntervals, opt => opt.MapFrom(src => src.ValidityIntervals))
+            config.NewConfig<YearcardUpdateRequest, Yearcard>()
+                .Map(dest => dest.Id, src => src.Id)
+                .Map(dest => dest.CardId, src => new CardNumber(src.CardId))
+                .Map(dest => dest.Name, src => new Name(src.Name!))
+                .Map(dest => dest.User, src => src.Adapt<ApplicationUser>())
+                .Map(dest => dest.ValidityIntervals, src => src.ValidityIntervals)
+                .Ignore(dest => dest.CreatedAt)
+                .Ignore(dest => dest.UpdatedAt);
 
-            // Derived fields
-            .ForMember(dest => dest.ValidTo, opt => opt.MapFrom(src =>
-                src.ValidityIntervals.Any()
-                    ? src.ValidityIntervals.Max(v => v.EndDate.Value)
-                    : DateTime.MinValue
-            ));
-            // .ForMember(dest => dest.IsValidForDiscount, opt => opt.MapFrom(src => src.IsYearcardSetForDeletion())); //TODO Find way to reimplement
+            config.NewConfig<YearcardUpdateRequest, ApplicationUser>()
+                .Map(dest => dest.Email, src => src.Email)
+                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.UserName, src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name);
 
-        //UPDATE MAPPING
-        CreateMap<YearcardUpdateRequest, Yearcard>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.Id))
-            .ForMember(dest => dest.CardId, opt => opt.MapFrom(src => new CardNumber(src.CardId)))
-            .ForMember(dest => dest.Name, opt => opt.MapFrom(src => new Name(src.Name!)))
-            .ForMember(dest => dest.User, opt => opt.MapFrom(src => src))
-            
-            // Validity intervals are replaced entirely
-            .ForMember(dest => dest.ValidityIntervals, opt => opt.MapFrom(src => src.ValidityIntervals))
+            config.NewConfig<ValidityInterval, ValidityIntervalResponseAndRequest>()
+                .Map(dest => dest.StartDate, src => src.StartDate.Value)
+                .Map(dest => dest.EndDate, src => src.EndDate.Value);
 
-            // Domain timestamps should not be overwritten by DTO
-            .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
-            .ForMember(dest => dest.UpdatedAt, opt => opt.Ignore());
-    
-        CreateMap<YearcardUpdateRequest, ApplicationUser>()
-            .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email))
-            .ForMember(dest => dest.PhoneNumber, opt => opt.MapFrom(src => src.PhoneNumber))
-            .ForMember(dest => dest.UserName, opt => opt.MapFrom(src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name));
-
-        // Map ValidityInterval → ValidityIntervalResponseAndRequest
-        CreateMap<ValidityInterval, ValidityIntervalResponseAndRequest>()
-            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.Value))
-            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.Value));
-
-        CreateMap<ValidityIntervalResponseAndRequest, ValidityInterval>()
-            .ConstructUsing(src =>
-                new ValidityInterval(
-                    startDate: new StartDate(src.StartDate),
-                    endDate: new EndDate(src.EndDate),
+            config.NewConfig<ValidityIntervalResponseAndRequest, ValidityInterval>()
+                .ConstructUsing(src => new ValidityInterval(
+                    new StartDate(src.StartDate),
+                    new EndDate(src.EndDate),
                     src.Id
-                )
-            );
+                ));
+        }
+    }
 
-
+    public static class MapsterConfig
+    {
+        public static void RegisterMappings()
+        {
+            TypeAdapterConfig.GlobalSettings.Scan(typeof(YearcardMapping).Assembly);
+        }
     }
 }

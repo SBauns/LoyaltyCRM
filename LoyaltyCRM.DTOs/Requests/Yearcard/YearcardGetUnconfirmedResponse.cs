@@ -5,11 +5,10 @@ using System.Linq;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using System.ComponentModel.DataAnnotations.Schema;
-using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
 namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
-    public class YearcardGetUnconfirmedResponse : IHasId, IHasCardId, IHasIsValidForDiscount, IHasExposedIdentification
+    public class YearcardGetUnconfirmedResponse
     {
         public Guid? Id { get; set; }
 

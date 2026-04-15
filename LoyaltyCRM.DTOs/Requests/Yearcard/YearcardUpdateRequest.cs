@@ -3,11 +3,10 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
-using LoyaltyCRM.DTOs.Requests.PropertyInterfaces;
 
 namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
-    public class YearcardUpdateRequest : Request, IHasId, IHasCardId, IHasEmail, IHasPhoneNumber, IHasName, IHasUserName
+    public class YearcardUpdateRequest
     {
         public Guid? Id { get; set; }
 

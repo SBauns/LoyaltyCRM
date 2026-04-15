@@ -6,23 +6,21 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using AutoMapper;
+using Mapster;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.DTOs.Dtos.FileImport;
-using LoyaltyCRM.Services.Repositories.Interfaces;
 using LoyaltyCRM.Services.Services.Interfaces;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using ClosedXML.Excel;
+using System.IO;
 
 namespace LoyaltyCRM.Services.Services
 {
     public class FileImportService : IFileImportService
     {
         private readonly IFileReaderService _fileReaderService;
-        private readonly IMapper _mapper;
-        private readonly ICustomerRepo _customerRepo;
-        private readonly IYearcardRepo _yearcardRepo;
         private readonly IYearcardService _yearcardService;
 
         private readonly UserManager<ApplicationUser> _userManager;
@@ -30,17 +28,11 @@ namespace LoyaltyCRM.Services.Services
 
         public FileImportService(
             IFileReaderService fileReaderService,
-            IMapper mapper,
-            ICustomerRepo customerRepo,
-            IYearcardRepo yearcardRepo,
             IYearcardService yearcardService,
             UserManager<ApplicationUser> userManager,
             ILogger<FileImportService> logger)
         {
             _fileReaderService = fileReaderService;
-            _mapper = mapper;
-            _customerRepo = customerRepo;
-            _yearcardRepo = yearcardRepo;
             _yearcardService = yearcardService;
             _userManager = userManager;
             _logger = logger;
@@ -87,8 +79,10 @@ namespace LoyaltyCRM.Services.Services
 
             if (invalidRows.Any())
             {
-                result.ErrorFileName = GenerateErrorFileName(fileName);
-                result.ErrorFileBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(BuildCsvErrorReport(invalidRows)));
+                result.ErrorFileName = GenerateErrorFileNameExcel(fileName);
+
+                var excelBytes = BuildExcelErrorReport(invalidRows);
+                result.ErrorFileBase64 = Convert.ToBase64String(excelBytes);
             }
 
             return result;
@@ -136,13 +130,9 @@ namespace LoyaltyCRM.Services.Services
 
         private async Task ProcessRowAsync(ImportRowDto importRow, DateTime startDate)
         {
-            var yearcard = _mapper.Map<Yearcard>(importRow);
+            var yearcard = importRow.Adapt<Yearcard>();
 
-            Yearcard createdYearcard = await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(startDate), false);
-
-            var customer = createdYearcard.User;
-
-            await _userManager.UpdateAsync(customer);
+            await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(startDate), false);
         }
 
         private static string BuildCsvErrorReport(IEnumerable<Dictionary<string, string>> invalidRows)
@@ -173,10 +163,53 @@ namespace LoyaltyCRM.Services.Services
             return value;
         }
 
-        private static string GenerateErrorFileName(string originalFileName)
+        private static string GenerateErrorFileNameCsv(string originalFileName)
         {
             var extension = ".csv";
             return Path.GetFileNameWithoutExtension(originalFileName) + "-import-errors" + extension;
+        }
+
+        private static string GenerateErrorFileNameExcel(string originalFileName)
+        {
+            return Path.GetFileNameWithoutExtension(originalFileName) + "-import-errors.xlsx";
+        }
+
+        private static byte[] BuildExcelErrorReport(IEnumerable<Dictionary<string, string>> invalidRows)
+        {
+            var headers = invalidRows
+                .SelectMany(row => row.Keys)
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .ToList();
+
+            using var workbook = new XLWorkbook();
+            var worksheet = workbook.Worksheets.Add("Errors");
+
+            // Headers
+            for (int col = 0; col < headers.Count; col++)
+            {
+                worksheet.Cell(1, col + 1).Value = headers[col];
+            }
+
+            // Rows
+            int rowIndex = 2;
+            foreach (var row in invalidRows)
+            {
+                for (int col = 0; col < headers.Count; col++)
+                {
+                    var header = headers[col];
+                    worksheet.Cell(rowIndex, col + 1).Value =
+                        row.TryGetValue(header, out var value) ? value : string.Empty;
+                }
+                rowIndex++;
+            }
+
+            // Nice formatting (optional but recommended)
+            worksheet.Row(1).Style.Font.Bold = true;
+            worksheet.Columns().AdjustToContents();
+
+            using var stream = new MemoryStream();
+            workbook.SaveAs(stream);
+            return stream.ToArray();
         }
     }
 }

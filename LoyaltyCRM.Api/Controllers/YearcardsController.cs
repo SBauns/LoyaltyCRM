@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using AutoMapper;
+using Mapster;
 using LoyaltyCRM.Authorization;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Enums;
@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using LoyaltyCRM.DTOs.Requests.Checkin;
 
 namespace LoyaltyCRM.Api.Controllers
 {
@@ -26,12 +27,9 @@ namespace LoyaltyCRM.Api.Controllers
     {
         private readonly IYearcardService _yearcardService;
 
-        private readonly IMapper _mapper;
-
-        public YearcardsController(IYearcardService yearcardService, IMapper mapper)
+        public YearcardsController(IYearcardService yearcardService)
         {
             _yearcardService = yearcardService;
-            _mapper = mapper;
         }
 
         //GET ALL YEARCARDS
@@ -42,7 +40,7 @@ namespace LoyaltyCRM.Api.Controllers
         {
             IEnumerable<Yearcard> yearcards = await _yearcardService.GetYearcards();
 
-            var response = _mapper.Map<IEnumerable<YearcardGetResponse>>(yearcards);
+            var response = yearcards.Adapt<IEnumerable<YearcardGetResponse>>();
             return Ok(response);
         }
 
@@ -56,7 +54,7 @@ namespace LoyaltyCRM.Api.Controllers
             {
                 Yearcard yearcard = await _yearcardService.GetYearcard(id);
 
-                var response = _mapper.Map<YearcardGetResponse>(yearcard);
+                var response = yearcard.Adapt<YearcardGetResponse>();
 
                 return response;   
             }
@@ -80,7 +78,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             try
             {
-                Yearcard updatedYearcard = _mapper.Map<Yearcard>(yearcard);
+                Yearcard updatedYearcard = yearcard.Adapt<Yearcard>();
 
                 Yearcard updated = await _yearcardService.UpdateYearcard(id, updatedYearcard);
 
@@ -107,10 +105,10 @@ namespace LoyaltyCRM.Api.Controllers
         {
             try
             {
-                Yearcard yearcard = _mapper.Map<Yearcard>(request);
+                Yearcard yearcard = request.Adapt<Yearcard>();
                 Yearcard createdYearcard = await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(request.StartDate));
 
-                var response = _mapper.Map<YearcardCreateResponse>(createdYearcard);
+                var response = createdYearcard.Adapt<YearcardCreateResponse>();
 
                 return CreatedAtAction("PostYearcard", new { id = createdYearcard.Id }, response);
             }
@@ -162,11 +160,11 @@ namespace LoyaltyCRM.Api.Controllers
         //CHECK IF YEARCARD IS VALID WITH PHONE
         [HttpPost("checkinphone")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithPhone(PhoneRequest phone)
+        public async Task<ActionResult<bool>> CheckInWithPhone(PhoneNumberCheckInRequest phone)
         {
             try
             {
-                PhoneNumber validatedNumber = new PhoneNumber(phone.phone!);
+                PhoneNumber validatedNumber = new PhoneNumber(phone.Phone!);
                 return await _yearcardService.CheckInWithPhone(validatedNumber);      
             }
             catch (Exception ex)
@@ -178,11 +176,11 @@ namespace LoyaltyCRM.Api.Controllers
         //CHECK IF YEARCARD IS VALID WITH Email
         [HttpPost("checkinemail")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithEmail(EmailRequest email)
+        public async Task<ActionResult<bool>> CheckInWithEmail(EmailCheckInRequest email)
         {
             try
             {
-                Email validatedEmail = new Email(email.email!);
+                Email validatedEmail = new Email(email.Email!);
                 return await _yearcardService.CheckInWithEmail(validatedEmail);      
             }
             catch (Exception ex)
@@ -194,11 +192,11 @@ namespace LoyaltyCRM.Api.Controllers
         //CHECK IF YEARCARD IS VALID WITH Email
         [HttpPost("checkinusername")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithUserName(UserNameRequest userName)
+        public async Task<ActionResult<bool>> CheckInWithUserName(UsernameCheckInRequest userName)
         {
             try
             {
-                UserName validatedUserName = new UserName(userName.userName!);
+                UserName validatedUserName = new UserName(userName.UserName!);
                 return await _yearcardService.CheckInWithUserName(validatedUserName);      
             }
             catch (Exception ex)
@@ -221,21 +219,6 @@ namespace LoyaltyCRM.Api.Controllers
             {
                 return BadRequest(new { message = ex.Message });
             }
-        }
-
-        public class PhoneRequest
-        {
-            public string? phone { get; set; }
-        }
-
-        public class EmailRequest
-        {
-            public string? email { get; set; }
-        }
-
-        public class UserNameRequest
-        {
-            public string? userName { get; set; }
         }
 
         public class NameRequest

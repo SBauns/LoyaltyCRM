@@ -2,6 +2,7 @@
 @inject YearcardService _yearcardService
 @inject NavigationManager Navigation
 @inject AuthService AuthService
+@using LoyaltyCRM.DTOs.Requests.Checkin
 @using LoyaltyCRM.WebApp.Components
 @using LoyaltyCRM.WebApp.Locales
 @inject IStringLocalizer<Resources> L
@@ -42,9 +43,9 @@
 </div>
 
 @code {
-    public PhoneNumberDTO PhoneNumber { get; set; } = new PhoneNumberDTO();
-    public EmailDTO Email { get; set; } = new EmailDTO();
-    public UserNameDTO UserName { get; set; } = new UserNameDTO();
+    public PhoneNumberCheckInRequest PhoneNumber { get; set; } = new PhoneNumberCheckInRequest();
+    public EmailCheckInRequest Email { get; set; } = new EmailCheckInRequest();
+    public UsernameCheckInRequest UserName { get; set; } = new UsernameCheckInRequest();
     public string ResultMessage { get; set; } = string.Empty;
     public string ResultClass { get; set; } = string.Empty;
     private string LastChecked { get; set; } = string.Empty;
@@ -95,9 +96,9 @@
             ResultClass = "alert-danger";
         }
         
-        PhoneNumber = new PhoneNumberDTO();
-        Email = new EmailDTO();
-        UserName = new UserNameDTO();
+        PhoneNumber = new PhoneNumberCheckInRequest();
+        Email = new EmailCheckInRequest();
+        UserName = new UsernameCheckInRequest();
         CardIsValid = false;
         StateHasChanged();
 

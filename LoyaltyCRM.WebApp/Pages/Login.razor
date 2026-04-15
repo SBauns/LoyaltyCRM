@@ -1,6 +1,7 @@
 @page "/login"
 @inject AuthService AuthService
 @inject NavigationManager Navigation
+@using LoyaltyCRM.DTOs.Requests.Auth
 @using LoyaltyCRM.WebApp.Components
 @using LoyaltyCRM.WebApp.Locales
 @inject IStringLocalizer<Resources> L
@@ -32,7 +33,7 @@
 </div>
 
 @code {
-    private LoginDto loginDto = new LoginDto();
+    private LoginRequest loginDto = new LoginRequest();
     private string errorMessage = string.Empty;
 
     private string path = "/yearcard/create";
