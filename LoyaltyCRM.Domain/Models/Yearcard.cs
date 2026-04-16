@@ -5,6 +5,7 @@ namespace LoyaltyCRM.Domain.Models
     public class Yearcard : WithTimestamps
     {
         public Guid? Id { get; }
+        public Name? Name { get; set; }
         public CardNumber? CardId { get; set; }
         // public CardValidTo ValidTo { get; }
 
@@ -21,6 +22,11 @@ namespace LoyaltyCRM.Domain.Models
         {
             Id = id;
             CardId = cardId;
+        }
+
+        public Yearcard(Guid? id, CardNumber cardId, Name name) 
+            : this(id, cardId){
+            Name = name;
         }
 
         public void AddValidityInterval(ValidityInterval validityInterval)

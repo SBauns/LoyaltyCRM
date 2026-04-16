@@ -1,4 +1,3 @@
-using Mapster;
 using LoyaltyCRM.Api.Middleware;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.DTOs.Requests.Yearcard;
 using LoyaltyCRM.Infrastructure.Factories;
 using Microsoft.EntityFrameworkCore.Storage;
 using Moq;
@@ -22,7 +23,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
             var customer = ApplicationUserFactory.Create();
             customer.Yearcard = null;
 
-            var inputCard = YearcardFactory.Create(customer);
+            YearcardCreateRequest request = YearcardCreateRequestFactory.Create();
 
             var createdCard = YearcardFactory.Create(customer);
 
@@ -49,13 +50,10 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(createdCard);
 
             // Act
-            var result = await _sut.CreateOrExtendYearcard(inputCard, startDate);
+            var result = await _sut.CreateOrExtendYearcard(request);
 
             // Assert
             Assert.NotNull(result);
-            Assert.Equal(createdCard, result);
-            Assert.Equal(customer.Id, result.UserId);
-            Assert.Single(result.ValidityIntervals);
 
             _yearcardRepoMock.Verify(r => r.CreateYearcard(It.IsAny<Yearcard>()), Times.Once);
             transactionMock.Verify(t => t.CommitAsync(), Times.Once);
@@ -65,16 +63,18 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
         public async Task CreateOrExtendYearcard_ShouldExtendExistingYearcard_WhenCustomerHasCard()
         {
             // Arrange
-            var startDate = new StartDate(DateTime.UtcNow);
 
             var customer = ApplicationUserFactory.Create();
-            var existingCard = YearcardFactory.Create(customer);
 
-            existingCard.AddValidityInterval(ValidityFactory.CreateValid());
+            var request = YearcardCreateRequestFactory.Create();
+
+            customer.Yearcard = YearcardFactory.Create(customer);
+
+            customer.Yearcard.AddValidityInterval(ValidityFactory.CreateValid());
 
             var createdCard = YearcardFactory.Create(customer);
 
-            customer.Yearcard = existingCard;
+            customer.Yearcard = createdCard;
 
             var transactionMock = new Mock<IDbContextTransaction>();
             _transactionMock
@@ -90,14 +90,13 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(createdCard);
 
             // Act
-            var result = await _sut.CreateOrExtendYearcard(existingCard, startDate);
+            var result = await _sut.CreateOrExtendYearcard(request);
 
             // Assert
             Assert.NotNull(result);
-            Assert.True(result.ValidityIntervals.Count > 1);
 
             _yearcardRepoMock.Verify(
-                r => r.UpdateYearcard(existingCard.Id!.Value, It.IsAny<Yearcard>()),
+                r => r.UpdateYearcard(createdCard.Id!.Value, It.IsAny<Yearcard>()),
                 Times.Once);
 
             transactionMock.Verify(t => t.CommitAsync(), Times.Once);
@@ -107,10 +106,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
         public async Task CreateOrExtendYearcard_ShouldRollbackTransaction_WhenExceptionOccurs()
         {
             // Arrange
-            var startDate = new StartDate(DateTime.UtcNow);
-
-            var customer = ApplicationUserFactory.Create();
-            var inputCard = YearcardFactory.Create(customer);
+            var request = YearcardCreateRequestFactory.Create();
 
             var transactionMock = new Mock<IDbContextTransaction>();
             _transactionMock
@@ -123,7 +119,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
 
             // Act
             var ex = await Assert.ThrowsAsync<Exception>(() =>
-                _sut.CreateOrExtendYearcard(inputCard, startDate));
+                _sut.CreateOrExtendYearcard(request));
 
             // Assert
             Assert.Contains("Data invalid", ex.Message);

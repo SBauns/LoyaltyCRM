@@ -38,9 +38,8 @@ namespace LoyaltyCRM.Api.Controllers
         [RequireRole(Role.Papa)]
         public async Task<ActionResult<IEnumerable<YearcardGetResponse>>> GetYearcards()
         {
-            IEnumerable<Yearcard> yearcards = await _yearcardService.GetYearcards();
+            var response = await _yearcardService.GetYearcards();
 
-            var response = yearcards.Adapt<IEnumerable<YearcardGetResponse>>();
             return Ok(response);
         }
 
@@ -52,11 +51,7 @@ namespace LoyaltyCRM.Api.Controllers
         {
             try
             {
-                Yearcard yearcard = await _yearcardService.GetYearcard(id);
-
-                var response = yearcard.Adapt<YearcardGetResponse>();
-
-                return response;   
+                return await _yearcardService.GetYearcard(id);
             }
             catch (EntityNotFoundException notFound)
             {
@@ -78,9 +73,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             try
             {
-                Yearcard updatedYearcard = yearcard.Adapt<Yearcard>();
-
-                Yearcard updated = await _yearcardService.UpdateYearcard(id, updatedYearcard);
+                Yearcard updated = await _yearcardService.UpdateYearcard(id, yearcard);
 
                 if (updated == null)
                 {
@@ -103,14 +96,13 @@ namespace LoyaltyCRM.Api.Controllers
         [Authorize]
         public async Task<ActionResult<YearcardCreateResponse>> PostYearcard(YearcardCreateRequest request)
         {
+            request.ValidTo = null; //Do not allow ValidTo
+            request.CardId = null; //TODO Find a better way to stop overposting
             try
             {
-                Yearcard yearcard = request.Adapt<Yearcard>();
-                Yearcard createdYearcard = await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(request.StartDate));
+                var response = await _yearcardService.CreateOrExtendYearcard(request);
 
-                var response = createdYearcard.Adapt<YearcardCreateResponse>();
-
-                return CreatedAtAction("PostYearcard", new { id = createdYearcard.Id }, response);
+                return CreatedAtAction("PostYearcard", new { id = response.Id }, response);
             }
             catch (ArgumentException ex)
             {

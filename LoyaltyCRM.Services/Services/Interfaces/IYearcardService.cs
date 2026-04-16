@@ -4,16 +4,17 @@ using System.Linq;
 using System.Threading.Tasks;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.DTOs.Requests.Yearcard;
 
 namespace LoyaltyCRM.Services.Services.Interfaces
 {
     public interface IYearcardService
     {
-        Task<IEnumerable<Yearcard>> GetYearcards();
-        Task<Yearcard> GetYearcard(Guid Id);
-        Task<Yearcard> UpdateYearcard(Guid Id, Yearcard yearcard);
+        Task<IEnumerable<YearcardGetResponse>> GetYearcards();
+        Task<YearcardGetResponse> GetYearcard(Guid Id);
+        Task<Yearcard> UpdateYearcard(Guid Id, YearcardUpdateRequest yearcard);
         Task<bool> DeleteYearcard(Guid Id);
-        Task<Yearcard> CreateOrExtendYearcard(Yearcard NewYearCard, StartDate startDate, bool ShouldExtend = true);
+        Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest NewYearCard, bool ShouldExtend = true);
         Task<Yearcard> AddValidityToCurrentYearcard(Yearcard NewYearCard, StartDate startDate);
         Task<bool> CheckInWithYearcards(Guid id);
         Task<bool> CheckInWithPhone(PhoneNumber phoneNumber);

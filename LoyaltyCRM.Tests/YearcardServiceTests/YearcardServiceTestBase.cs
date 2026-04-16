@@ -1,3 +1,4 @@
+using LoyaltyCRM.Api.Mapping;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services;
@@ -37,6 +38,8 @@ public abstract class YearcardServiceTestBase : IDisposable
         _settingsMock
             .Setup(s => s.Current)
             .Returns(new AppSettings());
+
+        MapsterConfig.RegisterMappings();
 
         _sut = new YearcardService(
             _yearcardRepoMock.Object,

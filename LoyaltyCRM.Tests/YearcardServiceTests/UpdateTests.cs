@@ -19,7 +19,8 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
             // Arrange
             var user = ApplicationUserFactory.Create();
             var yearcard = YearcardFactory.Create(user);
-            var id = yearcard.Id!.Value;
+            var request = YearcardUpdateRequestFactory.Create();
+            var id = request.Id!.Value;
 
             _yearcardRepoMock
                 .Setup(x => x.GetYearcard(id))
@@ -36,7 +37,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(transactionMock.Object);
 
             // Act
-            var result = await _sut.UpdateYearcard(id, yearcard);
+            var result = await _sut.UpdateYearcard(id, request);
 
             // Assert
             Assert.Equal(yearcard, result);

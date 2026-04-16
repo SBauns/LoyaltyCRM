@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using ClosedXML.Excel;
 using System.IO;
+using LoyaltyCRM.DTOs.Requests.Yearcard;
 
 namespace LoyaltyCRM.Services.Services
 {
@@ -56,7 +57,8 @@ namespace LoyaltyCRM.Services.Services
                 try
                 {
                     var importRow = MapRow(row, columnMapping);
-                    await ProcessRowAsync(importRow, startDate);
+                    importRow.StartDate = startDate;
+                    await ProcessRowAsync(importRow);
                     createdCount++;
                 }
                 catch (Exception ex)
@@ -88,35 +90,54 @@ namespace LoyaltyCRM.Services.Services
             return result;
         }
 
-        private static ImportRowDto MapRow(IDictionary<string, string> row, Dictionary<string, string> columnMapping)
+        private static YearcardCreateRequest MapRow(IDictionary<string, string> row, Dictionary<string, string> columnMapping)
         {
-            var importRow = new ImportRowDto
+            var importRow = new YearcardCreateRequest
             {
-                CardId = GetMappedValue(row, columnMapping, nameof(ImportRowDto.CardId)),
-                ValidTo = GetMappedValue(row, columnMapping, nameof(ImportRowDto.ValidTo)),
-                PhoneNumber = GetMappedValue(row, columnMapping, nameof(ImportRowDto.PhoneNumber)),
-                Email = GetMappedValue(row, columnMapping, nameof(ImportRowDto.Email)),
-                Name = GetMappedValue(row, columnMapping, nameof(ImportRowDto.Name)),
-                UserName = GetMappedValue(row, columnMapping, nameof(ImportRowDto.UserName))
+                CardId = GetMappedValue<int>(row, columnMapping, nameof(YearcardCreateRequest.CardId)),
+                ValidTo = GetMappedValue<DateTime?>(row, columnMapping, nameof(YearcardCreateRequest.ValidTo)),
+                PhoneNumber = GetMappedValue<string>(row, columnMapping, nameof(YearcardCreateRequest.PhoneNumber)),
+                Email = GetMappedValue<string>(row, columnMapping, nameof(YearcardCreateRequest.Email)),
+                Name = GetMappedValue<string>(row, columnMapping, nameof(YearcardCreateRequest.Name)),
+                UserName = GetMappedValue<string>(row, columnMapping, nameof(YearcardCreateRequest.UserName))
             };
+
 
             return importRow;
         }
 
-        private static string? GetMappedValue(IDictionary<string, string> row, Dictionary<string, string> columnMapping, string targetProperty)
+        private static T? GetMappedValue<T>(
+            IDictionary<string, string> row,
+            Dictionary<string, string> columnMapping,
+            string targetProperty)
         {
-            if (columnMapping == null || !columnMapping.TryGetValue(targetProperty, out var header))
+            if (!columnMapping.TryGetValue(targetProperty, out var header) ||
+                string.IsNullOrWhiteSpace(header) ||
+                !row.TryGetValue(header, out var raw))
             {
-                return null;
+                return default;
             }
 
-            if (string.IsNullOrWhiteSpace(header))
+            if (typeof(T) == typeof(DateTime) || typeof(T) == typeof(DateTime?))
             {
-                return null;
+                if (DateTime.TryParse(raw, out var dt))
+                    return (T)(object)dt;
+
+                return default;
             }
 
-            return row.TryGetValue(header, out var value) ? value : null;
+            // int
+            if (typeof(T) == typeof(int) || typeof(T) == typeof(int?))
+            {
+                if (int.TryParse(raw, out var i))
+                    return (T)(object)i;
+
+                return default;
+            }
+
+            return (T)(object)raw;
         }
+
 
         private static bool TryParseDate(string value, out DateTime result)
         {
@@ -128,11 +149,9 @@ namespace LoyaltyCRM.Services.Services
             return DateTime.TryParse(value, new CultureInfo("da-DK"), DateTimeStyles.None, out result);
         }
 
-        private async Task ProcessRowAsync(ImportRowDto importRow, DateTime startDate)
+        private async Task ProcessRowAsync(YearcardCreateRequest importRow)
         {
-            var yearcard = importRow.Adapt<Yearcard>();
-
-            await _yearcardService.CreateOrExtendYearcard(yearcard, new StartDate(startDate), false);
+            await _yearcardService.CreateOrExtendYearcard(importRow, false);
         }
 
         private static string BuildCsvErrorReport(IEnumerable<Dictionary<string, string>> invalidRows)

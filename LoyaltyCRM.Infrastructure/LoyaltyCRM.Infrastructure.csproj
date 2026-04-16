@@ -2,6 +2,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\LoyaltyCRM.Domain\LoyaltyCRM.Domain.csproj" />
+    <ProjectReference Include="..\LoyaltyCRM.DTOs\LoyaltyCRM.DTOs.csproj" />
   </ItemGroup>
 
   <ItemGroup>

@@ -12,25 +12,10 @@ namespace LoyaltyCRM.Api.Mapping
     {
         public void Register(TypeAdapterConfig config)
         {
-            config.NewConfig<ImportRowDto, ApplicationUser>()
-                .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
-                .Map(dest => dest.UserName, src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name)
-                .Ignore(dest => dest.Yearcard);
-
-            config.NewConfig<ImportRowDto, Yearcard>()
-                .ConstructUsing(src => new Yearcard(
-                    id: null,
-                    cardId: string.IsNullOrWhiteSpace(src.CardId) ? null : new CardNumber(int.Parse(src.CardId!))
-                ))
-                .Ignore(dest => dest.CardId)
-                .Map(dest => dest.Name, src => string.IsNullOrWhiteSpace(src.Name) ? null : new Name(src.Name!))
-                .Ignore(dest => dest.ValidityIntervals)
-                .Map(dest => dest.User, src => src.Adapt<ApplicationUser>())
-                .Ignore(dest => dest.UserId);
-
             config.NewConfig<YearcardCreateRequest, Yearcard>()
-                .ConstructUsing(_ => new Yearcard(id: null, cardId: null))
+                .ConstructUsing(_ => new Yearcard(id: null, cardId: null ))
+                .Map(dest => dest.Name, src => new Name(src.Name!))
+                .Map(dest => dest.CardId, src => src.CardId != null ? new CardNumber((int)src.CardId) : null)
                 .Map(dest => dest.User, src => src.Adapt<ApplicationUser>());
 
             config.NewConfig<YearcardCreateRequest, ApplicationUser>()

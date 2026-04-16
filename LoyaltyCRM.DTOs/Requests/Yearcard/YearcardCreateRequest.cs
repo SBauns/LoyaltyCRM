@@ -9,6 +9,7 @@ namespace LoyaltyCRM.DTOs.Requests.Yearcard
 {
     public class YearcardCreateRequest
     {
+        public int? CardId { get; set; }
 
         [MaxLength(50)]
         [Required]
@@ -25,6 +26,6 @@ namespace LoyaltyCRM.DTOs.Requests.Yearcard
         [MaxLength(50)]
         public string? UserName { get; set; }
         public DateTime StartDate { get; set; }
-
+        public DateTime? ValidTo { get; set; }
     }
 }
