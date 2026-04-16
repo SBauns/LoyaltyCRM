@@ -24,6 +24,10 @@ namespace LoyaltyCRM.DTOs.Requests.Yearcard
         public string? Email { get; set; }
         public DateTime ValidTo { get; set; }
 
+        public DateTime CreatedAt { get; set;}
+
+        public DateTime UpdatedAt { get; set;}
+
         public List<ValidityIntervalResponseAndRequest> ValidityIntervals { get; set; } = new List<ValidityIntervalResponseAndRequest>();
         public bool IsValidForDiscount { get; set; }
     }

@@ -53,6 +53,8 @@ namespace LoyaltyCRM.Api.Mapping
                 .Map(dest => dest.PhoneNumber, src => src.User.PhoneNumber)
                 .Map(dest => dest.UserName, src => src.User.UserName)
                 .Map(dest => dest.Email, src => src.User.Email)
+                .Map(dest => dest.CreatedAt, src => src.CreatedAt)
+                .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
                 .Map(dest => dest.ValidityIntervals, src => src.ValidityIntervals)
                 .Map(dest => dest.ValidTo, src =>
                     src.ValidityIntervals.Any()

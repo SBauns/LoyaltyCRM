@@ -26,4 +26,6 @@ public class YearcardDTO
     public string Name { get; set; } = string.Empty;
     public bool IsValidForDiscount { get; set; }
     public string ExposedIdentification { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set;}
+    public DateTime UpdatedAt { get; set;}
 }

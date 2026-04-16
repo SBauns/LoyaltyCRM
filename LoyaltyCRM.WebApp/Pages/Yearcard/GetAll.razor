@@ -42,13 +42,33 @@ else
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>@L["Card ID"]</th>
-                <th>@L["Valid Until"]</th>
-                <th>@L["Phone"]</th>
-                <th>@L["Name"]</th>
-                @* <th>@L["Email"]</th> *@
-                <th>@L["Discount Eligibility"]</th>
-                <th>@L["Actions"]</th>
+            <th style="cursor:pointer" @onclick='() => SortBy("CardId")'>
+                @L["Card ID"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("ValidTo")'>
+                @L["Valid Until"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("PhoneNumber")'>
+                @L["Phone"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("Name")'>
+                @L["Name"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("Email")'>
+                @L["Email"]
+            </th>
+
+            <th>
+                @L["Discount Eligibility"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("UpdatedAt")'>
+                @L["Last Updated"]
+            </th>
             </tr>
         </thead>
         <tbody>
@@ -59,8 +79,9 @@ else
                     <td>@card.ValidTo.ToString("dd-MM-yyyy")</td>
                     <td>@card.PhoneNumber</td>
                     <td>@card.Name</td>
-                    @* <td>@card.Email</td> *@
+                    <td>@card.Email</td>
                     <td>@(card.IsValidForDiscount ? @L["Yes"] : @L["No"])</td>
+                    <td>@card.UpdatedAt</td>
                     <td>
                         <button class="btn btn-warning btn-sm" @onclick="() => EditYearcard(card.Id)">@L["Edit"]</button>
                         <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteYearcard(card.Id)">@L["Delete"]</button>
@@ -108,6 +129,10 @@ else
     private List<YearcardDTO> pagedYearcards = new();
     private int totalPages = 1;
 
+    //Sorting Fields
+    private string? sortColumn = null;
+    private bool sortAscending = true;
+
     protected override async Task OnInitializedAsync()
     {
         try
@@ -130,6 +155,8 @@ else
             totalPages = 1;
             return;
         }
+
+        // FILTER
         if (string.IsNullOrWhiteSpace(searchText))
         {
             filteredYearcards = yearcards.ToList();
@@ -139,12 +166,54 @@ else
             filteredYearcards = yearcards.Where(card =>
                 (card.CardId.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
                 (card.PhoneNumber != null && card.PhoneNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
-                (card.Name != null && (card.Name).Contains(searchText, StringComparison.OrdinalIgnoreCase))
+                (card.Name != null && card.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
             ).ToList();
         }
-        totalPages = filteredYearcards.Count > 0 ? (int)Math.Ceiling(filteredYearcards.Count / (double)pageSize) : 1;
+
+        // SORT 👇 NEW
+        if (!string.IsNullOrWhiteSpace(sortColumn))
+        {
+            filteredYearcards = sortColumn switch
+            {
+                "CardId" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.CardId).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.CardId).ToList(),
+
+                "ValidTo" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.ValidTo).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.ValidTo).ToList(),
+
+                "PhoneNumber" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.PhoneNumber).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.PhoneNumber).ToList(),
+
+                "Name" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.Name).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.Name).ToList(),
+
+                "Email" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.Email).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.Email).ToList(),
+
+                "UpdatedAt" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.UpdatedAt).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.UpdatedAt).ToList(),
+
+                _ => filteredYearcards
+            };
+        }
+
+        // PAGING
+        totalPages = filteredYearcards.Count > 0
+            ? (int)Math.Ceiling(filteredYearcards.Count / (double)pageSize)
+            : 1;
+
         if (currentPage > totalPages) currentPage = totalPages;
-        pagedYearcards = filteredYearcards.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+
+        pagedYearcards = filteredYearcards
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
 
     private IEnumerable<YearcardDTO> PagedYearcards => pagedYearcards;
@@ -257,5 +326,24 @@ else
     {
         showDeleteConfirmation = false;
         yearcardToDelete = null;
+    }
+
+    //Sorting Methods
+
+    private void SortBy(string column)
+    {
+        if (sortColumn == column)
+        {
+            // toggle direction
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            sortColumn = column;
+            sortAscending = true;
+        }
+
+        currentPage = 1;
+        UpdateFilteredAndPagedYearcards();
     }
 }
