@@ -1,0 +1,26 @@
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+
+<select @onchange="OnCultureChanged" value="@Culture">
+    <option value="en">English</option>
+    <option value="da">Dansk</option>
+</select>
+
+@code {
+    private string Culture { get; set; } = "en";
+
+    protected override void OnInitialized()
+    {
+        Culture = System.Globalization.CultureInfo.CurrentCulture.Name;
+    }
+
+    private async Task OnCultureChanged(ChangeEventArgs e)
+    {
+        var selectedCulture = e.Value?.ToString();
+        if (!string.IsNullOrEmpty(selectedCulture) && selectedCulture != Culture)
+        {
+            await JS.InvokeVoidAsync("BlazorCulture.set", selectedCulture);
+            Navigation.NavigateTo(Navigation.Uri, forceLoad: true); // reloads the app
+        }
+    }
+}

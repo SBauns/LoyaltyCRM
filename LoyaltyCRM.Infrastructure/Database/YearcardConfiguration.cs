@@ -1,0 +1,29 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using LoyaltyCRM.Domain.DomainPrimitives;
+using LoyaltyCRM.Domain.Models;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+
+namespace LoyaltyCRM.Infrastructure.Database
+{
+    public class YearcardConfiguration : IEntityTypeConfiguration<Yearcard>
+    {
+        public void Configure(EntityTypeBuilder<Yearcard> builder)
+        {
+            builder.HasKey(x => x.Id);
+
+            builder.Property(x => x.Name)
+                .HasConversion(
+                    v => v!.Value,
+                    v => new Name(v));
+
+            builder.Property(x => x.CardId)
+                .HasConversion(
+                    v => v!.Value,
+                    v => new CardNumber(v));
+        }
+    }
+}

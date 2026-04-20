@@ -1,0 +1,94 @@
+﻿@inject AuthService AuthService
+@inject NavigationManager Navigation
+@using LoyaltyCRM.WebApp.Components
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">Papas CRM</a>
+        <button title="Navigation menu" class="navbar-toggler" @onclick="ToggleNavMenu">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+    </div>
+</div>
+
+<div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <nav class="flex-column">
+        @if (AuthService._role != AuthService.Role.Unauthenticated)
+        {                
+            <div class="nav-item px-3">
+                <NavLink class="nav-link nav-icon" href="yearcard/create" Match="NavLinkMatch.All">
+                    <img src="icons/pen.svg" alt="Create Yearcard"> @L["Create Yearcard"]
+                </NavLink>
+            </div>
+            @if (AuthService._role == AuthService.Role.Papa || AuthService._role == AuthService.Role.Bartender)
+                {
+            @* <div class="nav-item px-3">
+                <NavLink class="nav-link nav-icon" href="yearcard/getunconfirmed" Match="NavLinkMatch.All">
+                    <img src="icons/hourglass.svg" alt="Waiting Yearcards"> @L["Waiting Yearcards"]
+                </NavLink>
+            </div> *@
+            <div class="nav-item px-3">
+                <NavLink class="nav-link nav-icon" href="yearcard/checkin" Match="NavLinkMatch.All">
+                     <img src="icons/eye.svg" alt="Check-In Yearcard"> @L["Check-in Yearcard"]
+                </NavLink>
+            </div>
+            }
+            @if (AuthService._role == AuthService.Role.Papa)
+                {            
+            <div class="nav-item px-3">
+                <NavLink class="nav-link nav-icon" href="yearcard/getall">
+                     <img src="icons/card.svg" alt="Yearcards"> @L["Yearcards"]
+                </NavLink>
+            </div>
+            <div class="nav-item px-3">
+                <NavLink class="nav-link nav-icon" href="admin">
+                     <img src="icons/admin.svg" alt="admin"> @L["Administration"]
+                </NavLink>
+            </div>
+            }
+        }
+        else{
+        <div class="nav-item px-3">
+            <NavLink href="login" class="nav-link nav-icon" Match="NavLinkMatch.All">
+                 <img src="icons/dice-six.svg" alt="Login"> @L["Login"]
+            </NavLink>
+        </div>
+        }
+        @if (AuthService._role != AuthService.Role.Unauthenticated)
+        { 
+        <div @onclick="Logout" class="nav-item px-3">
+            <NavLink href="" class="nav-link nav-icon" Match="NavLinkMatch.All">
+                 <img src="icons/dice-one.svg" alt="Logout"> @L["Logout"]
+            </NavLink>
+        </div>
+        }
+    </nav>
+</div>
+
+@code {
+    private bool collapseNavMenu = true;
+
+    private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
+
+    protected override void OnInitialized()
+    {
+        AuthService.OnChange += StateHasChanged;
+    }
+
+    public void Dispose()
+    {
+        AuthService.OnChange -= StateHasChanged; // Unsubscribe
+    }
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+
+    private void ToggleNavMenu()
+    {
+        collapseNavMenu = !collapseNavMenu;
+    }
+}

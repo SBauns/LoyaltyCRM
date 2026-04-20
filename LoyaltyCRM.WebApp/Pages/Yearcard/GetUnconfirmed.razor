@@ -1,0 +1,215 @@
+@page "/yearcard/getunconfirmed"
+@inject YearcardService _yearcardService
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@inject IJSRuntime JS
+@using LoyaltyCRM.WebApp.Components
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<h3>@L["Unconfirmed Yearcards"]</h3>
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <div>
+        <label for="pageSizeSelect">@L["Rows per page:"]</label>
+        <select id="pageSizeSelect" @onchange="OnPageSizeChanged" class="form-select d-inline w-auto mx-2">
+            <option value="10">10</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+            <option value="100">100</option>
+        </select>
+    </div>
+    <div class="ms-auto">
+        <label for="searchInput" class="me-2">@L["Search:"]</label>
+        <input id="searchInput" class="form-control d-inline w-auto" @bind="SearchText" @bind:event="oninput" placeholder=@L["Card ID, Phone, Email..."] />
+    </div>
+</div>
+
+@if (yearcards == null)
+{
+    <p><em>@L["Loading..."]</em></p>
+}
+else
+{
+    @if (!string.IsNullOrEmpty(Message))
+    {
+        <div class="alert alert-success mt-3">@L[Message]</div>
+    }
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>@L["Card ID"]</th>
+                @* <th>@L["Valid Until"]</th> *@
+                <th>@L["Identification"]</th>
+                <th>@L["Discount Eligibility"]</th>
+                <th class="center-span">@L["Actions"]</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var card in PagedYearcards)
+            {
+                <tr>
+                    <td>@card.CardId</td>
+                    @* <td>@card.ValidTo.ToShortDateString()</td> *@
+                    <td>@card.ExposedIdentification</td>
+                    <td>@(card.IsValidForDiscount ? @L["Yes"] : @L["No"])</td>
+                    <td class="center-span">
+                        <button class="btn btn-primary btn-sm" @onclick="() => ConfirmYearcard(card)">@L["Confirm"]</button>
+                        <button class="btn btn-red btn-sm" @onclick="() => RejectYearcard(card)">@L["Reject"]</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <button class="btn btn-outline-primary btn-sm" @onclick="PreviousPage" disabled="@(currentPage == 1)">@L["Previous"]</button>
+        <span>
+            @L["Page"]
+            <input type="number" min="1" max="@TotalPages" value="@currentPage" @onchange="OnPageInputChanged" style="width: 60px; text-align: center;" />
+            @L["of"] @TotalPages
+        </span>
+        <button class="btn btn-outline-primary btn-sm" @onclick="NextPage" disabled="@(currentPage == TotalPages)">@L["Next"]</button>
+    </div>
+}
+
+@code {
+    private List<YearcardDTO>? yearcards;
+    private string Message = string.Empty;
+    private int pageSize = 10;
+    private int currentPage = 1;
+    private string searchText = string.Empty;
+    private List<YearcardDTO> filteredYearcards = new();
+    private List<YearcardDTO> pagedYearcards = new();
+    private int totalPages = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try{
+            yearcards = await _yearcardService.GetAllUnconfirmedYearcardsAsync();
+            UpdateFilteredAndPagedYearcards();
+        }
+        catch(Exception ex){
+            Message = ex.Message;
+        }
+    }
+
+    private void UpdateFilteredAndPagedYearcards()
+    {
+        if (yearcards == null)
+        {
+            filteredYearcards = new List<YearcardDTO>();
+            pagedYearcards = new List<YearcardDTO>();
+            totalPages = 1;
+            return;
+        }
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredYearcards = yearcards.ToList();
+        }
+        else
+        {
+            filteredYearcards = yearcards.Where(card =>
+                (card.CardId.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                (card.PhoneNumber != null && card.PhoneNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                (card.Email != null && card.Email.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+        }
+        totalPages = filteredYearcards.Count > 0 ? (int)Math.Ceiling(filteredYearcards.Count / (double)pageSize) : 1;
+        if (currentPage > totalPages) currentPage = totalPages;
+        pagedYearcards = filteredYearcards.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+    }
+
+    private IEnumerable<YearcardDTO> PagedYearcards => pagedYearcards;
+    private int TotalPages => totalPages;
+
+    private string SearchText
+    {
+        get => searchText;
+        set
+        {
+            if (searchText != value)
+            {
+                searchText = value;
+                currentPage = 1;
+                UpdateFilteredAndPagedYearcards();
+            }
+        }
+    }
+
+    private void OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newSize))
+        {
+            pageSize = newSize;
+            currentPage = 1;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void OnPageInputChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newPage))
+        {
+            if (newPage < 1)
+                newPage = 1;
+            if (newPage > TotalPages)
+                newPage = TotalPages;
+            currentPage = newPage;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < TotalPages)
+        {
+            currentPage++;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private async Task ConfirmYearcard(YearcardDTO yearcard)
+    {
+        try{
+            bool wasSuccess = await _yearcardService.ConfirmYearcardAsync(yearcard.Id);
+            if(wasSuccess){
+                Message = $"Confirmed Succesfully";
+                yearcards?.Remove(yearcard);
+                UpdateFilteredAndPagedYearcards();
+            }
+            else{
+                Message = $"Confirm Failed.";
+            }
+        }
+        catch(Exception ex){
+            Message = ex.Message;
+        }
+    }
+
+    private async Task RejectYearcard(YearcardDTO yearcard)
+    {
+        try{
+            bool wasSuccess = await _yearcardService.RejectYearcardAsync(yearcard.Id);
+            if(wasSuccess){
+                Message = $"Succesfully Rejected";
+                yearcards?.Remove(yearcard);
+                UpdateFilteredAndPagedYearcards();
+            }
+            else{
+                Message = $"Rejection Failed.";
+            }
+        }
+        catch(Exception ex){
+            Message = ex.Message;
+        }
+    }
+}

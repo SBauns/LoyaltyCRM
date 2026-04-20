@@ -1,0 +1,5 @@
+{
+    "github.copilot.nextEditSuggestions.enabled": false,
+    "dotnet-test-explorer.testProjectPath": "**/*LoyaltyCRM.Tests.csproj",
+    "dotnet-test-explorer.testArguments": "/p:CollectCoverage=true /p:CoverletOutputFormat=lcov /p:CoverletOutput=TestResults/coverage.info"
+}

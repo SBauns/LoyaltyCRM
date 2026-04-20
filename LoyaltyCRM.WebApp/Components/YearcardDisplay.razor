@@ -1,0 +1,44 @@
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<div class="card mt-4">
+    <div class="card-body">
+        <h5 class="card-title">@L["Yearcard Details"]</h5>
+        <p><strong>@L["Card ID:"]</strong> @Yearcard.CardId</p>
+        @if (ShowFullName())
+        {
+            <p><strong>@L["Full Name:"]</strong> @Yearcard.Name</p>
+        }
+        @if (ShowPhone())
+        {
+            <p><strong>@L["Phone:"]</strong> @Yearcard.PhoneNumber</p>
+        }
+        @if (ShowUserName())
+        {
+            <p><strong>@L["Username:"]</strong> @Yearcard.UserName</p>
+        }
+        @if (ShowEmail())
+        {
+            <p><strong>@L["Email:"]</strong> @Yearcard.Email</p>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public YearcardDTO Yearcard { get; set; } = new YearcardDTO();
+
+    private bool ShowFullName() =>
+        !string.IsNullOrEmpty(Yearcard.Name);
+
+    private bool ShowPhone() =>
+        !string.IsNullOrEmpty(Yearcard.PhoneNumber);
+
+    private bool ShowUserName() =>
+        !string.IsNullOrEmpty(Yearcard.UserName) &&
+        Yearcard.UserName != Yearcard.PhoneNumber &&
+        Yearcard.UserName != Yearcard.Email;
+
+    private bool ShowEmail() =>
+        !string.IsNullOrEmpty(Yearcard.Email);
+}

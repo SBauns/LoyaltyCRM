@@ -1,0 +1,228 @@
+<div class="dropdown country-code-dropdown" style="position:relative; min-width:120px;">
+    <button type="button"
+            class="btn btn-outline-secondary dropdown-toggle d-flex align-items-center gap-2"
+            @onclick="ToggleDropdown"
+            aria-expanded="@IsOpen">
+        @if (!string.IsNullOrEmpty(GetFlagUrl(SelectedCountryCode)))
+        {
+            <img src="@GetFlagUrl(SelectedCountryCode)" alt="Country flag" style="width:22px; height:16px; object-fit:contain;" />
+        }
+        <span>@SelectedCountryCode</span>
+    </button>
+
+    <ul class="dropdown-menu @((IsOpen) ? "show" : "")" style="max-height:280px; overflow:auto;">
+        @foreach (var country in Countries)
+        {
+            <li>
+                <button type="button"
+                        class="dropdown-item d-flex align-items-center gap-2 @(country.DialCode == SelectedCountryCode ? "active" : "")"
+                        @onclick="() => SelectCountryCode(country.DialCode)">
+                    @if (!string.IsNullOrEmpty(GetFlagUrl(country.Name)))
+                    {
+                        <img src="@GetFlagUrl(country.Name)" alt="@country.Name flag" style="width:20px; height:14px; object-fit:contain;" />
+                    }
+                    <span>@country.Name</span>
+                </button>
+            </li>
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public string SelectedCountryCode { get; set; } = "+45"; // Default to Denmark
+
+    [Parameter]
+    public EventCallback<string> SelectedCountryCodeChanged { get; set; }
+
+    private bool IsOpen { get; set; }
+
+    private void ToggleDropdown()
+    {
+        IsOpen = !IsOpen;
+    }
+
+    private async Task SelectCountryCode(string selected)
+    {
+        SelectedCountryCode = selected;
+        IsOpen = false;
+        await SelectedCountryCodeChanged.InvokeAsync(SelectedCountryCode);
+    }
+
+    private static string? GetFlagUrl(string countryNameOrCode)
+        => GetFlagIsoCode(countryNameOrCode) is string isoCode
+            ? $"/icons/flags/{isoCode}.png"
+            : null;
+
+    private static string? GetFlagIsoCode(string countryNameOrCode)
+    {
+        if (string.IsNullOrWhiteSpace(countryNameOrCode))
+        {
+            return null;
+        }
+
+        countryNameOrCode = countryNameOrCode.Trim();
+
+        if (countryNameOrCode.StartsWith("+"))
+        {
+            return Countries.FirstOrDefault(c => c.DialCode == countryNameOrCode)?.Iso;
+        }
+
+        return Countries.FirstOrDefault(c => string.Equals(c.Name, countryNameOrCode, StringComparison.OrdinalIgnoreCase))?.Iso;
+    }
+
+    private static readonly IReadOnlyList<CountryPhoneData> Countries = new List<CountryPhoneData>
+    {
+        new("Denmark", "+45", "dk"),
+        new("United States", "+1", "us"),
+        new("United Kingdom", "+44", "gb"),
+        new("Germany", "+49", "de"),
+        new("France", "+33", "fr"),
+        new("Sweden", "+46", "se"),
+        new("Norway", "+47", "no"),
+        new("Finland", "+358", "fi"),
+        new("Netherlands", "+31", "nl"),
+        new("Italy", "+39", "it"),
+        new("Spain", "+34", "es"),
+        new("Poland", "+48", "pl"),
+        new("Australia", "+61", "au"),
+        new("Canada", "+1", "ca"),
+        new("India", "+91", "in"),
+        new("China", "+86", "cn"),
+        new("Japan", "+81", "jp"),
+        new("Brazil", "+55", "br"),
+        new("South Africa", "+27", "za"),
+        new("Turkey", "+90", "tr"),
+        new("Switzerland", "+41", "ch"),
+        new("Austria", "+43", "at"),
+        new("Belgium", "+32", "be"),
+        new("Greece", "+30", "gr"),
+        new("Portugal", "+351", "pt"),
+        new("Ireland", "+353", "ie"),
+        new("New Zealand", "+64", "nz"),
+        new("Mexico", "+52", "mx"),
+        new("Russia", "+7", "ru"),
+        new("Ukraine", "+380", "ua"),
+        new("Czech Republic", "+420", "cz"),
+        new("Hungary", "+36", "hu"),
+        new("Romania", "+40", "ro"),
+        new("Slovakia", "+421", "sk"),
+        new("Slovenia", "+386", "si"),
+        new("Estonia", "+372", "ee"),
+        new("Latvia", "+371", "lv"),
+        new("Lithuania", "+370", "lt"),
+        new("Iceland", "+354", "is"),
+        new("Luxembourg", "+352", "lu"),
+        new("Bulgaria", "+359", "bg"),
+        new("Croatia", "+385", "hr"),
+        new("Serbia", "+381", "rs"),
+        new("Montenegro", "+382", "me"),
+        new("Macedonia", "+389", "mk"),
+        new("Bosnia and Herzegovina", "+387", "ba"),
+        new("Albania", "+355", "al"),
+        new("Israel", "+972", "il"),
+        new("Egypt", "+20", "eg"),
+        new("Morocco", "+212", "ma"),
+        new("Tunisia", "+216", "tn"),
+        new("Saudi Arabia", "+966", "sa"),
+        new("United Arab Emirates", "+971", "ae"),
+        new("Singapore", "+65", "sg"),
+        new("Thailand", "+66", "th"),
+        new("South Korea", "+82", "kr"),
+        new("Malaysia", "+60", "my"),
+        new("Indonesia", "+62", "id"),
+        new("Philippines", "+63", "ph"),
+        new("Pakistan", "+92", "pk"),
+        new("Bangladesh", "+880", "bd"),
+        new("Vietnam", "+84", "vn"),
+        new("Argentina", "+54", "ar"),
+        new("Chile", "+56", "cl"),
+        new("Colombia", "+57", "co"),
+        new("Peru", "+51", "pe"),
+        new("Venezuela", "+58", "ve"),
+        new("Nigeria", "+234", "ng"),
+        new("Kenya", "+254", "ke"),
+        new("Ghana", "+233", "gh"),
+        new("Ethiopia", "+251", "et"),
+        new("Tanzania", "+255", "tz"),
+        new("Uganda", "+256", "ug"),
+        new("Zimbabwe", "+263", "zw"),
+        new("South Sudan", "+211", "ss"),
+        new("Sudan", "+249", "sd"),
+        new("Qatar", "+974", "qa"),
+        new("Kuwait", "+965", "kw"),
+        new("Bahrain", "+973", "bh"),
+        new("Oman", "+968", "om"),
+        new("Jordan", "+962", "jo"),
+        new("Lebanon", "+961", "lb"),
+        new("Syria", "+963", "sy"),
+        new("Iraq", "+964", "iq"),
+        new("Iran", "+98", "ir"),
+        new("Afghanistan", "+93", "af"),
+        new("Nepal", "+977", "np"),
+        new("Sri Lanka", "+94", "lk"),
+        new("Maldives", "+960", "mv"),
+        new("Cambodia", "+855", "kh"),
+        new("Laos", "+856", "la"),
+        new("Myanmar", "+95", "mm"),
+        new("Mongolia", "+976", "mn"),
+        new("Kazakhstan", "+7", "kz"),
+        new("Uzbekistan", "+998", "uz"),
+        new("Turkmenistan", "+993", "tm"),
+        new("Kyrgyzstan", "+996", "kg"),
+        new("Tajikistan", "+992", "tj"),
+        new("Georgia", "+995", "ge"),
+        new("Armenia", "+374", "am"),
+        new("Azerbaijan", "+994", "az"),
+        new("Belarus", "+375", "by"),
+        new("Moldova", "+373", "md"),
+        new("Greenland", "+299", "gl"),
+        new("Faroe Islands", "+298", "fo"),
+        new("Svalbard", "+47", "no"),
+        new("Palestine", "+970", "ps"),
+        new("Hong Kong", "+852", "hk"),
+        new("Macau", "+853", "mo"),
+        new("Taiwan", "+886", "tw"),
+        new("North Korea", "+850", "kp"),
+        new("Yemen", "+967", "ye"),
+        new("Somalia", "+252", "so"),
+        new("Libya", "+218", "ly"),
+        new("Algeria", "+213", "dz"),
+        new("Angola", "+244", "ao"),
+        new("Mozambique", "+258", "mz"),
+        new("Madagascar", "+261", "mg"),
+        new("Botswana", "+267", "bw"),
+        new("Namibia", "+264", "na"),
+        new("Zambia", "+260", "zm"),
+        new("Malawi", "+265", "mw"),
+        new("Lesotho", "+266", "ls"),
+        new("Swaziland", "+268", "sz"),
+        new("Mauritius", "+230", "mu"),
+        new("Seychelles", "+248", "sc"),
+        new("Comoros", "+269", "km"),
+        new("Cape Verde", "+238", "cv"),
+        new("Sao Tome and Principe", "+239", "st"),
+        new("Gabon", "+241", "ga"),
+        new("Congo", "+242", "cg"),
+        new("DR Congo", "+243", "cd"),
+        new("Central African Republic", "+236", "cf"),
+        new("Chad", "+235", "td"),
+        new("Cameroon", "+237", "cm"),
+        new("Equatorial Guinea", "+240", "gq"),
+        new("Guinea", "+224", "gn"),
+        new("Guinea-Bissau", "+245", "gw"),
+        new("Sierra Leone", "+232", "sl"),
+        new("Liberia", "+231", "lr"),
+        new("Ivory Coast", "+225", "ci"),
+        new("Burkina Faso", "+226", "bf"),
+        new("Niger", "+227", "ne"),
+        new("Benin", "+229", "bj"),
+        new("Togo", "+228", "tg"),
+        new("Senegal", "+221", "sn"),
+        new("Gambia", "+220", "gm"),
+        new("Mali", "+223", "ml"),
+        new("Mauritania", "+222", "mr"),
+    };
+
+    private sealed record CountryPhoneData(string Name, string DialCode, string Iso);
+}
