@@ -1,7 +1,11 @@
-# Build stage
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
 WORKDIR /src
+
+COPY LoyaltyCRM.WebApp/LoyaltyCRM.WebApp.csproj LoyaltyCRM.WebApp/
+RUN dotnet restore LoyaltyCRM.WebApp/LoyaltyCRM.WebApp.csproj
+
 COPY . .
+WORKDIR /src/LoyaltyCRM.WebApp
 RUN dotnet publish -c Release -o /app/publish
 
 # Runtime stage
