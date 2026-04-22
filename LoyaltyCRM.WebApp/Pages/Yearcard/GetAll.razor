@@ -16,9 +16,8 @@
 else if(showOverlay)
 {
     <div class="overlay">
-        <div class="overlay-content">
-            <YearcardEdit Yearcard="selectedYearcard" />
-            <button class="btn btn-secondary" @onclick="CloseOverlay">Close</button>
+        <div class="overlay-content position-relative">
+            <YearcardEdit Yearcard="selectedYearcard" OnClose="CloseOverlay" />
         </div>
     </div>
 }

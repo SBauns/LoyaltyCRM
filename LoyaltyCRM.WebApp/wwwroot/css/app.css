@@ -215,3 +215,11 @@ code {
     align-self: center;
     margin-top: 1rem;
 }
+
+body {
+    margin: 0;
+}
+
+.wrapper {
+    min-height: 80dvh;
+}
