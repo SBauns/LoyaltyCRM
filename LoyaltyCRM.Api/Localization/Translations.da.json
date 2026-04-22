@@ -14,6 +14,7 @@
   "translation.phone.cannot_be_empty": "Telefonnummer må ikke være tomt",
   "translation.phone.too_long": "Telefonnummer er for langt",
   "translation.phone.too_short": "Telefonnummer er for kort",
-  "translation.phone.wrong_format": "Telefonnummer har forkert format",
-  "translation.username.invalid": "Ugyldigt brugernavn"
+  "translation.phone.wrong_format": "Telefonnummer skal følge +<landekode>-<nummer>, kun cifre og bindestreger",
+  "translation.username.invalid": "Ugyldigt brugernavn",
+  "translation.yearcard.update_failed" : "Der skete en opdaterings fejl: Sandsynligvis duplicate"
 }

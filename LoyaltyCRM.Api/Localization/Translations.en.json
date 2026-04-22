@@ -14,6 +14,7 @@
   "translation.phone.cannot_be_empty": "Phone number cannot be empty",
   "translation.phone.too_long": "Phone number is too long",
   "translation.phone.too_short": "Phone number is too short",
-  "translation.phone.wrong_format": "Phone number has the wrong format",
-  "translation.username.invalid": "Invalid username"
+  "translation.phone.wrong_format": "Phone number must follow +<country code>-<number>, digits and hyphens only",
+  "translation.username.invalid": "Invalid username",
+  "translation.yearcard.update_failed" : "Update error: likely duplicate"
 }

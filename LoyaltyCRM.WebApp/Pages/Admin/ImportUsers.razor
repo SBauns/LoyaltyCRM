@@ -1,0 +1,221 @@
+@page "/admin/import"
+@layout AdminLayout
+
+@using LoyaltyCRM.WebApp.Locales
+
+@inject FileImportService FileImportService
+@inject IJSRuntime JS
+@inject IStringLocalizer<Resources> L
+
+    <h4 class="text-center mb-3">@L["Import users"]</h4>
+
+<div class="mb-3 text-center text-muted">
+    @L["Upload a CSV or Excel file and map its first row to the correct yearcard fields."]
+</div>
+
+<div class="mb-3">
+    <label class="form-label">@L["File"]</label>
+    <InputFile OnChange="HandleFileSelected" accept=".csv,.xls,.xlsx" />
+</div>
+
+<div class="mb-3 d-flex gap-2">
+    <button class="btn btn-outline-primary"
+            @onclick="LoadPreviewAsync"
+            disabled="@(selectedFile == null)">
+        @L["Preview headers"]
+    </button>
+
+    <button class="btn btn-primary"
+            @onclick="ImportFileAsync"
+            disabled="@(selectedFile == null || !availableHeaders.Any())">
+        @L["Import file"]
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(importMessage))
+{
+    <div class="alert mt-2 @(importSuccess ? "alert-success" : "alert-danger") text-center">
+        @importMessage
+    </div>
+}
+
+<div class="row g-3">
+
+@if (availableHeaders.Any())
+{
+    <!-- LEFT: detected headers -->
+    <div class="col-12 col-md-4">
+        <h5>@L["Found Headers"]</h5>
+
+        @foreach (var header in availableHeaders)
+        {
+            <div class="form-text">@header</div>
+        }
+    </div>
+
+    <!-- RIGHT: mapping -->
+    <div class="col-12 col-md-8">
+        <div class="row g-3">
+
+            @foreach (var mappingKey in ImportFieldOrder)
+            {
+                <div class="col-12 col-md-6">
+                    <label class="form-label">
+                        @L[ImportFieldLabels[mappingKey]]
+                    </label>
+
+                    <select class="form-select"
+                            value="@GetMapping(mappingKey)"
+                            @onchange="e => SetMapping(mappingKey, e.Value?.ToString())">
+
+                        <option value="">@L["Select a header"]</option>
+
+                        @foreach (var header in availableHeaders)
+                        {
+                            <option value="@header">@header</option>
+                        }
+                    </select>
+                </div>
+            }
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">@L["Start Date"]</label>
+
+                <InputDate class="form-control"
+                           @bind-Value="importStartDate" />
+            </div>
+
+        </div>
+    </div>
+}
+
+</div>
+
+@code {
+    private IBrowserFile? selectedFile;
+
+    private List<string> availableHeaders = new();
+
+    private Dictionary<string, string> importMapping =
+        new(StringComparer.OrdinalIgnoreCase);
+
+    private readonly string[] ImportFieldOrder =
+    {
+        "CardId",
+        "ValidTo",
+        "PhoneNumber",
+        "Email",
+        "Name",
+        "UserName"
+    };
+
+    private readonly Dictionary<string, string> ImportFieldLabels =
+        new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["CardId"] = "Card ID",
+            ["ValidTo"] = "Valid To",
+            ["PhoneNumber"] = "Phone",
+            ["Email"] = "Email",
+            ["Name"] = "Name",
+            ["UserName"] = "Username"
+        };
+
+    private DateTime importStartDate = DateTime.Today;
+
+    private string importMessage = string.Empty;
+    private bool importSuccess;
+
+        private void HandleFileSelected(InputFileChangeEventArgs args)
+    {
+        selectedFile = args.File;
+
+        availableHeaders.Clear();
+        importMapping.Clear();
+
+        importMessage = string.Empty;
+        importSuccess = false;
+    }
+
+        private string GetMapping(string key)
+        => importMapping.TryGetValue(key, out var value)
+            ? value
+            : string.Empty;
+
+    private void SetMapping(string key, string? value)
+    {
+        if (string.IsNullOrWhiteSpace(value))
+            importMapping.Remove(key);
+        else
+            importMapping[key] = value;
+    }
+
+        private async Task LoadPreviewAsync()
+    {
+        if (selectedFile == null)
+        {
+            importMessage = L["Select a file before previewing."];
+            importSuccess = false;
+            return;
+        }
+
+        try
+        {
+            var preview = await FileImportService.PreviewAsync(selectedFile);
+
+            availableHeaders = preview.Headers;
+
+            importMessage = string.Empty;
+            importSuccess = true;
+
+            foreach (var key in ImportFieldOrder)
+            {
+                if (!importMapping.ContainsKey(key))
+                    importMapping[key] = string.Empty;
+            }
+        }
+        catch (Exception ex)
+        {
+            availableHeaders.Clear();
+
+            importMessage = L["Unable to read file headers:"] + $" {ex.Message}";
+            importSuccess = false;
+        }
+    }
+
+        private async Task ImportFileAsync()
+    {
+        if (selectedFile == null)
+        {
+            importMessage = L["Select a file before importing."];
+            importSuccess = false;
+            return;
+        }
+
+        try
+        {
+            var result = await FileImportService.ImportAsync(
+                selectedFile,
+                importMapping,
+                importStartDate.ToString("o")
+            );
+
+            importSuccess = result.Success;
+            importMessage = result.Message;
+
+            if (!string.IsNullOrWhiteSpace(result.ErrorFileBase64) &&
+                !string.IsNullOrWhiteSpace(result.ErrorFileName))
+            {
+                await JS.InvokeVoidAsync(
+                    "authHelpers.downloadBase64File",
+                    result.ErrorFileName,
+                    result.ErrorFileBase64
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            importMessage = L["Import failed:"] + $" {ex.Message}";
+            importSuccess = false;
+        }
+    }
+}

@@ -44,11 +44,11 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (System.ArgumentException ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
             catch (System.Exception ex)
             {
-                return StatusCode(500, new { message = ex.Message });
+                return StatusCode(500, new { Code = ex.Message });
             }
         }
 
