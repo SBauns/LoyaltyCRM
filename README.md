@@ -1,1 +1,5 @@
 # LoyaltyCRM
+
+PRODUCTION_IP=http://192.168.1.37
+DEVELOPMENT_IP=http://10.1.4.81
+LOCAL_IP=http://127.0.0.1:80
