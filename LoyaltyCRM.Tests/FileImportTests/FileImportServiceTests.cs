@@ -66,8 +66,16 @@ public class FileImportServiceTests
             .ReturnsAsync(new[] { row });
 
         _yearcardServiceMock
-            .Setup(x => x.CreateOrExtendYearcard(It.IsAny<YearcardCreateRequest>(), true))
-            .ReturnsAsync((YearcardCreateResponse y, bool b) => y);
+            .Setup(x => x.ImportYearcard(It.IsAny<YearcardImportRequest>()))
+            .ReturnsAsync(new YearcardCreateResponse
+            {
+                Id = Guid.NewGuid(),
+                CardId = 100,
+                Name = "Test Navn",
+                Email = "test@example.com",
+                PhoneNumber = "+45-12345678",
+                UserName = null
+            });
 
         var mapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
@@ -103,6 +111,10 @@ public class FileImportServiceTests
             .Setup(x => x.ReadRowsAsync(It.IsAny<Stream>(), It.IsAny<string>()))
             .ReturnsAsync(new[] { row });
 
+        _yearcardServiceMock
+            .Setup(x => x.ImportYearcard(It.IsAny<YearcardImportRequest>()))
+            .Throws(new ArgumentException());
+
         var mapping = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
             ["CardId"] = "Kortnummer",
@@ -114,6 +126,6 @@ public class FileImportServiceTests
 
         var result = await _sut.ImportAsync(new MemoryStream(), "import.csv", mapping, DateTime.Today);
 
-        result.Success.Should().BeTrue();
+        result.Success.Should().BeFalse();
     }
 }

@@ -14,7 +14,8 @@ namespace LoyaltyCRM.Services.Services.Interfaces
         Task<YearcardGetResponse> GetYearcard(Guid Id);
         Task<Yearcard> UpdateYearcard(Guid Id, YearcardUpdateRequest yearcard);
         Task<bool> DeleteYearcard(Guid Id);
-        Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest NewYearCard, bool ShouldExtend = true);
+        Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest NewYearCard);
+        Task<YearcardCreateResponse> ImportYearcard(YearcardImportRequest request);
         Task<Yearcard> AddValidityToCurrentYearcard(Yearcard NewYearCard, StartDate startDate);
         Task<bool> CheckInWithYearcards(Guid id);
         Task<bool> CheckInWithPhone(PhoneNumber phoneNumber);

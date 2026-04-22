@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using FuzzySharp;
@@ -163,7 +164,7 @@ namespace LoyaltyCRM.Services.Services
             return await _yearcardRepo.DeleteYearcard(Id);
         }
 
-        public async Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest request, bool ShouldExtend = true)
+        public async Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest request)
         {
             Yearcard NewYearCard = request.Adapt<Yearcard>();
             StartDate startDate = new StartDate(request.StartDate);
@@ -181,11 +182,11 @@ namespace LoyaltyCRM.Services.Services
                     {
                         NewYearCard.CardId = new CardNumber(_yearcardRepo.GetNewestCardId());
                         NewYearCard.UserId = Customer.Id;
-                        NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.Value, request.ValidTo));
+                        NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.Value));
                         NewYearCard.UpdateTimestamps();
                         createdYearcard = await _yearcardRepo.CreateYearcard(NewYearCard);
                     }
-                    else if (Customer.Yearcard != null && ShouldExtend) //Means we found a existing customer
+                    else if (Customer.Yearcard != null) //Means we found a existing customer
                     {
                         createdYearcard = await AddValidityToCurrentYearcard(Customer.Yearcard, startDate);
                     }
@@ -202,6 +203,47 @@ namespace LoyaltyCRM.Services.Services
                         throw new Exception($"Data invalid. {exception.Message}");
                     }
                 }
+        }
+
+        public async Task<YearcardCreateResponse> ImportYearcard(YearcardImportRequest request)
+        {
+            Yearcard NewYearCard = request.Adapt<Yearcard>();
+            StartDate startDate = new StartDate(request.StartDate);
+
+            using (var transaction = await _transactionService.BeginTransactionAsync())
+            {
+                try
+                {
+                    NewYearCard.User = SetUsername(NewYearCard.User);
+                    
+                    ApplicationUser Customer = await _customerRepo.CreateOrReturnFirstCustomer(NewYearCard.User);
+                    Yearcard createdYearcard = null;
+                    
+                    if(Customer.Yearcard == null)
+                    {
+                        NewYearCard.CardId = new CardNumber(NewYearCard.CardId != null ? NewYearCard.CardId.Value : _yearcardRepo.GetNewestCardId());
+                        NewYearCard.UserId = Customer.Id;
+                        NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.Value, request.ValidTo != null ? new EndDate((DateTime)request.ValidTo) : null));
+                        NewYearCard.UpdateTimestamps();
+                        createdYearcard = await _yearcardRepo.CreateYearcard(NewYearCard);
+                    }
+                    else if (Customer.Yearcard != null) //Means we found a existing customer
+                    {
+                        throw new DataException("translation.user.already_created");
+                    }
+    
+                    await transaction.CommitAsync();
+                    if(createdYearcard != null){
+                        return createdYearcard.Adapt<YearcardCreateResponse>();
+                    }
+                    return null;
+                }
+                catch (Exception exception)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception($"Data invalid. {exception.Message}");
+                }
+            }
         }
 
         public async Task<Yearcard> AddValidityToCurrentYearcard(Yearcard NewYearCard, StartDate startDate)
@@ -313,7 +355,7 @@ namespace LoyaltyCRM.Services.Services
             return false;
         }
 
-        private ValidityInterval CreateValidityInterval(DateTime startDate, DateTime? ValidTo = null)
+        private ValidityInterval CreateValidityInterval(DateTime startDate, EndDate? endDate = null)
         {
             if (startDate.Date <= DateTime.UtcNow.Date)
             {
@@ -324,7 +366,7 @@ namespace LoyaltyCRM.Services.Services
             var validityDays = _appSettingsProvider.Current.LengthOfYearcardInDays;
             return new ValidityInterval(
                 new StartDate(startDate),
-                new EndDate(ValidTo ?? startDate.AddDays(validityDays)),
+                endDate != null ? endDate : new EndDate(startDate.AddDays(validityDays)),
                 null
             );
         }

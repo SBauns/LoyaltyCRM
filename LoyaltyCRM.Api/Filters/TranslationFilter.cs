@@ -22,7 +22,11 @@ public class TranslationFilter : IAsyncResultFilter
             var dict = objectResult.Value
                 .GetType()
                 .GetProperties()
-                .ToDictionary(p => p.Name, p => p.GetValue(objectResult.Value));
+                .Where(p => p.GetIndexParameters().Length == 0)
+                .ToDictionary(
+                    p => p.Name,
+                    p => p.GetValue(objectResult.Value)
+                );
 
             if (dict.TryGetValue("Code", out var codeObj) && codeObj is string code)
             {

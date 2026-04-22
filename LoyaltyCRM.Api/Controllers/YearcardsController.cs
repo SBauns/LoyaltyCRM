@@ -96,8 +96,6 @@ namespace LoyaltyCRM.Api.Controllers
         [Authorize]
         public async Task<ActionResult<YearcardCreateResponse>> PostYearcard(YearcardCreateRequest request)
         {
-            request.ValidTo = null; //Do not allow ValidTo
-            request.CardId = null; //TODO Find a better way to stop overposting
             try
             {
                 var response = await _yearcardService.CreateOrExtendYearcard(request);
