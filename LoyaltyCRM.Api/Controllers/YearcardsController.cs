@@ -107,17 +107,17 @@ namespace LoyaltyCRM.Api.Controllers
             catch (ArgumentException ex)
             {
                 // Bad Request for invalid arguments
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
             catch (DbUpdateException ex)
             {
                 // Conflict for database-related issues
-                return Conflict(new { message = "A database error occurred while creating the yearcard.", details = ex.Message }); //TRANSLATE
+                return Conflict(new { Code = "yearcard.database_error", details = ex.Message });
             }
             catch (Exception ex)
             {
                 // Internal Server Error for any other unhandled exceptions
-                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message }); //TRANSLATE
+                return StatusCode(500, new { Code = "yearcard.unexpected_error", details = ex.Message });
             }
 
         }

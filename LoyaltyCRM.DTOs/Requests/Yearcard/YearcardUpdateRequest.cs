@@ -10,19 +10,12 @@ namespace LoyaltyCRM.DTOs.Requests.Yearcard
     {
         public Guid? Id { get; set; }
 
-        [Required]
-        [Range(1, 100000)]
         public int CardId { get; set; }
 
-        [Required]
-        [MaxLength(50)]
         public string? Email { get; set; }
 
-        [Required]
-        [MaxLength(50)]
         public string? PhoneNumber { get; set; }
 
-        [MaxLength(50)]
         public string? Name { get; set; }
 
         public string? UserName { get; set; }

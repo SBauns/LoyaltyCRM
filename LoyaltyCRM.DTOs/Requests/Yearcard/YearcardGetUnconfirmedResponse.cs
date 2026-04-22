@@ -12,7 +12,6 @@ namespace LoyaltyCRM.DTOs.Requests.Yearcard
     {
         public Guid? Id { get; set; }
 
-        [Range(1, 100000)]
         public int CardId { get; set; }
 
         public string ExposedIdentification { get; set; } = string.Empty;

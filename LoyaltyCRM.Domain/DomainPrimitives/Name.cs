@@ -16,13 +16,13 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
         private void ValidateName(string Value)
         {
             if(Value.Length > 50)
-                throw new ArgumentException("Name is too long."); //TRANSLATE
+                throw new ArgumentException("translation.name.too_long");
 
             //Allows only letters of all kinds and the special characters ( '-.,~)
             string pattern = @"^[a-zA-ZÀ-ÖØ-öø-ÿ]+([ '-.,~][a-zA-ZÀ-ÖØ-öø-ÿ]+)*$";
 
             if (!Regex.IsMatch(Value, pattern) && !string.IsNullOrWhiteSpace(Value))
-                throw new ArgumentException("Name is invalid.");
+                throw new ArgumentException("translation.name.invalid");
 
         }
 

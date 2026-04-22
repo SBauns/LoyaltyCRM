@@ -17,7 +17,7 @@
 
             if (!System.Text.RegularExpressions.Regex.IsMatch(Value, pattern))
             {
-                throw new ArgumentException("Invalid image format. Only valid URLs or base64 encoded images are allowed.");
+                throw new ArgumentException("translation.image.invalid");
             }
         }
 

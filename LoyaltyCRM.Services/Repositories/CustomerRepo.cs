@@ -26,7 +26,7 @@ namespace LoyaltyCRM.Services.Repositories
             return await _context.Users
                 .Where(y => y.PhoneNumber == phoneNumber.Value)
                 .Include(y => y.Yearcard!.ValidityIntervals)
-                .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("User with this phone number not found"); //TRANSLATE
+                .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("translation.user.phone_not_found");
         }
 
         public async Task<ApplicationUser> GetUserByEmail(Email email)
@@ -34,7 +34,7 @@ namespace LoyaltyCRM.Services.Repositories
             return await _context.Users
                 .Where(y => y.Email == StringNormalizationExtensions.Normalize(email.Value))
                 .Include(y => y.Yearcard!.ValidityIntervals)
-                .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("User with this email not found"); //TRANSLATE
+                .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("translation.user.email_not_found");
         }
 
         public async Task<ApplicationUser> GetUserByUserName(UserName userName)
@@ -42,7 +42,7 @@ namespace LoyaltyCRM.Services.Repositories
             return await _context.Users
                 .Where(y => y.UserName == StringNormalizationExtensions.Normalize(userName.Value))
                 .Include(y => y.Yearcard!.ValidityIntervals)
-                .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("User with this username not found"); //TRANSLATE
+                .FirstOrDefaultAsync() ?? throw new EntityNotFoundException("translation.user.username_not_found");
         }
 
         public async Task<ApplicationUser> CreateOrReturnFirstCustomer(ApplicationUser newCustomer)
@@ -74,12 +74,12 @@ namespace LoyaltyCRM.Services.Repositories
                 }
                 else
                 {
-                    throw new Exception("Customer failed to be created or updated"); //Translate
+                    throw new Exception("translation.user.failed_to_create_or_update");
                 }
             }
             else
             {
-                throw new Exception("Error creating or updating user: " + string.Join(", ", result.Errors.Select(e => e.Description))); //Translate
+                throw new Exception("translation.user.failed_to_create_or_update");
             }
         }
 

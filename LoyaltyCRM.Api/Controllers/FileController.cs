@@ -50,12 +50,12 @@ namespace LoyaltyCRM.Api.Controllers
         {
             if (request.File == null)
             {
-                return BadRequest(new { message = "A file must be provided for import." });
+                return BadRequest(new { Code = "file.missing_file" });
             }
 
             if (string.IsNullOrWhiteSpace(request.ColumnMappingJson))
             {
-                return BadRequest(new { message = "Column mapping must be provided." });
+                return BadRequest(new { Code = "file.missing_mapping" });
             }
 
             Dictionary<string, string>? mapping;
@@ -65,12 +65,12 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch
             {
-                return BadRequest(new { message = "Column mapping JSON is invalid." });
+                return BadRequest(new { Code = "file.invalid_mapping" });
             }
 
             if (mapping == null || mapping.Count == 0)
             {
-                return BadRequest(new { message = "Column mapping cannot be empty." });
+                return BadRequest(new { Code = "file.empty_mapping" });
             }
 
             try

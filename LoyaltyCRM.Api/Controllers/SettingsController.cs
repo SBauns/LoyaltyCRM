@@ -32,10 +32,10 @@ namespace LoyaltyCRM.Api.Controllers
         public async Task<IActionResult> Upsert(string key, [FromBody] SettingDto request)
         {
             if (request == null)
-                return BadRequest(new { message = "Request body is required." });
+                return BadRequest(new { Code = "setting.missing_body" });
 
             if (string.IsNullOrWhiteSpace(request.Value))
-                return BadRequest(new { message = "Setting value is required." });
+                return BadRequest(new { Code = "setting.missing_value" });
 
             try
             {
@@ -57,9 +57,9 @@ namespace LoyaltyCRM.Api.Controllers
         {
             var deleted = await _settingsService.DeleteSettingAsync(key);
             if (!deleted)
-                return NotFound(new { message = $"Setting '{key}' was not found." });
+                return NotFound(new { Code = "setting.delete_failed" });
 
-            return Ok(new { message = "Setting deleted." });
+            return Ok(new { Code = "setting.setting_deleted" });
         }
     }
 }

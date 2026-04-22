@@ -17,16 +17,16 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             string pattern = @"^\+\d{1,3}-(\d+(-\d+)*)$";
 
             if (string.IsNullOrWhiteSpace(value))
-                throw new ArgumentException("Phone number cannot be null or empty.");
+                throw new ArgumentException("translation.phone.cannot_be_empty");
 
             if (value.Length > 21)
-                throw new ArgumentException("Phone number is too long");
+                throw new ArgumentException("translation.phone.too_long");
 
             if (value.Length < 5)
-                throw new ArgumentException("Phone number is too short");
+                throw new ArgumentException("translation.phone.too_short");
 
             if (!Regex.IsMatch(value, pattern))
-                throw new ArgumentException("Phone number must follow format +<countrycode>-<number>");
+                throw new ArgumentException("translation.phone.wrong_format");
         }
     }
 }

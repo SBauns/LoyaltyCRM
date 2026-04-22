@@ -21,12 +21,12 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
         {
             if (Value < 1)
             {
-                throw new ArgumentException("Card Number is not allowed to be less than 1"); //Translate
+                throw new ArgumentException("translation.card_number.too_short");
             }
 
             if (Value > 1000000)
             {
-                throw new ArgumentException("Card Number is not allowed to be more than 100000"); //Translate
+                throw new ArgumentException("translation.card_number.too_long");
             }
         }
     }

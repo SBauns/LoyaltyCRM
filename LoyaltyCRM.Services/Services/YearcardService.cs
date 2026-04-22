@@ -78,6 +78,11 @@ namespace LoyaltyCRM.Services.Services
                     await transaction.CommitAsync();
                     return existingYearcard;
                 }
+                catch (DbUpdateException e)
+                {
+                    await transaction.RollbackAsync();
+                    throw new DbUpdateException("translation.yearcard.update_failed");
+                }
                 catch (Exception exception)
                 {
                     await transaction.RollbackAsync();
@@ -297,13 +302,13 @@ namespace LoyaltyCRM.Services.Services
             {
                 if (interval.StartDate.Value <= DateTime.Now && interval.EndDate.Value >= DateTime.Now)
                 {
-                    _logger.LogInformation($"Yearcard with ID {yearcard.Id} is valid."); //TRANSLATE
+                    _logger.LogInformation($"Yearcard with ID {yearcard.Id} is valid.");
                     return true;
                 }
             }
 
             // If no valid interval found, return false
-            _logger.LogWarning($"Yearcard with ID {yearcard.Id} is not valid."); //TRANSLATE
+            _logger.LogWarning($"Yearcard with ID {yearcard.Id} is not valid.");
 
             return false;
         }

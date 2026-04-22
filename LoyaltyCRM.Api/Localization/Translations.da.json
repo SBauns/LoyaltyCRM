@@ -1,0 +1,19 @@
+﻿{
+  "translation.auth.invalid_login": "Ugyldigt login",
+  "translation.auth.password_changed_failure": "Ændring af adgangskode mislykkedes",
+  "translation.auth.password_changed_succes": "Adgangskoden blev ændret",
+  "translation.auth.successfully.register": "Registrering gennemført",
+  "translation.auth.user_not_found": "Bruger ikke fundet",
+  "translation.card_number.too_long": "Kortnummeret er for langt",
+  "translation.card_number.too_short": "Kortnummeret er for kort",
+  "translation.email.cannot_be_empty": "E-mail må ikke være tom",
+  "translation.email.invalid": "Ugyldig e-mailadresse",
+  "translation.image.invalid": "Ugyldigt billede",
+  "translation.name.invalid": "Ugyldigt navn",
+  "translation.name.too_long": "Navnet er for langt",
+  "translation.phone.cannot_be_empty": "Telefonnummer må ikke være tomt",
+  "translation.phone.too_long": "Telefonnummer er for langt",
+  "translation.phone.too_short": "Telefonnummer er for kort",
+  "translation.phone.wrong_format": "Telefonnummer har forkert format",
+  "translation.username.invalid": "Ugyldigt brugernavn"
+}
