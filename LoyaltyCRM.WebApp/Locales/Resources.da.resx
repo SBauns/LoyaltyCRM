@@ -19,7 +19,7 @@
   <data name="Admin Username:"><value>Administrator brugernavn:</value></data>
   <data name="Administration"><value>Administration</value></data>
   <data name="An error occurred:"><value>Der opstod en fejl:</value></data>
-  <data name="And is valid for discount!"><value>OG er gyldigt til fornyelses rabat!</value></data>
+  <data name="And is valid for renewal discount!"><value>OG er gyldigt til fornyelses rabat!</value></data>
   <data name="App settings"><value>App-indstillinger</value></data>
   <data name="App settings saved successfully."><value>App-indstillinger blev gemt.</value></data>
   <data name="Are you sure you want to delete this yearcard?"><value>Er du sikker på, at du vil slette dette årskort?</value></data>
@@ -27,7 +27,7 @@
   <data name="Bartender Username:"><value>Bartender brugernavn:</value></data>
   <data name="Bold"><value>Fed</value></data>
   <data name="Bullets"><value>Punkttegn</value></data>
-  <data name="BUT is valid for discount!"><value>MEN er gyldigt for fornyelses rabat!</value></data>
+  <data name="BUT is valid for renewal discount!"><value>MEN er gyldigt for fornyelses rabat!</value></data>
   <data name="Cancel"><value>Annuller</value></data>
   <data name="Cannot save empty terms."><value>Kan ikke gemme tomme vilkår.</value></data>
   <data name="Card ID"><value>Kort-ID</value></data>
