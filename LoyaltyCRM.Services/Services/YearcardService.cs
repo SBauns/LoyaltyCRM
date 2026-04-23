@@ -1,16 +1,16 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
 using FuzzySharp;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.DTOs.Requests.Checkin;
 using LoyaltyCRM.DTOs.Requests.Yearcard;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories.Interfaces;
 using LoyaltyCRM.Services.Services.Interfaces;
 using Mapster;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -48,12 +48,17 @@ namespace LoyaltyCRM.Services.Services
         public async Task<IEnumerable<YearcardGetResponse>> GetYearcards()
         {
             var yearcards = await _yearcardRepo.GetYearcards();
+            foreach (var yearcard in yearcards)
+            {
+                yearcard.SetIsYearcardValidForDiscount(_appSettingsProvider.Current.DiscountGracePeriodInDays);
+            }
             return yearcards.Adapt<IEnumerable<YearcardGetResponse>>();
         }
 
         public async Task<YearcardGetResponse> GetYearcard(Guid Id)
         {
             var yearcard = await _yearcardRepo.GetYearcard(Id);
+            yearcard.SetIsYearcardValidForDiscount(_appSettingsProvider.Current.DiscountGracePeriodInDays);
             return yearcard.Adapt<YearcardGetResponse>();
         }
 
@@ -284,32 +289,32 @@ namespace LoyaltyCRM.Services.Services
             return NewYearCard;
         }
 
-        public async Task<bool> CheckInWithYearcards(Guid id)
+        public async Task<CheckInResponse> CheckInWithYearcards(Guid id)
         {
             Yearcard? yearcard = await _yearcardRepo.GetYearcard(id);
 
-            return ConfirmValidityOfYearcard(yearcard);
+            return CreateCheckInResponse(yearcard);
         }
 
-        public async Task<bool> CheckInWithPhone(PhoneNumber phoneNumber)
+        public async Task<CheckInResponse> CheckInWithPhone(PhoneNumber phoneNumber)
         {
             ApplicationUser user = await _customerRepo.GetUserByPhone(phoneNumber);
 
-            return ConfirmValidityOfYearcard(user.Yearcard);
+            return CreateCheckInResponse(user.Yearcard);
         }
         
-        public async Task<bool> CheckInWithEmail(Email email)
+        public async Task<CheckInResponse> CheckInWithEmail(Email email)
         {
             ApplicationUser? user = await _customerRepo.GetUserByEmail(email);
 
-            return ConfirmValidityOfYearcard(user.Yearcard);
+            return CreateCheckInResponse(user.Yearcard);
         }
 
-        public async Task<bool> CheckInWithUserName(UserName userName)
+        public async Task<CheckInResponse> CheckInWithUserName(UserName userName)
         {
             ApplicationUser? user = await _customerRepo.GetUserByUserName(userName);
 
-            return ConfirmValidityOfYearcard(user.Yearcard);
+            return CreateCheckInResponse(user.Yearcard);
         }
 
         public async Task<IEnumerable<Yearcard>> CheckInWithName(string fullName, int similarityThreshold = 80)
@@ -338,11 +343,26 @@ namespace LoyaltyCRM.Services.Services
             {
                 if (ConfirmValidityOfYearcard(matchedYearcard))
                 {
+                    matchedYearcard.SetIsYearcardValidForDiscount(_appSettingsProvider.Current.DiscountGracePeriodInDays);
                     returnCards.Add(matchedYearcard);
                 }
             }
 
             return returnCards;
+        }
+
+        private CheckInResponse CreateCheckInResponse(Yearcard yearcard)
+        {
+            if (yearcard == null)
+            {
+                throw new ArgumentException("yearcard.not_found");
+            }
+            yearcard.SetIsYearcardValidForDiscount(_appSettingsProvider.Current.DiscountGracePeriodInDays);
+            return new CheckInResponse()
+            {
+                IsValid = ConfirmValidityOfYearcard(yearcard),
+                IsValidForDiscount = yearcard.IsValidForDiscount
+            };
         }
 
         private bool ConfirmValidityOfYearcard(Yearcard? yearcard){

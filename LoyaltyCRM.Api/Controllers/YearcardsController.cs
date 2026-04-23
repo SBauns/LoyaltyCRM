@@ -142,15 +142,22 @@ namespace LoyaltyCRM.Api.Controllers
         //CHECK IF YEARCARD IS VALID
         [HttpPost("checkin/{id}")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithYearcard(Guid id)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithYearcard(Guid id)
         {
-            return await _yearcardService.CheckInWithYearcards(id);
+            try
+            {
+                return await _yearcardService.CheckInWithYearcards(id);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { Code = ex.Message });
+            }
         }
 
         //CHECK IF YEARCARD IS VALID WITH PHONE
         [HttpPost("checkinphone")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithPhone(PhoneNumberCheckInRequest phone)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithPhone(PhoneNumberCheckInRequest phone)
         {
             try
             {
@@ -159,14 +166,14 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 
         //CHECK IF YEARCARD IS VALID WITH Email
         [HttpPost("checkinemail")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithEmail(EmailCheckInRequest email)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithEmail(EmailCheckInRequest email)
         {
             try
             {
@@ -175,14 +182,14 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 
         //CHECK IF YEARCARD IS VALID WITH Email
         [HttpPost("checkinusername")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithUserName(UsernameCheckInRequest userName)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithUserName(UsernameCheckInRequest userName)
         {
             try
             {
@@ -191,7 +198,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 
@@ -207,7 +214,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 

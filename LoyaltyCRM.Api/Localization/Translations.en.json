@@ -16,5 +16,7 @@
   "translation.phone.too_short": "Phone number is too short",
   "translation.phone.wrong_format": "Phone number must follow +<country code>-<number>, digits and hyphens only",
   "translation.username.invalid": "Invalid username",
-  "translation.yearcard.update_failed" : "Update error: likely duplicate"
+  "translation.user.phone_not_found": "Phone not found",
+  "translation.yearcard.update_failed" : "Update error: likely duplicate",
+  "translation.yearcard.not_found" : "Yearcard not found"
 }

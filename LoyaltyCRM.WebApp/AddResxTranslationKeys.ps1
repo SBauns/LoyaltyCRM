@@ -31,7 +31,7 @@ $foundKeys = @{}
 foreach ($path in $searchPaths) {
     Get-ChildItem -Path $path -Recurse -Include *.razor | ForEach-Object {
         # @L["Key"] pattern
-        $matches1 = Select-String -Path $_.FullName -Pattern '@L\["([^"]+)"\]' -AllMatches
+        $matches1 = Select-String -Path $_.FullName -Pattern 'L\["([^"]+)"\]' -AllMatches
         foreach ($match in $matches1.Matches) {
             $foundKeys[$match.Groups[1].Value] = $true
         }

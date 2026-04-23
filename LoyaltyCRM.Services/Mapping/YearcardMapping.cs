@@ -54,6 +54,7 @@ namespace LoyaltyCRM.Api.Mapping
                 .Map(dest => dest.CreatedAt, src => src.CreatedAt)
                 .Map(dest => dest.UpdatedAt, src => src.UpdatedAt)
                 .Map(dest => dest.ValidityIntervals, src => src.ValidityIntervals)
+                .Map(dest => dest.IsValidForDiscount, src => src.IsValidForDiscount)
                 .Map(dest => dest.ValidTo, src =>
                     src.ValidityIntervals.Any()
                         ? src.ValidityIntervals.Max(v => v.EndDate.Value)

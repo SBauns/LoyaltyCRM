@@ -51,7 +51,7 @@
     private string LastChecked { get; set; } = string.Empty;
     private int CountdownSeconds { get; set; } = 0;
     private CancellationTokenSource? CountdownCts;
-    private bool CardIsValid { get; set; } = false;
+    private CheckInResponse CheckInResponse { get; set; } = new CheckInResponse();
 
     private async Task CheckYearcard()
     {
@@ -67,28 +67,35 @@
         try{
             // Call the API with the entered phone number
             if(PhoneNumber.Phone != null && !string.IsNullOrWhiteSpace(PhoneNumber.Phone)){
-                CardIsValid = await _yearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
+                CheckInResponse = await _yearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
                 LastChecked = PhoneNumber.Phone;
             }
-            if(!CardIsValid && Email.Email != null && !string.IsNullOrWhiteSpace(Email.Email)){
-                CardIsValid = await _yearcardService.CheckinWithEmailAsync(Email);
+            if(!CheckInResponse.IsValid && Email.Email != null && !string.IsNullOrWhiteSpace(Email.Email)){
+                CheckInResponse = await _yearcardService.CheckinWithEmailAsync(Email);
                 LastChecked = Email.Email;
             }
-            if(!CardIsValid && UserName.UserName != null && !string.IsNullOrWhiteSpace(UserName.UserName)){
-                CardIsValid = await _yearcardService.CheckinWithUsernameAsync(UserName);
+            if(!CheckInResponse.IsValid && UserName.UserName != null && !string.IsNullOrWhiteSpace(UserName.UserName)){
+                CheckInResponse = await _yearcardService.CheckinWithUsernameAsync(UserName);
                 LastChecked = UserName.UserName;
             }
             
             // Display message based on API result
-            if (CardIsValid)
+            if (CheckInResponse.IsValid)
             {
-                ResultMessage = $"Card with {LastChecked} is valid!";
+                ResultMessage = L["Card with"] +  $" {LastChecked} " + L["is valid!"];
                 ResultClass = "alert-success";
             }
             else
             {
-                ResultMessage = $"Card with {LastChecked} is invalid!";
+                ResultMessage = L["Card with"] +  $" {LastChecked} " + L["is invalid!"];
                 ResultClass = "alert-danger";
+            }
+
+            if(CheckInResponse.IsValidForDiscount && CheckInResponse.IsValid){
+                ResultMessage += Environment.NewLine + L["And is valid for renewal discount!"];
+            }
+            else if(CheckInResponse.IsValidForDiscount && !CheckInResponse.IsValid){
+                ResultMessage += Environment.NewLine + L["BUT is valid for renewal discount!"];
             }
         }
         catch(Exception ex){
@@ -99,7 +106,7 @@
         PhoneNumber = new PhoneNumberCheckInRequest();
         Email = new EmailCheckInRequest();
         UserName = new UsernameCheckInRequest();
-        CardIsValid = false;
+        CheckInResponse = new CheckInResponse();
         StateHasChanged();
 
         // Numeric countdown
