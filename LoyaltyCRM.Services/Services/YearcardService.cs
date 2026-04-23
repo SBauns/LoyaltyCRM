@@ -68,6 +68,7 @@ namespace LoyaltyCRM.Services.Services
                     Yearcard existingYearcard = await _yearcardRepo.GetYearcard(Id);
 
                     UpdateYearcardGraph(existingYearcard, updatedYearcard);
+                    existingYearcard.UpdateTimestamps();
 
                     var result = await _userManager.UpdateAsync(existingYearcard.User);
                     if (!result.Succeeded)
@@ -102,10 +103,20 @@ namespace LoyaltyCRM.Services.Services
             if (updated.User != null)
             {
                 UpdateUser(existing.User, updated.User);
-                existing.User.Yearcard = existing;
+            }
+
+            if (updated != null)
+            {
+                UpdateYearcard(existing, updated);
             }
 
             UpdateValidityIntervals(existing, updated.ValidityIntervals);
+        }
+
+        private static void UpdateYearcard(Yearcard existingCard, Yearcard updatedYearcard)
+        {
+            existingCard.CardId = updatedYearcard.CardId;
+            existingCard.Name = updatedYearcard.Name;
         }
 
         private static void UpdateUser(ApplicationUser existingUser, ApplicationUser updatedUser)
