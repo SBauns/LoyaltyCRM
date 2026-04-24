@@ -34,9 +34,6 @@ namespace LoyaltyCRM.Api.Controllers
             if (request == null)
                 return BadRequest(new { Code = "setting.missing_body" });
 
-            if (string.IsNullOrWhiteSpace(request.Value))
-                return BadRequest(new { Code = "setting.missing_value" });
-
             try
             {
                 var result = await _settingsService.UpsertSettingAsync(key, request.Value);

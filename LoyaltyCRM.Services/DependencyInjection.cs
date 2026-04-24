@@ -27,11 +27,14 @@ public static class DependencyInjection
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IFileReaderService, FileReaderService>();
         services.AddScoped<IFileImportService, FileImportService>();
+        services.AddHttpClient<ITransactionalMailService, TransactionalMailService>();
+        services.AddHttpClient<IAudienceSyncService, AudienceSyncService>();
+
 
         services.AddHostedService<YearcardCleanupService>();
 
         //Add extra Services
-        services.AddHttpClient<IMailService, MailchimpService>();
+        // services.AddHttpClient<IMailService, MailchimpService>();
 
         return services;
     }

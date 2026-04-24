@@ -22,9 +22,9 @@
 <div class="row g-3">
     @foreach (var setting in appSettings)
     {
-        var inputType = setting.Key.Equals("TimeToCleanUpCards", StringComparison.OrdinalIgnoreCase)
-            ? "time"
-            : "number";
+        var inputType = SettingMetadata.TryGetValue(setting.Key, out var metadata) 
+            ? metadata.InputType 
+            : "text";
 
         <div class="col-12 col-md-4">
             <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
@@ -48,15 +48,27 @@
         "LengthOfYearcardInDays",
         "DiscountGracePeriodInDays",
         "TimeBeforeDeleteInvalidYearcard",
-        "TimeToCleanUpCards"
+        "TimeToCleanUpCards",
+        "MailChimpApiKey",
+        "MailChimpServerPrefix",
+        "MailChimpListId",
+        "MandrillApiKey",
+        "SenderDomain",
+        "DiscountMailTemplate"
     };
 
-    private readonly Dictionary<string, string> SettingLabels = new(StringComparer.OrdinalIgnoreCase)
+    private readonly Dictionary<string, (string Label, string InputType)> SettingMetadata = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["LengthOfYearcardInDays"] = "Length of yearcard (days)",
-        ["DiscountGracePeriodInDays"] = "Discount grace period (days)",
-        ["TimeBeforeDeleteInvalidYearcard"] = "Delete invalid yearcard after (days)",
-        ["TimeToCleanUpCards"] = "Time of Day to Delete Invalid Yearcards"
+        ["LengthOfYearcardInDays"] = ("Length of yearcard (days)", "number"),
+        ["DiscountGracePeriodInDays"] = ("Discount grace period (days)", "number"),
+        ["TimeBeforeDeleteInvalidYearcard"] = ("Delete invalid yearcard after (days)", "number"),
+        ["TimeToCleanUpCards"] = ("Time of Day to Delete Invalid Yearcards", "time"),
+        ["MailChimpApiKey"] = ("Mailchimp Api Key", "text"),
+        ["MailChimpServerPrefix"] = ("Mailchimp Server Prefix", "text"),
+        ["MailChimpListId"] = ("Mailchimp Audience Id", "text"),
+        ["MandrillApiKey"] = ("Mandrill Api Key", "text"),
+        ["SenderDomain"] = ("Domain", "text"),
+        ["DiscountMailTemplate"] = ("Template", "text")
     };
 
     private List<SettingDto> appSettings = new();
@@ -142,8 +154,8 @@
 
         private string FormatSettingLabel(string key)
     {
-        return SettingLabels.TryGetValue(key, out var label)
-            ? label
+        return SettingMetadata.TryGetValue(key, out var metadata)
+            ? metadata.Label
             : key;
     }
 }

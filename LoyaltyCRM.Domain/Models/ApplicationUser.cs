@@ -5,6 +5,8 @@ namespace LoyaltyCRM.Domain.Models
     public class ApplicationUser : IdentityUser
     {
         public Yearcard Yearcard { get; set; }
+
+        public bool IsSubscribed { get; set; } = false;
     }
 }
         // public string? Id { get; }

@@ -255,8 +255,8 @@ using (var scope = app.Services.CreateScope())
     var settingsProvider = app.Services.GetRequiredService<IAppSettingsProvider>();
     await settingsProvider.InitializeAsync();
 
-    if(services.GetRequiredService<IHostEnvironment>().IsDevelopment())
-        await DataSeeder.SeedTestData(services, context);
+    // if(services.GetRequiredService<IHostEnvironment>().IsDevelopment())
+    //     await DataSeeder.SeedTestData(services, context);
 }
 
 app.Run();

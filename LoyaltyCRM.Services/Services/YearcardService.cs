@@ -28,6 +28,7 @@ namespace LoyaltyCRM.Services.Services
         private readonly ILogger<YearcardService> _logger;
         private readonly ITransactionService _transactionService;
         private readonly IAppSettingsProvider _appSettingsProvider;
+        private readonly IAudienceSyncService _audienceSyncService;
 
         public YearcardService(
             IYearcardRepo yearcardRepo, 
@@ -35,7 +36,8 @@ namespace LoyaltyCRM.Services.Services
             UserManager<ApplicationUser> userManager, 
             ILogger<YearcardService> logger,
             ITransactionService transactionService,
-            IAppSettingsProvider appSettingsProvider)
+            IAppSettingsProvider appSettingsProvider,
+            IAudienceSyncService audienceSyncService)
         {
             _yearcardRepo = yearcardRepo;
             _customerRepo = customerRepo;
@@ -43,6 +45,7 @@ namespace LoyaltyCRM.Services.Services
             _logger = logger;
             _transactionService = transactionService;
             _appSettingsProvider = appSettingsProvider;
+            _audienceSyncService = audienceSyncService;
         }
 
         public async Task<IEnumerable<YearcardGetResponse>> GetYearcards()
@@ -83,6 +86,7 @@ namespace LoyaltyCRM.Services.Services
                     }
 
                     await transaction.CommitAsync();
+                    await _audienceSyncService.SyncUserAsync(existingYearcard.User);
                     return existingYearcard;
                 }
                 catch (DbUpdateException e)
@@ -177,7 +181,11 @@ namespace LoyaltyCRM.Services.Services
 
         public async Task<bool> DeleteYearcard(Guid Id)
         {
-            return await _yearcardRepo.DeleteYearcard(Id);
+            Yearcard yearcard = await _yearcardRepo.GetYearcard(Id);
+            if(yearcard != null && yearcard.User != null && yearcard.User.Email != null)
+                await _audienceSyncService.DeleteUserAsync(yearcard.User.Email);
+            bool succes = await _yearcardRepo.DeleteYearcard(Id);
+            return succes;
         }
 
         public async Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest request)
@@ -201,12 +209,14 @@ namespace LoyaltyCRM.Services.Services
                         NewYearCard.ValidityIntervals.Add(CreateValidityInterval(startDate.Value));
                         NewYearCard.UpdateTimestamps();
                         createdYearcard = await _yearcardRepo.CreateYearcard(NewYearCard);
+                        Customer.Yearcard = createdYearcard;
+                        await _audienceSyncService.SyncUserAsync(Customer);
                     }
                     else if (Customer.Yearcard != null) //Means we found a existing customer
                     {
                         createdYearcard = await AddValidityToCurrentYearcard(Customer.Yearcard, startDate);
                     }
-    
+
                     await transaction.CommitAsync();
                     if(createdYearcard != null){
                         return createdYearcard.Adapt<YearcardCreateResponse>();

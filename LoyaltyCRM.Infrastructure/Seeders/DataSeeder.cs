@@ -92,8 +92,8 @@ namespace LoyaltyCRM.Infrastructure.Seeders
                 return;
             }
 
-            var users = ApplicationUserFactory.CreateMany(200); //TODO USE FOR STRESS TESTING
-            // var users = ApplicationUserFactory.CreateMany(10);
+            // var users = ApplicationUserFactory.CreateMany(200); //TODO USE FOR STRESS TESTING
+            var users = ApplicationUserFactory.CreateMany(10);
             var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
             var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
             const int batchSize = 200;

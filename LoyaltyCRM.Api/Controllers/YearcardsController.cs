@@ -126,14 +126,26 @@ namespace LoyaltyCRM.Api.Controllers
         [RequireRole(Role.Papa)]
         public async Task<IActionResult> DeleteYearcard(Guid id)
         {
-            bool isDeleted = await _yearcardService.DeleteYearcard(id);
-            if (!isDeleted)
+            try
             {
-                return NotFound();
+                bool isDeleted = await _yearcardService.DeleteYearcard(id);
+                if (!isDeleted)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return NoContent();
+                }
             }
-            else
+            catch (MailChimpException e)
             {
-                return NoContent();
+                return StatusCode(200, "Failed to delete user in mailchimp, but deleted in databse");
+                throw;
+            }
+            catch (Exception e)
+            {
+                return BadRequest("Failed to delete");
             }
         }
 
