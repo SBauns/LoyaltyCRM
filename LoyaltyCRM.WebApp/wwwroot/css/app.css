@@ -151,7 +151,7 @@ code {
     -moz-appearance: textfield; /* Firefox */
 }
 
-..modal-overlay {
+.modal-overlay {
     position: fixed;
     top: 0;
     left: 0;
@@ -161,7 +161,8 @@ code {
     display: flex;
     justify-content: center;
     align-items: center;
-    z-index: 1000;\n}
+    z-index: 1000;
+}
 
 .modal-content {
     background-color: white;
@@ -214,4 +215,12 @@ code {
 .modal-content button {
     align-self: center;
     margin-top: 1rem;
+}
+
+body {
+    margin: 0;
+}
+
+.wrapper {
+    min-height: 80dvh;
 }

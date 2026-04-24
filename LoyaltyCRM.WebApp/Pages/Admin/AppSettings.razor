@@ -1,0 +1,161 @@
+@page "/admin/app"
+@layout AdminLayout
+@using LoyaltyCRM.DTOs.DTOs
+@using LoyaltyCRM.WebApp.Locales
+
+@inject SettingsService SettingsService
+@inject IStringLocalizer<Resources> L
+
+<h4 class="text-center mb-3">@L["App settings"]</h4>
+
+<div class="mb-3 text-center text-muted">
+    @L["Configure app settings using numeric values or a time value where appropriate. These are validated before saving."]
+</div>
+
+@if (!string.IsNullOrEmpty(appSettingsMessage))
+{
+    <div class="alert mt-2 @(appSettingsSuccess ? "alert-success" : "alert-danger") text-center">
+        @appSettingsMessage
+    </div>
+}
+
+<div class="row g-3">
+    @foreach (var setting in appSettings)
+    {
+        var inputType = SettingMetadata.TryGetValue(setting.Key, out var metadata) 
+            ? metadata.InputType 
+            : "text";
+
+        <div class="col-12 col-md-4">
+            <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
+
+            <InputText class="form-control"
+                       @bind-Value="setting.Value"
+                       type="@inputType" />
+        </div>
+    }
+</div>
+
+<div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-primary" @onclick="SaveAppSettings">
+        @L["Save App Settings"]
+    </button>
+</div>
+
+@code {
+    private readonly string[] KnownKeys =
+    {
+        "LengthOfYearcardInDays",
+        "DiscountGracePeriodInDays",
+        "TimeBeforeDeleteInvalidYearcard",
+        "TimeToCleanUpCards",
+        "MailChimpApiKey",
+        "MailChimpServerPrefix",
+        "MailChimpListId",
+        "MandrillApiKey",
+        "SenderDomain",
+        "DiscountMailTemplate"
+    };
+
+    private readonly Dictionary<string, (string Label, string InputType)> SettingMetadata = new(StringComparer.OrdinalIgnoreCase)
+    {
+        ["LengthOfYearcardInDays"] = ("Length of yearcard (days)", "number"),
+        ["DiscountGracePeriodInDays"] = ("Discount grace period (days)", "number"),
+        ["TimeBeforeDeleteInvalidYearcard"] = ("Delete invalid yearcard after (days)", "number"),
+        ["TimeToCleanUpCards"] = ("Time of Day to Delete Invalid Yearcards", "time"),
+        ["MailChimpApiKey"] = ("Mailchimp Api Key", "text"),
+        ["MailChimpServerPrefix"] = ("Mailchimp Server Prefix", "text"),
+        ["MailChimpListId"] = ("Mailchimp Audience Id", "text"),
+        ["MandrillApiKey"] = ("Mandrill Api Key", "text"),
+        ["SenderDomain"] = ("Domain", "text"),
+        ["DiscountMailTemplate"] = ("Template", "text")
+    };
+
+    private List<SettingDto> appSettings = new();
+    private string appSettingsMessage = string.Empty;
+    private bool appSettingsSuccess;
+
+    private bool appSettingsInitialized = false;
+
+        protected override async Task OnInitializedAsync()
+    {
+        await LoadAppSettings();
+    }
+
+    private async Task LoadAppSettings()
+    {
+        if (appSettingsInitialized)
+            return;
+
+        appSettingsInitialized = true;
+        appSettingsMessage = string.Empty;
+
+        try
+        {
+            var loaded = await SettingsService.GetSettingsAsync();
+            var result = loaded.ToList();
+
+            foreach (var key in KnownKeys)
+            {
+                if (!result.Any(s =>
+                    string.Equals(s.Key, key, StringComparison.OrdinalIgnoreCase)))
+                {
+                    result.Add(new SettingDto
+                    {
+                        Key = key,
+                        Value = string.Empty
+                    });
+                }
+            }
+
+            appSettings = result
+                .OrderBy(s =>
+                {
+                    var index = Array.IndexOf(KnownKeys, s.Key);
+                    return index < 0 ? int.MaxValue : index;
+                })
+                .ThenBy(s => s.Key)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            appSettingsMessage = L["Unable to load app settings:"] + $" {ex.Message}";
+            appSettingsSuccess = false;
+
+            appSettings = KnownKeys
+                .Select(k => new SettingDto { Key = k, Value = string.Empty })
+                .ToList();
+        }
+    }
+
+        private async Task SaveAppSettings()
+    {
+        appSettingsMessage = string.Empty;
+
+        try
+        {
+            foreach (var setting in appSettings)
+            {
+                await SettingsService.UpsertSettingAsync(
+                    setting.Key,
+                    setting.Value ?? string.Empty
+                );
+            }
+
+            appSettingsSuccess = true;
+            appSettingsMessage = L["App settings saved successfully."];
+        }
+        catch (Exception ex)
+        {
+            appSettingsSuccess = false;
+            appSettingsMessage = L["Save failed:"] + $" {ex.Message}";
+        }
+    }
+
+        private string FormatSettingLabel(string key)
+    {
+        return SettingMetadata.TryGetValue(key, out var metadata)
+            ? metadata.Label
+            : key;
+    }
+}

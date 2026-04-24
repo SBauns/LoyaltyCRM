@@ -1,5 +1,7 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Transactions;
+using Bogus;
+using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.Infrastructure.Context;
@@ -90,48 +92,50 @@ namespace LoyaltyCRM.Infrastructure.Seeders
                 return;
             }
 
-            var transaction = context.Database.BeginTransaction();
+            // var users = ApplicationUserFactory.CreateMany(200); //TODO USE FOR STRESS TESTING
+            var users = ApplicationUserFactory.CreateMany(10);
+            var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+            var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+            const int batchSize = 200;
 
-            try
+            for (int i = 0; i < users.Count; i += batchSize)
             {
-                // var users = ApplicationUserFactory.CreateMany(10000); //TODO USE FOR STRESS TESTING
-                var users = ApplicationUserFactory.CreateMany(10);
-                var userManager = serviceProvider.GetRequiredService<UserManager<ApplicationUser>>();
-                var roleManager = serviceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+                var batch = users.Skip(i).Take(batchSize).ToList();
 
-                int counter = 1;
-                foreach (var user in users)
+                using var transaction = await context.Database.BeginTransactionAsync();
+
+                try
                 {
-                    // Create the user asynchronously and check the result
-                    var result = await userManager.CreateAsync(user, "DefaultPassword123!"); // Specify a default password
-
-                    if (result.Succeeded)
+                    foreach (var user in batch)
                     {
-                        await userManager.AddToRoleAsync(user, Role.Customer.ToString());
-                        // Create a YearcardEntity for the user after successful creation
-                        Yearcard yearcard = YearcardFactory.Create(user);
+                        var result = await userManager.CreateAsync(user, "DefaultPassword123!");
 
-                        // yearcard.CardId!.Create(counter);
-                        // Add the YearcardEntity to the context
-                        await context.Yearcards.AddAsync(yearcard);
+                        if (result.Succeeded)
+                        {
+                            await userManager.AddToRoleAsync(user, Role.Customer.ToString());
+
+                            var yearcard = YearcardFactory.Create(user);
+                            var random = new Random();
+
+                            bool valid = random.Next(2) == 0;
+
+                            if(valid)
+                                yearcard.AddValidityInterval(ValidityFactory.CreateValid());
+                            else
+                                yearcard.AddValidityInterval(ValidityFactory.CreateExpired());
+
+                            await context.Yearcards.AddAsync(yearcard);
+                        }
                     }
-                    else
-                    {
-                        // Log any issues with user creation (optional)
-                        Console.WriteLine($"Failed to create user {user.UserName}: {string.Join(", ", result.Errors.Select(e => e.Description))}");
-                    }
-                    counter++;
+
+                    await context.SaveChangesAsync();
+                    await transaction.CommitAsync();
                 }
-
-                // Save changes to the database after all users and yearcards are created
-                await context.SaveChangesAsync();
-
-                transaction.Commit();
-                
-            }
-            catch (System.Exception)
-            {
-                transaction.Rollback();
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
             }
         }
 

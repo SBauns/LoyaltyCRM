@@ -4,6 +4,11 @@
 
 <div class="d-flex flex-column align-items-center justify-content-center min-vh-100">
     <div class="card shadow-sm p-4 w-100" style="max-width: 600px;">
+
+        <button class="btn-close position-absolute top-0 end-0 m-3"
+                @onclick="() => OnClose.InvokeAsync()">
+        </button>
+
         <EditForm Model="@Yearcard" OnSubmit="HandleSubmit">
             <DataAnnotationsValidator />
             <ValidationSummary />
@@ -77,6 +82,9 @@
     [Parameter]
     public YearcardDTO Yearcard { get; set; } = new YearcardDTO();
 
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
     private YearcardDTO? OriginalYearcard { get; set; }
     public string Message { get; set; } = string.Empty;
     public string ErrorMessage { get; set; } = string.Empty;
@@ -112,7 +120,7 @@
 
             if (!context.Validate())
             {
-                ErrorMessage = "Validation Failed!";
+                ErrorMessage = context.GetValidationMessages().ToList().FirstOrDefault() ?? "Validation failed";
                 return;
             }
 

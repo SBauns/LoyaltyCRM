@@ -16,7 +16,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
         {
             if (string.IsNullOrWhiteSpace(Value))
             {
-                throw new ArgumentException("Email cannot be empty."); //TRANSLATE
+                throw new ArgumentException("translation.email.cannot_be_empty");
             }
 
             //Allows only letters of all kinds and the special characters ( '-.,~)
@@ -25,7 +25,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             bool isValid = Regex.IsMatch(Value, pattern);
 
             if (!isValid)
-                throw new ArgumentException($"{Value} is invalid.");
+                throw new ArgumentException("translation.email.invalid");
 
         }
     }

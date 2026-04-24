@@ -16,12 +16,16 @@ using Microsoft.AspNetCore.Identity;
 using LoyaltyCRM.Api.Settings;
 using LoyaltyCRM.Api.Services.Interfaces;
 using LoyaltyCRM.Api.Services;
+using LoyaltyCRM.Api.Filters;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-builder.Services.AddControllers();
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<TranslationFilter>();
+});
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddHttpContextAccessor();
 
@@ -169,7 +173,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 
 var app = builder.Build();
 
-TranslationService.HttpContextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>();
+// TranslationService.HttpContextAccessor = app.Services.GetRequiredService<IHttpContextAccessor>(); //TODO DELETE
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -184,12 +188,12 @@ else
     // app.UseHttpsRedirection();
 }
 
+//Middleware
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLoggingMiddleware>();
 app.UseCors("AllowBlazorClient");
 app.UseAuthentication();
 app.UseAuthorization();
-//Middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.MapControllers();
 

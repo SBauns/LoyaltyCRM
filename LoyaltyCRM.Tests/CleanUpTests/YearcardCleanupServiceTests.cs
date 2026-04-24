@@ -41,12 +41,29 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
             .Setup(s => s.Current)
             .Returns(new AppSettings());
 
+        var transactionalMailMock = new Mock<ITransactionalMailService>();
+        transactionalMailMock
+            .Setup(x => x.SendTemplateEmailAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<Dictionary<string, string>>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(true);
+
+        var audienceSyncMock = new Mock<IAudienceSyncService>();
+        audienceSyncMock
+            .Setup(x => x.DeleteUserAsync(It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddScoped(_ => new LoyaltyContext(options));
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddSingleton(userManagerMock.Object);
         services.AddSingleton(settingsMock.Object);
+        services.AddSingleton(transactionalMailMock.Object);
+        services.AddSingleton(audienceSyncMock.Object);
 
         var serviceProvider = services.BuildServiceProvider();
         var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -64,12 +81,21 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
         context.Yearcards.Add(expiredYearcard);
         await context.SaveChangesAsync();
 
-        var cleanupService = new YearcardCleanupService(logger, scopeFactory, settingsMock.Object);
+        var cleanupService = new YearcardCleanupService(
+            logger,
+            scopeFactory,
+            settingsMock.Object,
+            transactionalMailMock.Object,
+            audienceSyncMock.Object);
 
         await cleanupService.CleanupExpiredYearcardsAsync();
 
         userManagerMock.Verify(
             x => x.DeleteAsync(It.Is<ApplicationUser>(u => u.Id == user.Id)),
+            Times.Once);
+
+        audienceSyncMock.Verify(
+            x => x.DeleteUserAsync(It.Is<string>(email => email == user.Email)),
             Times.Once);
     }
 
@@ -91,12 +117,29 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
             .Setup(s => s.Current)
             .Returns(new AppSettings());
 
+        var transactionalMailMock = new Mock<ITransactionalMailService>();
+        transactionalMailMock
+            .Setup(x => x.SendTemplateEmailAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<Dictionary<string, string>>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(true);
+
+        var audienceSyncMock = new Mock<IAudienceSyncService>();
+        audienceSyncMock
+            .Setup(x => x.DeleteUserAsync(It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
         var services = new ServiceCollection();
         services.AddLogging();
         services.AddScoped(_ => new LoyaltyContext(options));
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddSingleton(userManagerMock.Object);
         services.AddSingleton(settingsMock.Object);
+        services.AddSingleton(transactionalMailMock.Object);
+        services.AddSingleton(audienceSyncMock.Object);
 
         var serviceProvider = services.BuildServiceProvider();
         var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
@@ -114,9 +157,101 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
         context.Yearcards.Add(validYearcard);
         await context.SaveChangesAsync();
 
-        var cleanupService = new YearcardCleanupService(logger, scopeFactory, settingsMock.Object);
+        var cleanupService = new YearcardCleanupService(
+            logger,
+            scopeFactory,
+            settingsMock.Object,
+            transactionalMailMock.Object,
+            audienceSyncMock.Object);
 
         await cleanupService.CleanupExpiredYearcardsAsync();
+
+        userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Never);
+    }
+
+    [Fact]
+    public async Task CleanupExpiredYearcardsAsync_SendsDiscountReminderForUsersWithinGracePeriod()
+    {
+        var (context, connection) = CreateSqliteContext();
+        var options = new DbContextOptionsBuilder<LoyaltyContext>()
+            .UseSqlite(connection)
+            .Options;
+
+        var userManagerMock = CreateUserManagerMock();
+        userManagerMock
+            .Setup(x => x.DeleteAsync(It.IsAny<ApplicationUser>()))
+            .ReturnsAsync(IdentityResult.Success);
+
+        var settingsMock = new Mock<IAppSettingsProvider>();
+        settingsMock
+            .Setup(s => s.Current)
+            .Returns(new AppSettings
+            {
+                DiscountGracePeriodInDays = 90,
+                DiscountMailTemplate = "expired-discount-template"
+            });
+
+        var transactionalMailMock = new Mock<ITransactionalMailService>();
+        transactionalMailMock
+            .Setup(x => x.SendTemplateEmailAsync(
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<string>(),
+                It.IsAny<Dictionary<string, string>>(),
+                It.IsAny<string>()))
+            .ReturnsAsync(true);
+
+        var audienceSyncMock = new Mock<IAudienceSyncService>();
+        audienceSyncMock
+            .Setup(x => x.DeleteUserAsync(It.IsAny<string>()))
+            .Returns(Task.CompletedTask);
+
+        var services = new ServiceCollection();
+        services.AddLogging();
+        services.AddScoped(_ => new LoyaltyContext(options));
+        services.AddScoped<IYearcardRepo, YearcardRepo>();
+        services.AddSingleton(userManagerMock.Object);
+        services.AddSingleton(settingsMock.Object);
+        services.AddSingleton(transactionalMailMock.Object);
+        services.AddSingleton(audienceSyncMock.Object);
+
+        var serviceProvider = services.BuildServiceProvider();
+        var scopeFactory = serviceProvider.GetRequiredService<IServiceScopeFactory>();
+        var logger = serviceProvider.GetRequiredService<ILogger<YearcardCleanupService>>();
+
+        var user = ApplicationUserFactory.Create();
+        user.Email = "test@example.com";
+        user.UserName = "Test User";
+
+        var expiredYearcard = YearcardFactory.Create(user);
+        expiredYearcard.AddValidityInterval(new ValidityInterval(
+            new StartDate(DateTime.Now.AddYears(-1)),
+            new EndDate(DateTime.Now.AddDays(-30)),
+            null));
+
+        user.Yearcard = expiredYearcard;
+
+        context.Users.Add(user);
+        context.Yearcards.Add(expiredYearcard);
+        await context.SaveChangesAsync();
+
+        var cleanupService = new YearcardCleanupService(
+            logger,
+            scopeFactory,
+            settingsMock.Object,
+            transactionalMailMock.Object,
+            audienceSyncMock.Object);
+
+        await cleanupService.CleanupExpiredYearcardsAsync();
+
+        transactionalMailMock.Verify(
+            x => x.SendTemplateEmailAsync(
+                "expired-discount-template",
+                user.Email,
+                "no-reply@loyaltycrm.com",
+                It.Is<Dictionary<string, string>>(v => v["DISCOUNT_GRACE_PERIOD_DAYS"] == "90"),
+                It.IsAny<string>()),
+            Times.Once);
 
         userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Never);
     }

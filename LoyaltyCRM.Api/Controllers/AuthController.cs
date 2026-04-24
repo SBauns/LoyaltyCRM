@@ -6,7 +6,6 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Configuration;
-using static LoyaltyCRM.Services.Services.TranslationService;
 using LoyaltyCRM.Authorization;
 using LoyaltyCRM.Domain.Enums;
 using LoyaltyCRM.Domain.Models;
@@ -49,7 +48,7 @@ namespace LoyaltyCRM.Api.Controllers
 
         //    if (result.Succeeded)
         //    {
-        //        return Ok(new { Message = "User registered successfully" });
+        //        return Ok(new { Code = "translation.auth.successfully.register" });
         //    }
 
         //    return BadRequest(result.Errors);
@@ -73,7 +72,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             // _logger.LogWarning("Invalid login attempt for user {UserName}.}", request.UserName);
 
-            return Unauthorized(new { Message = Translate("Invalid login attempt") });
+            return Unauthorized(new { Code = "translation.auth.invalid_login" });
         }
 
         private string GenerateJwtToken(ApplicationUser user)
@@ -113,17 +112,17 @@ namespace LoyaltyCRM.Api.Controllers
             var user = await _userManager.FindByNameAsync(request.UserName);
             if (user == null)
             {
-                return NotFound(new { Message = Translate("User not found.") });
+                return NotFound(new { Code = "translation.auth.user_not_found" });
             }
 
             var result = await _userManager.ChangePasswordAsync(user, request.CurrentPassword, request.NewPassword);
             if (result.Succeeded)
             {
-                return Ok(new { Message = Translate("Password changed successfully.") });
+                return Ok(new { Code = "translation.auth.password_changed_succes" });
             }
             else
             {
-                return BadRequest(new { Message = Translate("Password change failed."), Errors = result.Errors });
+                return BadRequest(new { Code = "translation.auth.password_changed_failure", Errors = result.Errors });
             }
         }
     }

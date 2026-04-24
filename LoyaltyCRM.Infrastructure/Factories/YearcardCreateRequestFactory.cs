@@ -16,7 +16,6 @@ namespace LoyaltyCRM.Infrastructure.Factories
             new Faker<YearcardCreateRequest>()
                 .CustomInstantiator(f => new YearcardCreateRequest
                 {
-                    CardId = f.Random.Int(1, 100000),
                     Email = f.Internet.Email(),
                     PhoneNumber = f.Phone.PhoneNumber(),
                     Name = f.Name.FirstName(),

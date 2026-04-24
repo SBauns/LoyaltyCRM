@@ -54,7 +54,6 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
 
             // Assert
             Assert.NotNull(result);
-
             _yearcardRepoMock.Verify(r => r.CreateYearcard(It.IsAny<Yearcard>()), Times.Once);
             transactionMock.Verify(t => t.CommitAsync(), Times.Once);
         }

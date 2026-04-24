@@ -1,0 +1,22 @@
+﻿{
+  "translation.auth.invalid_login": "Invalid login credentials",
+  "translation.auth.password_changed_failure": "Password change failed",
+  "translation.auth.password_changed_succes": "Password changed successfully",
+  "translation.auth.successfully.register": "Successfully registered",
+  "translation.auth.user_not_found": "User not found",
+  "translation.card_number.too_long": "Card number is too long",
+  "translation.card_number.too_short": "Card number is too short",
+  "translation.email.cannot_be_empty": "Email cannot be empty",
+  "translation.email.invalid": "Invalid email address",
+  "translation.image.invalid": "Invalid image",
+  "translation.name.invalid": "Invalid name",
+  "translation.name.too_long": "Name is too long",
+  "translation.phone.cannot_be_empty": "Phone number cannot be empty",
+  "translation.phone.too_long": "Phone number is too long",
+  "translation.phone.too_short": "Phone number is too short",
+  "translation.phone.wrong_format": "Phone number must follow +<country code>-<number>, digits and hyphens only",
+  "translation.username.invalid": "Invalid username",
+  "translation.user.phone_not_found": "Phone not found",
+  "translation.yearcard.update_failed" : "Update error: likely duplicate",
+  "translation.yearcard.not_found" : "Yearcard not found"
+}

@@ -110,7 +110,7 @@ public class YearcardService
         }
     }
 
-    public async Task<bool> ConfirmYearcardAsync(Guid? id)
+    public async Task<CheckInResponse> ConfirmYearcardAsync(Guid? id)
     {
         if (id == null)
         {
@@ -119,19 +119,26 @@ public class YearcardService
         var request = new HttpRequestMessage(HttpMethod.Put, $"/api/yearcards/confirm/{id}");
         request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _auth.GetTokenAsync());
 
-        var response = await _httpClient.SendAsync(request);
+        HttpResponseMessage response = await _httpClient.SendAsync(request);
 
+        return await CreateCheckInResponse(response);
+    }
+
+    private async Task<CheckInResponse> CreateCheckInResponse(HttpResponseMessage response)
+    {
         if (response.IsSuccessStatusCode)
         {
-            return true;
+            return await response.Content.ReadFromJsonAsync<CheckInResponse>() ?? new CheckInResponse();
         }
         else
         {
-            throw new Exception("Failed to load yearcards.");
+            var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+
+            throw new ArgumentException(error?.Message ?? "Unknown error");
         }
     }
 
-    public async Task<bool> CheckinWithPhonenumberAsync(PhoneNumberCheckInRequest phone)
+    public async Task<CheckInResponse> CheckinWithPhonenumberAsync(PhoneNumberCheckInRequest phone)
     {
         if (phone == null || string.IsNullOrWhiteSpace(phone.Phone))
         {
@@ -145,26 +152,10 @@ public class YearcardService
 
         var response = await _httpClient.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
-        {
-            // Read response as a string and parse to bool
-            var responseString = await response.Content.ReadAsStringAsync();
-            if (bool.TryParse(responseString, out bool isValid))
-            {
-                return isValid;
-            }
-            else
-            {
-                throw new Exception("Unexpected response format.");
-            }
-        }
-        else
-        {
-            throw new Exception("Number was invalid");
-        }
+        return await CreateCheckInResponse(response);
     }
 
-    public async Task<bool> CheckinWithEmailAsync(EmailCheckInRequest email)
+    public async Task<CheckInResponse> CheckinWithEmailAsync(EmailCheckInRequest email)
     {
         if (email == null || string.IsNullOrWhiteSpace(email.Email))
         {
@@ -178,26 +169,10 @@ public class YearcardService
 
         var response = await _httpClient.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
-        {
-            // Read response as a string and parse to bool
-            var responseString = await response.Content.ReadAsStringAsync();
-            if (bool.TryParse(responseString, out bool isValid))
-            {
-                return isValid;
-            }
-            else
-            {
-                throw new Exception("Unexpected response format.");
-            }
-        }
-        else
-        {
-            throw new Exception("Email was invalid");
-        }
+        return await CreateCheckInResponse(response);
     }
 
-    public async Task<bool> CheckinWithUsernameAsync(UsernameCheckInRequest username)
+    public async Task<CheckInResponse> CheckinWithUsernameAsync(UsernameCheckInRequest username)
     {
         if (username == null || string.IsNullOrWhiteSpace(username.UserName))
         {
@@ -211,23 +186,7 @@ public class YearcardService
 
         var response = await _httpClient.SendAsync(request);
 
-        if (response.IsSuccessStatusCode)
-        {
-            // Read response as a string and parse to bool
-            var responseString = await response.Content.ReadAsStringAsync();
-            if (bool.TryParse(responseString, out bool isValid))
-            {
-                return isValid;
-            }
-            else
-            {
-                throw new Exception("Unexpected response format.");
-            }
-        }
-        else
-        {
-            throw new Exception("username was invalid");
-        }
+        return await CreateCheckInResponse(response);
     }
 
     public async Task<YearcardDTO> GetYearcardAsync(Guid? id)

@@ -12,6 +12,7 @@ namespace LoyaltyCRM.Infrastructure.Factories
 
 public static class YearcardFactory
 {
+    private static int _counter = 1;
     private static readonly Faker<Yearcard> Faker = new Faker<Yearcard>()
         .CustomInstantiator(f => new Yearcard(
             Guid.NewGuid(),
@@ -25,11 +26,14 @@ public static class YearcardFactory
         var yearcard = Faker.Clone()
             .RuleFor(y => y.UserId, _ => user.Id)
             .RuleFor(y => y.User, _ => user)
+            .RuleFor(y => y.CardId, _ => new CardNumber(Interlocked.Increment(ref _counter)))
             .Generate();
 
 
         // Apply customizations if any
         customizer?.Invoke(yearcard);
+
+        yearcard.UpdateTimestamps();
 
         return yearcard;
     }

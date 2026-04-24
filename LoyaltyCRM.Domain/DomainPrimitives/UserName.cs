@@ -20,7 +20,7 @@ namespace LoyaltyCRM.Domain.DomainPrimitives
             string pattern = @"^[a-zA-ZÀ-ÖØ-öø-ÿ]+([@.-][a-zA-ZÀ-ÖØ-öø-ÿ]+)*$";
 
             if (!Regex.IsMatch(Value, pattern))
-                throw new ArgumentException("UserName is invalid.");
+                throw new ArgumentException("translation.username.invalid");
         }
     }
 }

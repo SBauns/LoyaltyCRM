@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static LoyaltyCRM.Services.Services.TranslationService;
 
 namespace LoyaltyCRM.Api.Middleware
 {
@@ -44,7 +43,7 @@ namespace LoyaltyCRM.Api.Middleware
                     stackTrace = exception.StackTrace,
                     innerException = exception.InnerException?.Message
                 }
-                : new { message = Translate("Something went wrong.") };
+                : new { Code = "global.something_went_wrong" };
 
             return context.Response.WriteAsJsonAsync(response);
         }

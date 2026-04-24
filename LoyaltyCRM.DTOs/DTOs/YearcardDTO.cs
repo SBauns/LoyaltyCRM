@@ -14,12 +14,8 @@ public class YearcardDTO
     [DisplayFormat(DataFormatString = "{0:dd-MM-yyyy}")]
     public DateTime StartDate { get; set; } = DateTime.Today;
 
-    [Required(ErrorMessage = "Phone number is required")]
-    [RegularExpression(@"^\+\d{1,3}-(\d+(-\d+)*)$", ErrorMessage = "Phone number must follow +<country code>-<number>, digits and hyphens only")]
     public string? PhoneNumber { get; set; }
 
-    [Required(ErrorMessage = "Email is required")]
-    [EmailAddress(ErrorMessage = "Invalid email address")]
     public string? Email { get; set; }
 
     public string? UserName { get; set; }

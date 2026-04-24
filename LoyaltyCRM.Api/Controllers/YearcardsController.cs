@@ -84,7 +84,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest( new { message = ex.Message });
+                return BadRequest( new { Code = ex.Message });
             }
 
         }
@@ -96,8 +96,6 @@ namespace LoyaltyCRM.Api.Controllers
         [Authorize]
         public async Task<ActionResult<YearcardCreateResponse>> PostYearcard(YearcardCreateRequest request)
         {
-            request.ValidTo = null; //Do not allow ValidTo
-            request.CardId = null; //TODO Find a better way to stop overposting
             try
             {
                 var response = await _yearcardService.CreateOrExtendYearcard(request);
@@ -107,17 +105,17 @@ namespace LoyaltyCRM.Api.Controllers
             catch (ArgumentException ex)
             {
                 // Bad Request for invalid arguments
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
             catch (DbUpdateException ex)
             {
                 // Conflict for database-related issues
-                return Conflict(new { message = "A database error occurred while creating the yearcard.", details = ex.Message }); //TRANSLATE
+                return Conflict(new { Code = "yearcard.database_error", details = ex.Message });
             }
             catch (Exception ex)
             {
                 // Internal Server Error for any other unhandled exceptions
-                return StatusCode(500, new { message = "An unexpected error occurred.", details = ex.Message }); //TRANSLATE
+                return StatusCode(500, new { Code = "yearcard.unexpected_error", details = ex.Message });
             }
 
         }
@@ -128,14 +126,26 @@ namespace LoyaltyCRM.Api.Controllers
         [RequireRole(Role.Papa)]
         public async Task<IActionResult> DeleteYearcard(Guid id)
         {
-            bool isDeleted = await _yearcardService.DeleteYearcard(id);
-            if (!isDeleted)
+            try
             {
-                return NotFound();
+                bool isDeleted = await _yearcardService.DeleteYearcard(id);
+                if (!isDeleted)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return NoContent();
+                }
             }
-            else
+            catch (MailChimpException e)
             {
-                return NoContent();
+                return StatusCode(200, "Failed to delete user in mailchimp, but deleted in databse");
+                throw;
+            }
+            catch (Exception e)
+            {
+                return BadRequest("Failed to delete");
             }
         }
 
@@ -144,15 +154,22 @@ namespace LoyaltyCRM.Api.Controllers
         //CHECK IF YEARCARD IS VALID
         [HttpPost("checkin/{id}")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithYearcard(Guid id)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithYearcard(Guid id)
         {
-            return await _yearcardService.CheckInWithYearcards(id);
+            try
+            {
+                return await _yearcardService.CheckInWithYearcards(id);
+            }
+            catch (System.Exception ex)
+            {
+                return BadRequest(new { Code = ex.Message });
+            }
         }
 
         //CHECK IF YEARCARD IS VALID WITH PHONE
         [HttpPost("checkinphone")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithPhone(PhoneNumberCheckInRequest phone)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithPhone(PhoneNumberCheckInRequest phone)
         {
             try
             {
@@ -161,14 +178,14 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 
         //CHECK IF YEARCARD IS VALID WITH Email
         [HttpPost("checkinemail")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithEmail(EmailCheckInRequest email)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithEmail(EmailCheckInRequest email)
         {
             try
             {
@@ -177,14 +194,14 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 
         //CHECK IF YEARCARD IS VALID WITH Email
         [HttpPost("checkinusername")]
         [RequireRole(Role.Papa, Role.Bartender)]
-        public async Task<ActionResult<bool>> CheckInWithUserName(UsernameCheckInRequest userName)
+        public async Task<ActionResult<CheckInResponse>> CheckInWithUserName(UsernameCheckInRequest userName)
         {
             try
             {
@@ -193,7 +210,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 
@@ -209,7 +226,7 @@ namespace LoyaltyCRM.Api.Controllers
             }
             catch (Exception ex)
             {
-                return BadRequest(new { message = ex.Message });
+                return BadRequest(new { Code = ex.Message });
             }
         }
 

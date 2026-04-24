@@ -1,0 +1,22 @@
+﻿{
+  "translation.auth.invalid_login": "Ugyldigt login",
+  "translation.auth.password_changed_failure": "Ændring af adgangskode mislykkedes",
+  "translation.auth.password_changed_succes": "Adgangskoden blev ændret",
+  "translation.auth.successfully.register": "Registrering gennemført",
+  "translation.auth.user_not_found": "Bruger ikke fundet",
+  "translation.card_number.too_long": "Kortnummeret er for langt",
+  "translation.card_number.too_short": "Kortnummeret er for kort",
+  "translation.email.cannot_be_empty": "E-mail må ikke være tom",
+  "translation.email.invalid": "Ugyldig e-mailadresse",
+  "translation.image.invalid": "Ugyldigt billede",
+  "translation.name.invalid": "Ugyldigt navn",
+  "translation.name.too_long": "Navnet er for langt",
+  "translation.phone.cannot_be_empty": "Telefonnummer må ikke være tomt",
+  "translation.phone.too_long": "Telefonnummer er for langt",
+  "translation.phone.too_short": "Telefonnummer er for kort",
+  "translation.phone.wrong_format": "Telefonnummer skal følge +<landekode>-<nummer>, kun cifre og bindestreger",
+  "translation.username.invalid": "Ugyldigt brugernavn",
+  "translation.user.phone_not_found": "Telefonnummer ikke fundet",
+  "translation.yearcard.update_failed" : "Der skete en opdaterings fejl: Sandsynligvis duplicate",
+  "translation.yearcard.not_found" : "Årskort ikke fundet"
+}

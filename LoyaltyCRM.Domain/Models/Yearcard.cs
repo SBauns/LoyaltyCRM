@@ -1,4 +1,6 @@
-﻿using LoyaltyCRM.Domain.DomainPrimitives;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using LoyaltyCRM.Domain.DomainPrimitives;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LoyaltyCRM.Domain.Models
 {
@@ -7,6 +9,9 @@ namespace LoyaltyCRM.Domain.Models
         public Guid? Id { get; }
         public Name? Name { get; set; }
         public CardNumber? CardId { get; set; }
+
+        [NotMapped]
+        public bool IsValidForDiscount { get; set; } = false;
         // public CardValidTo ValidTo { get; }
 
         //Relationships
@@ -39,16 +44,29 @@ namespace LoyaltyCRM.Domain.Models
             ValidityIntervals.Add(validityInterval);
         }
 
-        public bool IsYearcardSetForDeletion(int gracePeriodDays)
+        public bool IsYearcardSetForDeletion(int deleteGracePeriodDays)
         {
             foreach (ValidityInterval interval in ValidityIntervals)
             {
-                if (interval.EndDate.Value.AddDays(gracePeriodDays) >= DateTime.Now)
+                if (interval.EndDate.Value.AddDays(deleteGracePeriodDays) >= DateTime.Now)
                 {
                     return true;
                 }
             }
             return false;
+        }
+
+        public void SetIsYearcardValidForDiscount(int discountGracePeriodDays)
+        {
+            foreach (ValidityInterval interval in ValidityIntervals)
+            {
+                if (interval.EndDate.Value.AddDays(discountGracePeriodDays) >= DateTime.Now)
+                {
+                    IsValidForDiscount = true;
+                    return;
+                }
+            }
+            IsValidForDiscount = false;
         }
     }
 }

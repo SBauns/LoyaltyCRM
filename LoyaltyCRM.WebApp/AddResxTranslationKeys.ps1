@@ -2,11 +2,11 @@ param (
     [string]$lang = "da" # Language code, e.g. "da" or "en"
 )
 
-$resxFile = "Locales/Resources.$lang.resx"
+$resxFile = "LoyaltyCRM.WebApp/Locales/Resources.$lang.resx"
 
 # Load existing .resx as XML
 if (Test-Path $resxFile) {
-    [xml]$resxXml = Get-Content $resxFile
+    [xml]$resxXml = Get-Content $resxFile -Raw
 } else {
     # Create a new .resx structure if file doesn't exist
     $resxXml = [xml]@"
@@ -20,6 +20,10 @@ if (Test-Path $resxFile) {
 "@
 }
 
+if (-not $resxXml.root) {
+    throw "Invalid .resx structure: missing root node"
+}
+
 # Collect all translation keys from .razor files
 $searchPaths = @("Components", "Layout", "Pages")
 $foundKeys = @{}
@@ -27,13 +31,8 @@ $foundKeys = @{}
 foreach ($path in $searchPaths) {
     Get-ChildItem -Path $path -Recurse -Include *.razor | ForEach-Object {
         # @L["Key"] pattern
-        $matches1 = Select-String -Path $_.FullName -Pattern '@L\["([^"]+)"\]' -AllMatches
+        $matches1 = Select-String -Path $_.FullName -Pattern 'L\["([^"]+)"\]' -AllMatches
         foreach ($match in $matches1.Matches) {
-            $foundKeys[$match.Groups[1].Value] = $true
-        }
-        # <Translate Text="Key" /> pattern
-        $matches2 = Select-String -Path $_.FullName -Pattern '<Translate Text="([^"]+)"\s*/?>' -AllMatches
-        foreach ($match in $matches2.Matches) {
             $foundKeys[$match.Groups[1].Value] = $true
         }
     }
@@ -41,21 +40,50 @@ foreach ($path in $searchPaths) {
 
 # Get existing keys from .resx
 $existingKeys = @{}
-$resxXml.root.data | ForEach-Object {
-    $existingKeys[$_.name] = $true
+
+@($resxXml.root.data) | ForEach-Object {
+    if ($_) {
+        $nameAttr = $_.GetAttribute("name")
+        if ($nameAttr) {
+            $existingKeys[$nameAttr] = $true
+        }
+    }
 }
 
-# Add missing keys
+# Get all existing data nodes sorted by name
+$dataNodes = @($resxXml.root.data)
+
+# Add missing keys (alphabetically)
 $added = $false
-foreach ($key in $foundKeys.Keys) {
+
+foreach ($key in ($foundKeys.Keys | Sort-Object)) {
     if (-not $existingKeys.ContainsKey($key)) {
+
         $dataNode = $resxXml.CreateElement("data")
         $dataNode.SetAttribute("name", $key)
         $dataNode.SetAttribute("xml:space", "preserve")
+
         $valueNode = $resxXml.CreateElement("value")
-        $valueNode.InnerText = $key # Default value is the key itself
+        $valueNode.InnerText = $key
         $dataNode.AppendChild($valueNode) | Out-Null
-        $resxXml.root.AppendChild($dataNode) | Out-Null
+
+        # Always fetch fresh nodes (avoids array issues entirely)
+        $currentNodes = @($resxXml.root.data) | Sort-Object name
+
+        $inserted = $false
+        foreach ($node in $currentNodes) {
+            $nodeName = $node.GetAttribute("name")
+            if ($nodeName  -gt $key) {
+                $resxXml.root.InsertBefore($dataNode, $node) | Out-Null
+                $inserted = $true
+                break
+            }
+        }
+
+        if (-not $inserted) {
+            $resxXml.root.AppendChild($dataNode) | Out-Null
+        }
+
         Write-Host "Added key: $key"
         $added = $true
     }

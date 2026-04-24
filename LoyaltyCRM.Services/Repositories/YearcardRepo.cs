@@ -37,7 +37,7 @@ namespace LoyaltyCRM.Services.Repositories
 
             if (yearcard == null)
             {
-                throw new EntityNotFoundException("We could not find this yearcard"); //TRANSLATE
+                throw new EntityNotFoundException("translation.yearcard.not_found");
             }
 
             return yearcard;
@@ -51,7 +51,7 @@ namespace LoyaltyCRM.Services.Repositories
                 .FirstOrDefaultAsync(y => y.Id == id);
 
             if (existing == null)
-                throw new ArgumentException("Could not find old Yearcard"); //TRANSLATE
+                throw new ArgumentException("translation.yearcard.not_found");
 
             // Update scalar properties on the yearcard
             _context.Entry(existing).CurrentValues.SetValues(updated);

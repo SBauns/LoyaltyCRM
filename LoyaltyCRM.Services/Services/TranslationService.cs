@@ -1,56 +1,45 @@
-using Microsoft.AspNetCore.Http;
-using System.Collections.Generic;
-using System.Diagnostics.CodeAnalysis;
+using Microsoft.Extensions.Logging;
+using System.Text.Json;
 
-namespace LoyaltyCRM.Services.Services
+public static class TranslationService
 {
-    [ExcludeFromCodeCoverage]
-    public static class TranslationService
+    private static readonly Dictionary<string, Dictionary<string, string>> _cache = new();
+    private static readonly object _lock = new();
+
+    public static string TranslateAndTrack(string key, string lang, ILogger logger)
     {
-        private static readonly Dictionary<string, Dictionary<string, string>> _cache = new();
-        private static readonly object _lock = new();
+        var dict = GetTranslationsForLanguage(lang);
 
-        public static IHttpContextAccessor? HttpContextAccessor { get; set; }
+        if (dict != null && dict.TryGetValue(key, out var value))
+            return value;
 
-        public static string Translate(string key)
+        // fallback to English
+        var enDict = GetTranslationsForLanguage("en");
+        if (enDict != null && enDict.TryGetValue(key, out var fallback))
+            return fallback;
+
+        return key;
+    }
+
+    private static Dictionary<string, string>? GetTranslationsForLanguage(string lang)
+    {
+        lock (_lock)
         {
-            var lang = GetLanguage();
-            var dict = GetTranslationsForLanguage(lang);
-            if (dict != null && dict.TryGetValue(key, out var value))
-                return value;
-            // fallback to English
-            var enDict = GetTranslationsForLanguage("en");
-            if (enDict != null && enDict.TryGetValue(key, out var fallback))
-                return fallback;
-            return key;
-        }
+            if (_cache.TryGetValue(lang, out var dict))
+                return dict;
 
-        private static string GetLanguage()
-        {
-            var httpContext = HttpContextAccessor?.HttpContext;
-            var acceptLang = httpContext?.Request.Headers["Accept-Language"].ToString();
-            if (!string.IsNullOrEmpty(acceptLang))
-            {
-                return acceptLang.Split(',')[0].Split('-')[0];
-            }
-            return "en"; // default
-        }
+            var filePath = Path.Combine(AppContext.BaseDirectory, "Localization", $"Translations.{lang}.json");
 
-        private static Dictionary<string, string>? GetTranslationsForLanguage(string lang)
-        {
-            lock (_lock)
-            {
-                if (_cache.TryGetValue(lang, out var dict))
-                    return dict;
-                var filePath = $"Resources/Translations.{lang}.json";
-                if (!System.IO.File.Exists(filePath))
-                    return null;
-                var json = System.IO.File.ReadAllText(filePath);
-                var loaded = System.Text.Json.JsonSerializer.Deserialize<Dictionary<string, string>>(json);
-                if (loaded != null)
-                    _cache[lang] = loaded;
-                return loaded;
-            }
+            if (!File.Exists(filePath))
+                return null;
+
+            var json = File.ReadAllText(filePath);
+            var loaded = JsonSerializer.Deserialize<Dictionary<string, string>>(json);
+
+            if (loaded != null)
+                _cache[lang] = loaded;
+
+            return loaded;
         }
     }
 }
