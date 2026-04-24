@@ -1,0 +1,80 @@
+@page "/create"
+@inject YearcardService YearcardService
+@inject AuthService AuthService
+@inject NavigationManager Navigation
+
+<h1>Create Yearcard</h1>
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="alert alert-success">@successMessage</div>
+}
+@if (!string.IsNullOrEmpty(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+
+<EditForm Model="@Yearcard" OnValidSubmit="HandleSubmit">
+    <DataAnnotationsValidator />
+
+    <div class="form-group">
+        <label>Name</label>
+        <InputText @bind-Value="Yearcard.Name" class="input" />
+    </div>
+    <div class="form-group">
+        <label>Username</label>
+        <InputText @bind-Value="Yearcard.UserName" class="input" />
+    </div>
+    <div class="form-group">
+        <label>Phone</label>
+        <InputText @bind-Value="Yearcard.PhoneNumber" class="input" />
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <InputText @bind-Value="Yearcard.Email" class="input" />
+    </div>
+    <div class="form-group horizontal">
+        <label>Gift card</label>
+        <input type="checkbox" @bind="IsGiftCard" />
+    </div>
+    @if (IsGiftCard)
+    {
+        <div class="form-group">
+            <label>Start Date</label>
+            <InputDate @bind-Value="Yearcard.StartDate" class="input" />
+        </div>
+    }
+    <button class="button primary-button" type="submit">Create Yearcard</button>
+</EditForm>
+
+@code {
+    private YearcardDTO Yearcard { get; set; } = new YearcardDTO();
+    private string successMessage = string.Empty;
+    private string errorMessage = string.Empty;
+    private bool IsGiftCard { get; set; }
+
+    private async Task HandleSubmit()
+    {
+        try
+        {
+            if (string.IsNullOrWhiteSpace(Yearcard.Name) || string.IsNullOrWhiteSpace(Yearcard.PhoneNumber) || string.IsNullOrWhiteSpace(Yearcard.Email))
+            {
+                errorMessage = "Please fill all required fields.";
+                return;
+            }
+
+            var created = await YearcardService.CreateYearcardAsync(Yearcard);
+            successMessage = $"Yearcard created: {created.Name}";
+            Yearcard = new YearcardDTO();
+            IsGiftCard = false;
+            errorMessage = string.Empty;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Navigation.NavigateTo("/", true);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+}

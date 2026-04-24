@@ -1,0 +1,25 @@
+@page "/download"
+
+<PageTitle>Download Mobile App</PageTitle>
+
+<div class="container py-4">
+    <h1>Download the LoyaltyCRM Mobile App</h1>
+    <p>
+        Download the latest Android APK for the LoyaltyCRM Mobile App.
+        Place the signed APK file at <code>wwwroot/downloads/LoyaltyCRM.MobileApp.apk</code> in the WebApp project,
+        then rebuild/publish the WebApp so the new version is served.
+    </p>
+    <div class="mb-3">
+        <a class="btn btn-primary" href="downloads/LoyaltyCRM.MobileApp.apk" download>
+            Download APK
+        </a>
+    </div>
+    <div>
+        <p><strong>Android installation notes:</strong></p>
+        <ul>
+            <li>Use an Android tablet and enable installation from unknown sources if needed.</li>
+            <li>Open the downloaded APK to install the app.</li>
+            <li>If the file is missing, add the APK to <code>wwwroot/downloads</code> and republish the web app.</li>
+        </ul>
+    </div>
+</div>

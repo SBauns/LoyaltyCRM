@@ -3,6 +3,7 @@
   <Project Path="LoyaltyCRM.Domain/LoyaltyCRM.Domain.csproj" />
   <Project Path="LoyaltyCRM.DTOs/LoyaltyCRM.DTOs.csproj" />
   <Project Path="LoyaltyCRM.Infrastructure/LoyaltyCRM.Infrastructure.csproj" />
+  <Project Path="LoyaltyCRM.MobileApp/LoyaltyCRM.MobileApp.csproj" />
   <Project Path="LoyaltyCRM.Services/LoyaltyCRM.Services.csproj" />
   <Project Path="LoyaltyCRM.Tests/LoyaltyCRM.Tests.csproj" />
   <Project Path="LoyaltyCRM.WebApp/LoyaltyCRM.WebApp.csproj" />

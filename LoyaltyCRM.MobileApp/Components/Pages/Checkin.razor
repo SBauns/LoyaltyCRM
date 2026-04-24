@@ -1,0 +1,93 @@
+@page "/checkin"
+@inject YearcardService YearcardService
+@inject NavigationManager Navigation
+
+<h1>Check Yearcard</h1>
+@if (!string.IsNullOrEmpty(ResultMessage))
+{
+    <div class="alert @ResultClass">@ResultMessage</div>
+}
+
+<EditForm Model="@PhoneNumber" OnValidSubmit="CheckYearcard">
+    <DataAnnotationsValidator />
+    <ValidationSummary />
+
+    <div class="form-group">
+        <label>Phone Number</label>
+        <InputText @bind-Value="PhoneNumber.Phone" class="input" />
+    </div>
+    <div class="form-group">
+        <label>Email</label>
+        <InputText @bind-Value="Email.Email" class="input" />
+    </div>
+    <div class="form-group">
+        <label>Username</label>
+        <InputText @bind-Value="UserName.UserName" class="input" />
+    </div>
+    <button class="button primary-button" type="submit">Check In</button>
+</EditForm>
+
+@code {
+    private PhoneNumberCheckInRequest PhoneNumber { get; set; } = new PhoneNumberCheckInRequest();
+    private EmailCheckInRequest Email { get; set; } = new EmailCheckInRequest();
+    private UsernameCheckInRequest UserName { get; set; } = new UsernameCheckInRequest();
+    private string ResultMessage { get; set; } = string.Empty;
+    private string ResultClass { get; set; } = string.Empty;
+
+    private async Task CheckYearcard()
+    {
+        ResultMessage = string.Empty;
+        ResultClass = string.Empty;
+
+        try
+        {
+            CheckInResponse response = new CheckInResponse();
+            string lastChecked = string.Empty;
+
+            if (!string.IsNullOrWhiteSpace(PhoneNumber.Phone))
+            {
+                response = await YearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
+                lastChecked = PhoneNumber.Phone;
+            }
+            if (!response.IsValid && !string.IsNullOrWhiteSpace(Email.Email))
+            {
+                response = await YearcardService.CheckinWithEmailAsync(Email);
+                lastChecked = Email.Email;
+            }
+            if (!response.IsValid && !string.IsNullOrWhiteSpace(UserName.UserName))
+            {
+                response = await YearcardService.CheckinWithUsernameAsync(UserName);
+                lastChecked = UserName.UserName;
+            }
+
+            if (response.IsValid)
+            {
+                ResultMessage = $"Card with {lastChecked} is valid.";
+                ResultClass = "alert-success";
+            }
+            else
+            {
+                ResultMessage = $"Card with {lastChecked} is invalid.";
+                ResultClass = "alert-danger";
+            }
+
+            if (response.IsValidForDiscount)
+            {
+                ResultMessage += " And it is valid for renewal discount.";
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            Navigation.NavigateTo("/", true);
+        }
+        catch (Exception ex)
+        {
+            ResultMessage = ex.Message;
+            ResultClass = "alert-danger";
+        }
+
+        PhoneNumber = new PhoneNumberCheckInRequest();
+        Email = new EmailCheckInRequest();
+        UserName = new UsernameCheckInRequest();
+    }
+}

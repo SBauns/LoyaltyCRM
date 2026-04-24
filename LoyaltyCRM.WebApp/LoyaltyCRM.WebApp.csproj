@@ -20,4 +20,8 @@
     <ProjectReference Include="..\LoyaltyCRM.DTOs\LoyaltyCRM.DTOs.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Include="wwwroot\downloads\**\*.*" CopyToPublishDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>

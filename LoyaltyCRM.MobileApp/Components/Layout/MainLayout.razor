@@ -1,0 +1,28 @@
+﻿@inherits LayoutComponentBase
+
+<div class="page-container">
+    <header class="top-bar">
+        <div class="title">LoyaltyCRM</div>
+    </header>
+
+    <main class="content">
+        @Body
+    </main>
+
+    <footer class="bottom-nav">
+        <NavLink class="nav-link" href="/create">Create</NavLink>
+        <NavLink class="nav-link" href="/checkin">Check-in</NavLink>
+        <NavLink class="nav-link" href="/" @onclick="Logout">Logout</NavLink>
+    </footer>
+</div>
+
+@code {
+    [Inject] AuthService AuthService { get; set; } = default!;
+    [Inject] NavigationManager Navigation { get; set; } = default!;
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/", true);
+    }
+}

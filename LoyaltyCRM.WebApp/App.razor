@@ -29,9 +29,9 @@
         var uri = Navigation.ToBaseRelativePath(Navigation.Uri).ToLower();
 
         var isAuthenticated = await AuthService.IsAuthenticatedAsync();
-        if (!isAuthenticated && uri != "login")
+        if (!isAuthenticated && uri != "login" && uri != "download")
         {
-            // If the user is not authenticated and not on the login page, redirect to login
+            // If the user is not authenticated and not on the login or download page, redirect to login
             Navigation.NavigateTo("/login", true);
             return;
         }

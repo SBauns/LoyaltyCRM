@@ -15,6 +15,11 @@
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
     <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link nav-icon" href="download" Match="NavLinkMatch.All">
+                <img src="icons/pen.svg" alt="Download Mobile App"> Download Mobile App
+            </NavLink>
+        </div>
         @if (AuthService._role != AuthService.Role.Unauthenticated)
         {                
             <div class="nav-item px-3">
