@@ -69,7 +69,6 @@
   <data name="Yearcard.GiftStartDate"><value>Fra hvornår skal dette kort være aktivt?</value></data>
   <data name="Yearcard.FullNameLabel"><value>Fulde navn:</value></data>
   <data name="Yearcard.AcceptTerms"><value>Jeg accepterer vilkår og betingelser</value></data>
-  <data name="Navigation.ImportUsers"><value>Importer brugere</value></data>
   <data name="Checkin.Invalid"><value>er ugyldigt!</value></data>
   <data name="Checkin.Valid"><value>er gyldigt!</value></data>
   <data name="Yearcard.IsGiftCheckbox"><value>Det er en gave</value></data>
@@ -93,7 +92,6 @@
   <data name="Common.Save"><value>Gem</value></data>
   <data name="YearcardList.Search"><value>Søg:</value></data>
   <data name="Yearcard.TermsTitle"><value>Vilkår og betingelser</value></data>
-  <data name="Navigation.TermsSettings"><value>Indstillinger for vilkår</value></data>
   <data name="YearcardEdit.UpdateButton"><value>Opdater årskort</value></data>
   <data name="YearcardEdit.UserName"><value>Brugernavn</value></data>
   <data name="Yearcard.Username"><value>Brugernavn</value></data>
@@ -112,7 +110,6 @@
   <data name="YearcardList.Title"><value>Årskort</value></data>
   <data name="Yearcard.Create"><value>Opret årskort</value></data>
   <data name="TermsEditor.Title"><value>Vilkårseditor</value></data>
-  <data name="TermsEditor.Bold"><value>Fed</value></data>
   <data name="TermsEditor.Bullets"><value>Punkttegn</value></data>
   <data name="TermsEditor.Save"><value>Gem</value></data>
   <data name="TermsEditor.Clear"><value>Ryd</value></data>
@@ -153,13 +150,8 @@
   <data name="PasswordSettings.BartenderUsername"><value>Bartender brugernavn:</value></data>
   <data name="TermsSettings.Title"><value>Indstillinger for vilkår</value></data>
   <data name="TermsEditor.Bold"><value>Fed</value></data>
-  <data name="TermsEditor.Bullets"><value>Punkttegn</value></data>
-  <data name="TermsEditor.Save"><value>Gem</value></data>
-  <data name="TermsEditor.Clear"><value>Ryd</value></data>
-  <data name="TermsEditor.CannotSaveEmpty"><value>Kan ikke gemme tomme vilkår.</value></data>
-  <data name="TermsEditor.SavedSuccessfully"><value>Vilkår gemt på serveren.</value></data>
-  <data name="TermsEditor.SaveError"><value>Fejl ved gemning:</value></data>
-  <data name="TermsEditor.TermsCleared"><value>Vilkår ryddet.</value></data>
+  <data name="Fullscreen.Enter"><value>Gå Fuld skærm</value></data>
+  <data name="Fullscreen.Exit"><value>Ud af Fuld skærm</value></data>
 
 </root>
 

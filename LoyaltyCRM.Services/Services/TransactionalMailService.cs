@@ -12,14 +12,16 @@ public class TransactionalMailService : ITransactionalMailService
     {
         _httpClient = httpClient;
 
-        _apiKey = config.Current.MandrillApiKey
-            ?? throw new ArgumentNullException("Mandrill API key missing");
+        _apiKey = config.Current.MandrillApiKey;
 
         _httpClient.BaseAddress = new Uri("https://mandrillapp.com/api/1.0/");
     }
 
     public async Task<bool> PingAsync()
     {
+        if(string.IsNullOrWhiteSpace(_apiKey))
+         return false;
+
         var response = await _httpClient.PostAsync("users/ping.json",
             new StringContent(JsonSerializer.Serialize(new { key = _apiKey }),
             Encoding.UTF8, "application/json"));
@@ -35,6 +37,9 @@ public class TransactionalMailService : ITransactionalMailService
         Dictionary<string, string> variables,
         string subject = "")
     {
+        if(string.IsNullOrWhiteSpace(_apiKey))
+         return false;
+
         var body = new
         {
             key = _apiKey,
@@ -70,6 +75,8 @@ public class TransactionalMailService : ITransactionalMailService
 
     public async Task<List<string>> GetTemplatesAsync()
     {
+        if(string.IsNullOrWhiteSpace(_apiKey))
+            return new List<string>();
         var body = new
         {
             key = _apiKey

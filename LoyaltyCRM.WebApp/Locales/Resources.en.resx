@@ -149,13 +149,7 @@
   <data name="PasswordSettings.Bartender"><value>Bartender</value></data>
   <data name="PasswordSettings.BartenderUsername"><value>Bartender Username:</value></data>
   <data name="TermsSettings.Title"><value>Terms setting</value></data>
-  <data name="TermsEditor.Bold"><value>Bold</value></data>
-  <data name="TermsEditor.Bullets"><value>Bullets</value></data>
-  <data name="TermsEditor.Save"><value>Save</value></data>
-  <data name="TermsEditor.Clear"><value>Clear</value></data>
-  <data name="TermsEditor.CannotSaveEmpty"><value>Cannot save empty terms.</value></data>
-  <data name="TermsEditor.SavedSuccessfully"><value>Saved terms to server.</value></data>
-  <data name="TermsEditor.SaveError"><value>Save error:</value></data>
-  <data name="TermsEditor.TermsCleared"><value>Terms cleared.</value></data>
+  <data name="Fullscreen.Enter"><value>Enter Fullscreen</value></data>
+  <data name="Fullscreen.Exit"><value>Exit Fullscreen</value></data>
 
 </root>
