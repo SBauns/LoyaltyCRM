@@ -7,14 +7,14 @@
 @inject IJSRuntime JS
 @inject IStringLocalizer<Resources> L
 
-    <h4 class="text-center mb-3">@L["Import users"]</h4>
+    <h4 class="text-center mb-3">@L["ImportUsers.Title"]</h4>
 
 <div class="mb-3 text-center text-muted">
-    @L["Upload a CSV or Excel file and map its first row to the correct yearcard fields."]
+    @L["ImportUsers.Description"]
 </div>
 
 <div class="mb-3">
-    <label class="form-label">@L["File"]</label>
+    <label class="form-label">@L["ImportUsers.File"]</label>
     <InputFile OnChange="HandleFileSelected" accept=".csv,.xls,.xlsx" />
 </div>
 
@@ -22,13 +22,13 @@
     <button class="btn btn-outline-primary"
             @onclick="LoadPreviewAsync"
             disabled="@(selectedFile == null)">
-        @L["Preview headers"]
+        @L["ImportUsers.PreviewHeaders"]
     </button>
 
     <button class="btn btn-primary"
             @onclick="ImportFileAsync"
             disabled="@(selectedFile == null || !availableHeaders.Any())">
-        @L["Import file"]
+        @L["ImportUsers.ImportButton"]
     </button>
 </div>
 
@@ -45,7 +45,7 @@
 {
     <!-- LEFT: detected headers -->
     <div class="col-12 col-md-4">
-        <h5>@L["Found Headers"]</h5>
+        <h5>@L["ImportUsers.FoundHeaders"]</h5>
 
         @foreach (var header in availableHeaders)
         {
@@ -68,7 +68,7 @@
                             value="@GetMapping(mappingKey)"
                             @onchange="e => SetMapping(mappingKey, e.Value?.ToString())">
 
-                        <option value="">@L["Select a header"]</option>
+                        <option value="">@L["ImportUsers.SelectHeader"]</option>
 
                         @foreach (var header in availableHeaders)
                         {
@@ -79,7 +79,7 @@
             }
 
             <div class="col-12 col-md-6">
-                <label class="form-label">@L["Start Date"]</label>
+                <label class="form-label">@L["ImportUsers.StartDate"]</label>
 
                 <InputDate class="form-control"
                            @bind-Value="importStartDate" />
@@ -112,12 +112,12 @@
     private readonly Dictionary<string, string> ImportFieldLabels =
         new(StringComparer.OrdinalIgnoreCase)
         {
-            ["CardId"] = "Card ID",
-            ["ValidTo"] = "Valid To",
-            ["PhoneNumber"] = "Phone",
-            ["Email"] = "Email",
-            ["Name"] = "Name",
-            ["UserName"] = "Username"
+            ["CardId"] = "Yearcard.CardId",
+            ["ValidTo"] = "Yearcard.ValidTo",
+            ["PhoneNumber"] = "Yearcard.Phone",
+            ["Email"] = "Yearcard.Email",
+            ["Name"] = "Yearcard.Name",
+            ["UserName"] = "Yearcard.Username"
         };
 
     private DateTime importStartDate = DateTime.Today;
@@ -153,7 +153,7 @@
     {
         if (selectedFile == null)
         {
-            importMessage = L["Select a file before previewing."];
+            importMessage = L["ImportUsers.SelectFileBeforePreview"];
             importSuccess = false;
             return;
         }
@@ -177,7 +177,7 @@
         {
             availableHeaders.Clear();
 
-            importMessage = L["Unable to read file headers:"] + $" {ex.Message}";
+            importMessage = L["ImportUsers.UnableToReadHeaders"] + $" {ex.Message}";
             importSuccess = false;
         }
     }
@@ -186,7 +186,7 @@
     {
         if (selectedFile == null)
         {
-            importMessage = L["Select a file before importing."];
+            importMessage = L["ImportUsers.SelectFileBeforeImport"];
             importSuccess = false;
             return;
         }
@@ -214,7 +214,7 @@
         }
         catch (Exception ex)
         {
-            importMessage = L["Import failed:"] + $" {ex.Message}";
+            importMessage = L["ImportUsers.ImportFailed"] + $" {ex.Message}";
             importSuccess = false;
         }
     }

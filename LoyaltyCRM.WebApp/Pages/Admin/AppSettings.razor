@@ -7,10 +7,10 @@
 @inject SettingsService SettingsService
 @inject IStringLocalizer<Resources> L
 
-<h4 class="text-center mb-3">@L["App settings"]</h4>
+<h4 class="text-center mb-3">@L["AppSettings.Title"]</h4>
 
 <div class="mb-3 text-center text-muted">
-    @L["Configure app settings using numeric values or a time value where appropriate. These are validated before saving."]
+    @L["AppSettings.Description"]
 </div>
 
 @if (!string.IsNullOrEmpty(appSettingsMessage))
@@ -33,7 +33,7 @@
             @if (string.Equals(setting.Key, "DiscountNotificationRules", StringComparison.OrdinalIgnoreCase))
             {
                 <div class="mb-3">
-                    <label class="form-label">@L["Notification count"]</label>
+                    <label class="form-label">@L["AppSettings.NotificationCount"]</label>
                     <InputNumber class="form-control"
                                  @bind-Value="DiscountNotificationRulesCount"
                                  min="0" />
@@ -42,7 +42,7 @@
                 @if (!discountNotificationRules.Any())
                 {
                     <div class="form-text mb-2">
-                        @L["Add at least one discount notification rule to send reminders on a specific number of days before the discount period expires."]
+                        @L["AppSettings.DiscountRuleDescription"]
                     </div>
                 }
 
@@ -53,13 +53,13 @@
 
                     <div class="row gx-2 mb-3 align-items-end" @key="rule">
                         <div class="col-5">
-                            <label class="form-label">@L["Days before discount period expires"]</label>
+                            <label class="form-label">@L["AppSettings.DaysBeforeExpiry"]</label>
                             <InputNumber class="form-control"
                                          @bind-Value="discountNotificationRules[ruleIndex].DaysBeforeDiscountPeriodExpires"
                                          min="0" />
                         </div>
                         <div class="col-5">
-                            <label class="form-label">@L["Template name"]</label>
+                            <label class="form-label">@L["AppSettings.TemplateName"]</label>
                             <InputText class="form-control"
                                        @bind-Value="discountNotificationRules[ruleIndex].TemplateName" />
                         </div>
@@ -67,14 +67,14 @@
                             <button type="button"
                                     class="btn btn-outline-danger w-100"
                                     @onclick="() => RemoveDiscountNotificationRule(ruleIndex)">
-                                @L["Remove"]
+                                @L["AppSettings.Remove"]
                             </button>
                         </div>
                     </div>
                 }
 
                 <button type="button" class="btn btn-secondary" @onclick="AddDiscountNotificationRule">
-                    @L["Add rule"]
+                    @L["AppSettings.AddRule"]
                 </button>
             }
             else
@@ -89,7 +89,7 @@
 
 <div class="d-flex justify-content-end mt-3">
     <button class="btn btn-primary" @onclick="SaveAppSettings">
-        @L["Save App Settings"]
+        @L["AppSettings.SaveButton"]
     </button>
 </div>
 
@@ -110,16 +110,16 @@
 
     private readonly Dictionary<string, (string Label, string InputType)> SettingMetadata = new(StringComparer.OrdinalIgnoreCase)
     {
-        ["LengthOfYearcardInDays"] = ("Length of yearcard (days)", "number"),
-        ["DiscountGracePeriodInDays"] = ("Discount grace period (days)", "number"),
-        ["TimeBeforeDeleteInvalidYearcard"] = ("Delete invalid yearcard after (days)", "number"),
-        ["TimeToCleanUpCards"] = ("Time of Day to Delete Invalid Yearcards", "time"),
-        ["DiscountNotificationRules"] = ("Discount notification rules", "textarea"),
-        ["MailChimpApiKey"] = ("Mailchimp Api Key", "text"),
-        ["MailChimpServerPrefix"] = ("Mailchimp Server Prefix", "text"),
-        ["MailChimpListId"] = ("Mailchimp Audience Id", "text"),
-        ["MandrillApiKey"] = ("Mandrill Api Key", "text"),
-        ["SenderDomain"] = ("Domain", "text")
+        ["LengthOfYearcardInDays"] = ("AppSettings.YearcardLength", "number"),
+        ["DiscountGracePeriodInDays"] = ("AppSettings.DiscountGracePeriod", "number"),
+        ["TimeBeforeDeleteInvalidYearcard"] = ("AppSettings.DeleteInvalidYearcardDays", "number"),
+        ["TimeToCleanUpCards"] = ("AppSettings.TimeToDeleteCards", "time"),
+        ["DiscountNotificationRules"] = ("AppSettings.DiscountNotificationRules", "textarea"),
+        ["MailChimpApiKey"] = ("AppSettings.MailchimpApiKey", "text"),
+        ["MailChimpServerPrefix"] = ("AppSettings.MailchimpServerPrefix", "text"),
+        ["MailChimpListId"] = ("AppSettings.MailchimpAudienceId", "text"),
+        ["MandrillApiKey"] = ("AppSettings.MandrillApiKey", "text"),
+        ["SenderDomain"] = ("AppSettings.Domain", "text")
     };
 
     private List<SettingDto> appSettings = new();
@@ -172,7 +172,7 @@
         }
         catch (Exception ex)
         {
-            appSettingsMessage = L["Unable to load app settings:"] + $" {ex.Message}";
+            appSettingsMessage = L["AppSettings.UnableToLoad"] + $" {ex.Message}";
             appSettingsSuccess = false;
 
             appSettings = KnownKeys
@@ -201,12 +201,12 @@
             }
 
             appSettingsSuccess = true;
-            appSettingsMessage = L["App settings saved successfully."];
+            appSettingsMessage = L["AppSettings.SavedSuccessfully"];
         }
         catch (Exception ex)
         {
             appSettingsSuccess = false;
-            appSettingsMessage = L["Save failed:"] + $" {ex.Message}";
+            appSettingsMessage = L["AppSettings.SaveFailed"] + $" {ex.Message}";
         }
     }
 

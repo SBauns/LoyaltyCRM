@@ -3,23 +3,23 @@
 
 <div class="card mt-4">
     <div class="card-body">
-        <h5 class="card-title">@L["Yearcard Details"]</h5>
-        <p><strong>@L["Card ID:"]</strong> @Yearcard.CardId</p>
+        <h5 class="card-title">@L["YearcardDisplay.Title"]</h5>
+        <p><strong>@L["Yearcard.CardIdLabel"]</strong> @Yearcard.CardId</p>
         @if (ShowFullName())
         {
-            <p><strong>@L["Full Name:"]</strong> @Yearcard.Name</p>
+            <p><strong>@L["Yearcard.FullNameLabel"]</strong> @Yearcard.Name</p>
         }
         @if (ShowPhone())
         {
-            <p><strong>@L["Phone:"]</strong> @Yearcard.PhoneNumber</p>
+            <p><strong>@L["Yearcard.PhoneLabel"]</strong> @Yearcard.PhoneNumber</p>
         }
         @if (ShowUserName())
         {
-            <p><strong>@L["Username:"]</strong> @Yearcard.UserName</p>
+            <p><strong>@L["Yearcard.Username"]</strong> @Yearcard.UserName</p>
         }
         @if (ShowEmail())
         {
-            <p><strong>@L["Email:"]</strong> @Yearcard.Email</p>
+            <p><strong>@L["Yearcard.EmailLabel"]</strong> @Yearcard.Email</p>
         }
     </div>
 </div>
