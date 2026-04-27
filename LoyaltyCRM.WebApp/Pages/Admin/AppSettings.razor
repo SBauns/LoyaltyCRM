@@ -1,5 +1,6 @@
 @page "/admin/app"
 @layout AdminLayout
+@using System.Text.Json
 @using LoyaltyCRM.DTOs.DTOs
 @using LoyaltyCRM.WebApp.Locales
 
@@ -29,9 +30,59 @@
         <div class="col-12 col-md-4">
             <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
 
-            <InputText class="form-control"
-                       @bind-Value="setting.Value"
-                       type="@inputType" />
+            @if (string.Equals(setting.Key, "DiscountNotificationRules", StringComparison.OrdinalIgnoreCase))
+            {
+                <div class="mb-3">
+                    <label class="form-label">@L["Notification count"]</label>
+                    <InputNumber class="form-control"
+                                 @bind-Value="DiscountNotificationRulesCount"
+                                 min="0" />
+                </div>
+
+                @if (!discountNotificationRules.Any())
+                {
+                    <div class="form-text mb-2">
+                        @L["Add at least one discount notification rule to send reminders on a specific number of days before the discount period expires."]
+                    </div>
+                }
+
+                @for (var index = 0; index < discountNotificationRules.Count; index++)
+                {
+                    var ruleIndex = index;
+                    var rule = discountNotificationRules[ruleIndex];
+
+                    <div class="row gx-2 mb-3 align-items-end" @key="rule">
+                        <div class="col-5">
+                            <label class="form-label">@L["Days before discount period expires"]</label>
+                            <InputNumber class="form-control"
+                                         @bind-Value="discountNotificationRules[ruleIndex].DaysBeforeDiscountPeriodExpires"
+                                         min="0" />
+                        </div>
+                        <div class="col-5">
+                            <label class="form-label">@L["Template name"]</label>
+                            <InputText class="form-control"
+                                       @bind-Value="discountNotificationRules[ruleIndex].TemplateName" />
+                        </div>
+                        <div class="col-2">
+                            <button type="button"
+                                    class="btn btn-outline-danger w-100"
+                                    @onclick="() => RemoveDiscountNotificationRule(ruleIndex)">
+                                @L["Remove"]
+                            </button>
+                        </div>
+                    </div>
+                }
+
+                <button type="button" class="btn btn-secondary" @onclick="AddDiscountNotificationRule">
+                    @L["Add rule"]
+                </button>
+            }
+            else
+            {
+                <InputText class="form-control"
+                           @bind-Value="setting.Value"
+                           type="@inputType" />
+            }
         </div>
     }
 </div>
@@ -49,12 +100,12 @@
         "DiscountGracePeriodInDays",
         "TimeBeforeDeleteInvalidYearcard",
         "TimeToCleanUpCards",
+        "DiscountNotificationRules",
         "MailChimpApiKey",
         "MailChimpServerPrefix",
         "MailChimpListId",
         "MandrillApiKey",
-        "SenderDomain",
-        "DiscountMailTemplate"
+        "SenderDomain"
     };
 
     private readonly Dictionary<string, (string Label, string InputType)> SettingMetadata = new(StringComparer.OrdinalIgnoreCase)
@@ -63,15 +114,16 @@
         ["DiscountGracePeriodInDays"] = ("Discount grace period (days)", "number"),
         ["TimeBeforeDeleteInvalidYearcard"] = ("Delete invalid yearcard after (days)", "number"),
         ["TimeToCleanUpCards"] = ("Time of Day to Delete Invalid Yearcards", "time"),
+        ["DiscountNotificationRules"] = ("Discount notification rules", "textarea"),
         ["MailChimpApiKey"] = ("Mailchimp Api Key", "text"),
         ["MailChimpServerPrefix"] = ("Mailchimp Server Prefix", "text"),
         ["MailChimpListId"] = ("Mailchimp Audience Id", "text"),
         ["MandrillApiKey"] = ("Mandrill Api Key", "text"),
-        ["SenderDomain"] = ("Domain", "text"),
-        ["DiscountMailTemplate"] = ("Template", "text")
+        ["SenderDomain"] = ("Domain", "text")
     };
 
     private List<SettingDto> appSettings = new();
+    private List<DiscountNotificationRuleModel> discountNotificationRules = new();
     private string appSettingsMessage = string.Empty;
     private bool appSettingsSuccess;
 
@@ -94,6 +146,7 @@
         {
             var loaded = await SettingsService.GetSettingsAsync();
             var result = loaded.ToList();
+            InitializeDiscountNotificationRules(result);
 
             foreach (var key in KnownKeys)
             {
@@ -125,6 +178,7 @@
             appSettings = KnownKeys
                 .Select(k => new SettingDto { Key = k, Value = string.Empty })
                 .ToList();
+            discountNotificationRules = new List<DiscountNotificationRuleModel>();
         }
     }
 
@@ -136,9 +190,13 @@
         {
             foreach (var setting in appSettings)
             {
+                var value = setting.Key == "DiscountNotificationRules"
+                    ? JsonSerializer.Serialize(discountNotificationRules)
+                    : setting.Value ?? string.Empty;
+
                 await SettingsService.UpsertSettingAsync(
                     setting.Key,
-                    setting.Value ?? string.Empty
+                    value
                 );
             }
 
@@ -152,7 +210,81 @@
         }
     }
 
-        private string FormatSettingLabel(string key)
+        private int DiscountNotificationRulesCount
+    {
+        get => discountNotificationRules.Count;
+        set
+        {
+            if (value < 0)
+            {
+                value = 0;
+            }
+
+            while (discountNotificationRules.Count < value)
+            {
+                discountNotificationRules.Add(new DiscountNotificationRuleModel());
+            }
+
+            while (discountNotificationRules.Count > value)
+            {
+                discountNotificationRules.RemoveAt(discountNotificationRules.Count - 1);
+            }
+        }
+    }
+
+    private void AddDiscountNotificationRule()
+    {
+        discountNotificationRules.Add(new DiscountNotificationRuleModel());
+    }
+
+    private void RemoveDiscountNotificationRule(int index)
+    {
+        if (index >= 0 && index < discountNotificationRules.Count)
+        {
+            discountNotificationRules.RemoveAt(index);
+        }
+    }
+
+    private void InitializeDiscountNotificationRules(List<SettingDto> settings)
+    {
+        var ruleSetting = settings.FirstOrDefault(s =>
+            string.Equals(s.Key, "DiscountNotificationRules", StringComparison.OrdinalIgnoreCase));
+
+        discountNotificationRules = ParseDiscountNotificationRules(ruleSetting?.Value);
+    }
+
+    private static List<DiscountNotificationRuleModel> ParseDiscountNotificationRules(string? json)
+    {
+        if (string.IsNullOrWhiteSpace(json))
+        {
+            return new List<DiscountNotificationRuleModel>();
+        }
+
+        try
+        {
+            var rules = JsonSerializer.Deserialize<List<DiscountNotificationRuleModel>>(json,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return rules?.Select(rule => new DiscountNotificationRuleModel
+            {
+                DaysBeforeDiscountPeriodExpires = rule.DaysBeforeDiscountPeriodExpires,
+                TemplateName = rule.TemplateName?.Trim() ?? string.Empty
+            })
+            .Where(rule => rule.DaysBeforeDiscountPeriodExpires >= 0 && !string.IsNullOrWhiteSpace(rule.TemplateName))
+            .ToList() ?? new List<DiscountNotificationRuleModel>();
+        }
+        catch
+        {
+            return new List<DiscountNotificationRuleModel>();
+        }
+    }
+
+    private sealed class DiscountNotificationRuleModel
+    {
+        public int DaysBeforeDiscountPeriodExpires { get; set; }
+        public string TemplateName { get; set; } = string.Empty;
+    }
+
+    private string FormatSettingLabel(string key)
     {
         return SettingMetadata.TryGetValue(key, out var metadata)
             ? metadata.Label
