@@ -27,11 +27,11 @@
             ? metadata.InputType 
             : "text";
 
-        <div class="col-12 col-md-4">
-            <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
+        @if (string.Equals(setting.Key, "DiscountNotificationRules", StringComparison.OrdinalIgnoreCase))
+        {
+            <div class="col-12">
+                <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
 
-            @if (string.Equals(setting.Key, "DiscountNotificationRules", StringComparison.OrdinalIgnoreCase))
-            {
                 <div class="mb-3">
                     <label class="form-label">@L["AppSettings.NotificationCount"]</label>
                     <InputNumber class="form-control"
@@ -49,9 +49,8 @@
                 @for (var index = 0; index < discountNotificationRules.Count; index++)
                 {
                     var ruleIndex = index;
-                    var rule = discountNotificationRules[ruleIndex];
 
-                    <div class="row gx-2 mb-3 align-items-end" @key="rule">
+                    <div class="row gx-2 mb-3 align-items-end" @key="discountNotificationRules[ruleIndex]">
                         <div class="col-5">
                             <label class="form-label">@L["AppSettings.DaysBeforeExpiry"]</label>
                             <InputNumber class="form-control"
@@ -76,14 +75,17 @@
                 <button type="button" class="btn btn-secondary" @onclick="AddDiscountNotificationRule">
                     @L["AppSettings.AddRule"]
                 </button>
-            }
-            else
-            {
+            </div>
+        }
+        else
+        {
+            <div class="col-12 col-md-6">
+                <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
                 <InputText class="form-control"
                            @bind-Value="setting.Value"
                            type="@inputType" />
-            }
-        </div>
+            </div>
+        }
     }
 </div>
 
