@@ -18,34 +18,56 @@ public class YearcardService
 
     public async Task<YearcardDTO> CreateYearcardAsync(YearcardDTO yearcard)
     {
-        try
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/yearcards/create")
         {
-            var request = new HttpRequestMessage(HttpMethod.Post, "api/yearcards")
-            {
-                Content = JsonContent.Create(yearcard) // Add DTO as JSON content
-            };
+            Content = JsonContent.Create(yearcard) // Add DTO as JSON content
+        };
 
-            request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _auth.GetTokenAsync());
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _auth.GetTokenAsync());
 
-            var response = await _httpClient.SendAsync(request);
+        var response = await _httpClient.SendAsync(request);
 
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<YearcardDTO>() ?? throw new Exception("Failed to read Yearcard from response.");
-            }
-            else if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
-            {
-                throw new UnauthorizedAccessException("You are not authorized. Please log in again.");
-            }
-            else
-            {
-                throw new Exception(response.Content.ReadFromJsonAsync<ErrorMessage>().Result?.Message ?? "Failed to create Yearcard. Please try again.");
-            }
-        }
-        catch (Exception ex)
+        if (response.IsSuccessStatusCode)
         {
-            throw new Exception($"{ex.Message}");
+            return await response.Content.ReadFromJsonAsync<YearcardDTO>() ?? throw new Exception("Failed to read Yearcard from response.");
         }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            throw new UnauthorizedAccessException("You are not authorized. Please log in again.");
+        }
+
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        var errorMessage = error?.Message ?? error?.Code ?? "Failed to create Yearcard. Please try again.";
+
+        throw new HttpRequestException(errorMessage, null, response.StatusCode);
+    }
+
+    public async Task<YearcardDTO> ExtendYearcardAsync(YearcardDTO yearcard)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, "api/yearcards/extend")
+        {
+            Content = JsonContent.Create(yearcard) // Add DTO as JSON content
+        };
+
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", await _auth.GetTokenAsync());
+
+        var response = await _httpClient.SendAsync(request);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<YearcardDTO>() ?? throw new Exception("Failed to read Yearcard from response.");
+        }
+
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            throw new UnauthorizedAccessException("You are not authorized. Please log in again.");
+        }
+
+        var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+        var errorMessage = error?.Message ?? error?.Code ?? "Failed to extend Yearcard. Please try again.";
+
+        throw new HttpRequestException(errorMessage, null, response.StatusCode);
     }
 
     public async Task<bool> UpdateYearcardAsync(YearcardDTO yearcard)

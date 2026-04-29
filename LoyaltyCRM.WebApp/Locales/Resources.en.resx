@@ -111,6 +111,7 @@
   <data name="Navigation.Yearcards"><value>Yearcards</value></data>
   <data name="YearcardList.Title"><value>Yearcards</value></data>
   <data name="Yearcard.Create"><value>Create Yearcard</value></data>
+  <data name="translation.yearcard.already_created"><value>Yearcard already exists. Want to extend?</value></data>
   <data name="TermsEditor.Title"><value>Terms Editor</value></data>
   <data name="TermsEditor.Bold"><value>Bold</value></data>
   <data name="TermsEditor.Bullets"><value>Bullets</value></data>

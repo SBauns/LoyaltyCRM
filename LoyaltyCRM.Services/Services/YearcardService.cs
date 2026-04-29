@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Data;
 using FuzzySharp;
 using LoyaltyCRM.Domain.DomainPrimitives;
+using LoyaltyCRM.Domain.Exceptions;
 using LoyaltyCRM.Domain.Models;
 using LoyaltyCRM.DTOs.Requests.Checkin;
 using LoyaltyCRM.DTOs.Requests.Yearcard;
@@ -188,7 +189,7 @@ namespace LoyaltyCRM.Services.Services
             return succes;
         }
 
-        public async Task<YearcardCreateResponse> CreateOrExtendYearcard(YearcardCreateRequest request)
+        public async Task<YearcardCreateResponse> CreateYearcard(YearcardCreateRequest request)
         {
             Yearcard NewYearCard = request.Adapt<Yearcard>();
             StartDate startDate = new StartDate(request.StartDate);
@@ -214,7 +215,44 @@ namespace LoyaltyCRM.Services.Services
                     }
                     else if (Customer.Yearcard != null) //Means we found a existing customer
                     {
+                        throw new YearcardAlreadyCreatedException("translation.yearcard.already_created");
+                    }
+
+                    await transaction.CommitAsync();
+                    if(createdYearcard != null){
+                        return createdYearcard.Adapt<YearcardCreateResponse>();
+                    }
+                    return null;
+                }
+                catch (Exception exception)
+                    {
+                        await transaction.RollbackAsync();
+                        throw exception;
+                    }
+                }
+        }
+
+        public async Task<YearcardCreateResponse> ExtendYearcard(YearcardCreateRequest request)
+        {
+            Yearcard NewYearCard = request.Adapt<Yearcard>();
+            StartDate startDate = new StartDate(request.StartDate);
+
+            using (var transaction = await _transactionService.BeginTransactionAsync())
+            {
+                try
+                {
+                    NewYearCard.User = SetUsername(NewYearCard.User);
+                    
+                    ApplicationUser Customer = await _customerRepo.CreateOrReturnFirstCustomer(NewYearCard.User);
+                    Yearcard createdYearcard = null;
+                    
+                    if(Customer.Yearcard != null)
+                    {
                         createdYearcard = await AddValidityToCurrentYearcard(Customer.Yearcard, startDate);
+                    }
+                    else
+                    {
+                        throw new ArgumentException("translation.yearcard.not_found");
                     }
 
                     await transaction.CommitAsync();

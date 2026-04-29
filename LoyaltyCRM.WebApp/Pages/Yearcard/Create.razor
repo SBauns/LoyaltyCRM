@@ -4,6 +4,7 @@
 @using System.ComponentModel.DataAnnotations
 @using LoyaltyCRM.WebApp.Components
 @using LoyaltyCRM.WebApp.Locales
+@using System.Net
 @inject IStringLocalizer<Resources> L
 @inject NavigationManager Navigation
 @inject AuthService AuthService
@@ -25,10 +26,10 @@
                             <label for="Name" class="form-label">@L["Yearcard.Name"]*</label>
                             <InputText id="Name" class="form-control" @bind-Value="Yearcard.Name" />
                         </div>
-                        <div class="mb-3">
+                        @* <div class="mb-3">
                             <label for="UserName" class="form-label">@L["Create.UsernameField"]</label>
                             <InputText id="UserName" class="form-control" @bind-Value="Yearcard.UserName" />
-                        </div>
+                        </div> *@
                         <div class="mb-3 d-flex align-items-center gap-2">
                             <input class="form-check-input" type="checkbox" id="acceptTerms" @bind="AcceptedTerms" style="margin-right: 0.5em;" />
                             <button type="button" class="btn btn-link p-0 align-baseline" style="text-decoration:underline; color:inherit; font-weight:normal;" @onclick="TooggleTermsModal">
@@ -59,7 +60,17 @@
                         }
                     </div>
                 </div>
-                <button type="submit" class="btn btn-primary w-100 mt-2" disabled="@(!EverythingIsValid())">@L["Yearcard.Create"]</button>
+                @if (ShowExtendButton)
+                {
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                        <button type="submit" class="btn btn-primary w-100 mt-2" disabled="@(!EverythingIsValid())">@ExtendMessage</button>
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2" @onclick="CancelExtend">@L["Common.No"]</button>
+                    </div>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary w-100 mt-2" disabled="@(!EverythingIsValid())">@L["Yearcard.Create"]</button>
+                }
             </EditForm>
         }
         else
@@ -98,6 +109,8 @@
     private YearcardDTO? CreatedYearcard { get; set; }
     private string Message { get; set; } = string.Empty;
     private string ErrorMessage { get; set; } = string.Empty;
+    private bool ShowExtendButton { get; set ; } = false;
+    private string ExtendMessage { get; set; } = string.Empty;
     private bool AcceptedTerms { get; set; } = false;
     private bool IsGiftCard { get; set; } = false;
     private bool ShowModal { get; set; } = false;
@@ -130,25 +143,36 @@
     {
         try
         {
-            if (context.Validate() && EverythingIsValid())
+            if (!context.Validate() && EverythingIsValid())
             {
+                ErrorMessage = string.Join(", ", context.GetValidationMessages());
+                return;
+            }
+            if(ShowExtendButton){
+                CreatedYearcard = await yearcards.ExtendYearcardAsync(Yearcard);
+            }
+            else{
                 CreatedYearcard = await yearcards.CreateYearcardAsync(Yearcard);
-                Message = "Yearcard.CreatedSuccessfully";
-                ErrorMessage = string.Empty;
             }
-            else
-            {
-                ErrorMessage = context.GetValidationMessages().ToList().FirstOrDefault() ?? "Validation failed";
-            }
+            Message = "Yearcard.CreatedSuccessfully";
+            ErrorMessage = string.Empty;
+            ShowExtendButton = false;
         }
-        catch (UnauthorizedAccessException ex)
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == HttpStatusCode.Conflict)
         {
-            ErrorMessage = ex.Message;
+            ShowExtendButton = true;
+            ExtendMessage = LocalizeApiMessage(httpEx.Message);
+            ErrorMessage = string.Empty;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ErrorMessage = "Unauthorized access. Please log in again.";
             Navigation.NavigateTo("/login", true);
         }
         catch (Exception ex)
         {
-            ErrorMessage = ex.Message;
+            ErrorMessage = LocalizeApiMessage(ex.Message);
+            ShowExtendButton = false;
         }
     }
 
@@ -160,12 +184,34 @@
                AcceptedTerms;
     }
 
+    private void CancelExtend()
+    {
+        ShowExtendButton = false;
+        ExtendMessage = string.Empty;
+        ErrorMessage = string.Empty;
+    }
+
+    private string LocalizeApiMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return string.Empty;
+        }
+
+        var localized = L[message];
+        return localized.ResourceNotFound ? message : localized.Value;
+    }
+
     private void ResetForm()
     {
         CreatedYearcard = null;
         Yearcard = new YearcardDTO(); // Reset the form data
         Message = string.Empty;
         ErrorMessage = string.Empty;
+        ShowExtendButton = false;
+        ExtendMessage = string.Empty;
+        AcceptedTerms = false;
+        IsGiftCard = false;
     }
 
     private async Task TooggleTermsModal()

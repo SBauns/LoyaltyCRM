@@ -18,5 +18,6 @@
   "translation.username.invalid": "Ugyldigt brugernavn",
   "translation.user.phone_not_found": "Telefonnummer ikke fundet",
   "translation.yearcard.update_failed" : "Der skete en opdaterings fejl: Sandsynligvis duplicate",
-  "translation.yearcard.not_found" : "Årskort ikke fundet"
+  "translation.yearcard.not_found" : "Årskort ikke fundet",
+  "translation.yearcard.already_created" : "Årskort eksisterer allerede. Vil du forlænge?"
 }

@@ -24,11 +24,11 @@
                         <InputText id="Name" class="form-control" @bind-Value="Yearcard.Name" />
                         <ValidationMessage For="@(() => Yearcard.Name)" />
                     </div>
-                    <div class="mb-3">
+                    @* <div class="mb-3">
                         <label for="UserName" class="form-label">@L["YearcardEdit.UserName"]</label>
                         <InputText id="UserName" class="form-control" @bind-Value="Yearcard.UserName" />
                         <ValidationMessage For="@(() => Yearcard.UserName)" />
-                    </div>
+                    </div> *@
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="mb-3">
@@ -150,7 +150,7 @@
             PhoneNumber = yearcard.PhoneNumber,
             Email = yearcard.Email,
             Name = yearcard.Name,
-            UserName = yearcard.UserName,
+            @* UserName = yearcard.UserName, *@
             ValidityIntervals = yearcard.ValidityIntervals.Select(v => new ValidityIntervalDTO
             {
                 Id = v.Id,
@@ -182,7 +182,7 @@
         yearcard.PhoneNumber = originalYearcard.PhoneNumber;
         yearcard.Email = originalYearcard.Email;
         yearcard.Name = originalYearcard.Name;
-        yearcard.UserName = originalYearcard.UserName;
+        @* yearcard.UserName = originalYearcard.UserName; *@
         yearcard.ValidityIntervals = originalYearcard.ValidityIntervals.Select(v => new ValidityIntervalDTO
         {
             Id = v.Id,

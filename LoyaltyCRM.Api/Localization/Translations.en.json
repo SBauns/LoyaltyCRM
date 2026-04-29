@@ -18,5 +18,6 @@
   "translation.username.invalid": "Invalid username",
   "translation.user.phone_not_found": "Phone not found",
   "translation.yearcard.update_failed" : "Update error: likely duplicate",
-  "translation.yearcard.not_found" : "Yearcard not found"
+  "translation.yearcard.not_found" : "Yearcard not found",
+  "translation.yearcard.already_created" : "Yearcard already exists. Want to Extend?"
 }

@@ -112,6 +112,7 @@
   <data name="Navigation.Yearcards"><value>Årskort</value></data>
   <data name="YearcardList.Title"><value>Årskort</value></data>
   <data name="Yearcard.Create"><value>Opret årskort</value></data>
+  <data name="translation.yearcard.already_created"><value>Årskort eksisterer allerede. Vil du forlænge?</value></data>
   <data name="TermsEditor.Title"><value>Vilkårseditor</value></data>
   <data name="TermsEditor.Bullets"><value>Punkttegn</value></data>
   <data name="TermsEditor.Save"><value>Gem</value></data>
