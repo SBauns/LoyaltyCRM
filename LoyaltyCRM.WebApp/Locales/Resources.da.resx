@@ -66,6 +66,7 @@
   <data name="Yearcard.EmailLabel"><value>E-mail:</value></data>
   <data name="Checkin.FillOutOneField"><value>Udfyld et af felterne</value></data>
   <data name="YearcardEdit.FirstName"><value>Fornavn</value></data>
+  <data name="YearcardEdit.AddInterval"><value>Tilføj Interval</value></data>
   <data name="Yearcard.GiftStartDate"><value>Fra hvornår skal dette kort være aktivt?</value></data>
   <data name="Yearcard.FullNameLabel"><value>Fulde navn:</value></data>
   <data name="Yearcard.AcceptTerms"><value>Jeg accepterer vilkår og betingelser</value></data>
@@ -98,6 +99,8 @@
   <data name="Create.UsernameField"><value>Brugernavn</value></data>
   <data name="Login.Username"><value>Brugernavn:</value></data>
   <data name="Checkin.Username"><value>Brugernavn:</value></data>
+  <data name="Checkin.AndValidForDiscount"><value>OG er gyldig for rabat:</value></data>
+  <data name="Checkin.ButValidForDiscount"><value>MEN er gyldig for rabat:</value></data>
   <data name="YearcardList.ValidUntil"><value>Gyldig indtil</value></data>
   <data name="YearcardEdit.ValidityDates"><value>Gyldighedsdatoer</value></data>
   <data name="Navigation.WaitingYearcards"><value>Afventende årskort</value></data>

@@ -65,6 +65,7 @@
   <data name="Yearcard.EmailLabel"><value>Email:</value></data>
   <data name="Checkin.FillOutOneField"><value>Fill out one of the fields</value></data>
   <data name="YearcardEdit.FirstName"><value>First Name</value></data>
+  <data name="YearcardEdit.AddInterval"><value>Add Interval</value></data>
   <data name="Yearcard.GiftStartDate"><value>From whence shall this card be active from?</value></data>
   <data name="Yearcard.FullNameLabel"><value>Full Name:</value></data>
   <data name="Yearcard.AcceptTerms"><value>I Accept the Terms and Agreement</value></data>
@@ -97,6 +98,8 @@
   <data name="Create.UsernameField"><value>Username</value></data>
   <data name="Login.Username"><value>Username:</value></data>
   <data name="Checkin.Username"><value>Username:</value></data>
+  <data name="Checkin.AndValidForDiscount"><value>AND is valid for discount:</value></data>
+  <data name="Checkin.ButValidForDiscount"><value>BUT is valid for discount:</value></data>
   <data name="YearcardList.ValidUntil"><value>Valid Until</value></data>
   <data name="YearcardEdit.ValidityDates"><value>Validity Dates</value></data>
   <data name="Navigation.WaitingYearcards"><value>Waiting Yearcards</value></data>
