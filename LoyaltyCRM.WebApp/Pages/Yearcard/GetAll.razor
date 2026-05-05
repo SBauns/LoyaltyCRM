@@ -7,11 +7,11 @@
 @using LoyaltyCRM.WebApp.Locales
 @inject IStringLocalizer<Resources> L
 
-<h3>@L["Yearcards"]</h3>
+<h3>@L["YearcardList.Title"]</h3>
 
 @if (yearcards == null)
 {
-    <p><em>@L["Loading..."]</em></p>
+    <p><em>@L["Common.Loading"]</em></p>
 }
 else if(showOverlay)
 {
@@ -25,7 +25,7 @@ else
 {
     <div class="d-flex justify-content-between align-items-center mb-2">
         <div>
-            <label for="pageSizeSelect">@L["Rows per page:"]</label>
+            <label for="pageSizeSelect">@L["YearcardList.RowsPerPage"]</label>
             <select id="pageSizeSelect" @onchange="OnPageSizeChanged" class="form-select d-inline w-auto mx-2">
                 <option value="10">10</option>
                 <option value="20">20</option>
@@ -34,39 +34,39 @@ else
             </select>
         </div>
         <div class="ms-auto">
-            <label for="searchInput" class="me-2">@L["Search:"]</label>
-            <input id="searchInput" class="form-control d-inline w-auto" @bind="SearchText" @bind:event="oninput" placeholder=@L["Card ID, Phone, Name..."]/>
+            <label for="searchInput" class="me-2">@L["YearcardList.Search"]</label>
+            <input id="searchInput" class="form-control d-inline w-auto" @bind="SearchText" @bind:event="oninput" placeholder=@L["YearcardList.SearchPlaceholder"]/>
         </div>
     </div>
     <table class="table table-striped">
         <thead>
             <tr>
             <th style="cursor:pointer" @onclick='() => SortBy("CardId")'>
-                @L["Card ID"]
+                @L["Yearcard.CardIdLabel"]
             </th>
 
             <th style="cursor:pointer" @onclick='() => SortBy("ValidTo")'>
-                @L["Valid Until"]
+                @L["YearcardList.ValidUntil"]
             </th>
 
             <th style="cursor:pointer" @onclick='() => SortBy("PhoneNumber")'>
-                @L["Phone"]
+                @L["Yearcard.Phone"]
             </th>
 
             <th style="cursor:pointer" @onclick='() => SortBy("Name")'>
-                @L["Name"]
+                @L["Yearcard.Name"]
             </th>
 
             <th style="cursor:pointer" @onclick='() => SortBy("Email")'>
-                @L["Email"]
+                @L["Yearcard.Email"]
             </th>
 
             <th>
-                @L["Discount Eligibility"]
+                @L["YearcardList.DiscountEligibility"]
             </th>
 
             <th style="cursor:pointer" @onclick='() => SortBy("UpdatedAt")'>
-                @L["Last Updated"]
+                @L["YearcardList.LastUpdated"]
             </th>
             </tr>
         </thead>
@@ -79,24 +79,24 @@ else
                     <td>@card.PhoneNumber</td>
                     <td>@card.Name</td>
                     <td>@card.Email</td>
-                    <td>@(card.IsValidForDiscount ? @L["Yes"] : @L["No"])</td>
+                    <td>@(card.IsValidForDiscount ? @L["Common.Yes"] : @L["Common.No"])</td>
                     <td>@card.UpdatedAt</td>
                     <td>
-                        <button class="btn btn-warning btn-sm" @onclick="() => EditYearcard(card.Id)">@L["Edit"]</button>
-                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteYearcard(card.Id)">@L["Delete"]</button>
+                        <button class="btn btn-warning btn-sm" @onclick="() => EditYearcard(card.Id)">@L["YearcardList.Edit"]</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteYearcard(card.Id)">@L["YearcardList.Delete"]</button>
                     </td>
                 </tr>
             }
         </tbody>
     </table>
     <div class="d-flex justify-content-between align-items-center mt-2">
-        <button class="btn btn-outline-primary btn-sm" @onclick="PreviousPage" disabled="@(currentPage == 1)">@L["Previous"]</button>
+        <button class="btn btn-outline-primary btn-sm" @onclick="PreviousPage" disabled="@(currentPage == 1)">@L["Pagination.Previous"]</button>
         <span>
-            @L["Page"]
+            @L["Pagination.Page"]
             <input type="number" min="1" max="@TotalPages" value="@currentPage" @onchange="OnPageInputChanged" style="width: 60px; text-align: center;" />
-            @L["of"] @TotalPages
+            @L["Pagination.Of"] @TotalPages
         </span>
-        <button class="btn btn-outline-primary btn-sm" @onclick="NextPage" disabled="@(currentPage == TotalPages)">@L["Next"]</button>
+        <button class="btn btn-outline-primary btn-sm" @onclick="NextPage" disabled="@(currentPage == TotalPages)">@L["Pagination.Next"]</button>
     </div>
 }
 
@@ -104,10 +104,10 @@ else
 {
     <div class="modal-overlay">
         <div class="modal-content">
-            <h5>@L["Confirm Delete"]</h5>
-            <p>@L["Are you sure you want to delete this yearcard?"]</p>
-            <button class="btn btn-danger" @onclick="ConfirmDelete">@L["Yes, Delete"]</button>
-            <button class="btn btn-secondary" @onclick="CancelDelete">@L["Cancel"]</button>
+            <h5>@L["YearcardList.ConfirmDeleteTitle"]</h5>
+            <p>@L["YearcardList.ConfirmDelete"]</p>
+            <button class="btn btn-danger" @onclick="ConfirmDelete">@L["YearcardList.ConfirmDelete"]</button>
+            <button class="btn btn-secondary" @onclick="CancelDelete">@L["Common.Cancel"]</button>
         </div>
     </div>
 }

@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
@@ -124,26 +125,87 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
     {
         _logger.LogInformation("Checking for expired yearcards eligible for discount reminders...");
 
+        var rules = GetDiscountNotificationRules(_settings.Current);
+        if (!rules.Any())
+        {
+            _logger.LogInformation("No discount notification rules are configured.");
+            return;
+        }
+
         using var scope = _scopeFactory.CreateScope();
 
         var yearcardRepo = scope.ServiceProvider.GetRequiredService<IYearcardRepo>();
         var cards = yearcards?.ToList() ?? await yearcardRepo.GetYearcards();
+        var now = DateTime.Now;
 
-        var usersToWarn = cards
+        var reminders = cards
             .Where(yearcard => yearcard.User != null && IsExpiredButEligibleForDiscount(yearcard, _settings.Current.DiscountGracePeriodInDays))
-            .Select(yearcard => yearcard.User!)
-            .DistinctBy(user => user.Id)
+            .SelectMany(yearcard => GetReminderTemplates(yearcard, rules, now))
+            .DistinctBy(x => (x.User.Id, x.TemplateName))
             .ToList();
 
-        if (!usersToWarn.Any())
+        if (!reminders.Any())
         {
-            _logger.LogInformation("No users were eligible for a discount reminder.");
+            _logger.LogInformation("No users were eligible for a discount reminder today.");
             return;
         }
 
-        foreach (var user in usersToWarn)
+        foreach (var reminder in reminders)
         {
-            await SendDiscountReminderAsync(user, _transactionalMailService);
+            await SendDiscountReminderAsync(reminder.User, reminder.TemplateName, _transactionalMailService);
+        }
+    }
+
+    private IReadOnlyList<DiscountNotificationRule> GetDiscountNotificationRules(AppSettings settings)
+    {
+        if (string.IsNullOrWhiteSpace(settings.DiscountNotificationRules))
+        {
+            return Array.Empty<DiscountNotificationRule>();
+        }
+
+        try
+        {
+            var rules = JsonSerializer.Deserialize<List<DiscountNotificationRule>>(settings.DiscountNotificationRules,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+                ?? new List<DiscountNotificationRule>();
+
+            return rules
+                .Where(rule => rule.DaysBeforeDiscountPeriodExpires >= 0 && !string.IsNullOrWhiteSpace(rule.TemplateName))
+                .Select(rule => rule with { TemplateName = rule.TemplateName!.Trim() })
+                .ToList();
+        }
+        catch (JsonException ex)
+        {
+            _logger.LogWarning(ex, "Unable to parse DiscountNotificationRules JSON. No discount reminders will be sent.");
+            return Array.Empty<DiscountNotificationRule>();
+        }
+    }
+
+    private IEnumerable<(ApplicationUser User, string TemplateName)> GetReminderTemplates(
+        Yearcard yearcard,
+        IReadOnlyList<DiscountNotificationRule> rules,
+        DateTime now)
+    {
+        var latestExpiredEndDate = yearcard.ValidityIntervals
+            .Where(interval => interval.EndDate.Value < now)
+            .Select(interval => interval.EndDate.Value)
+            .OrderByDescending(endDate => endDate)
+            .FirstOrDefault();
+
+        if (latestExpiredEndDate == default)
+        {
+            yield break;
+        }
+
+        var expiryDate = latestExpiredEndDate.AddDays(_settings.Current.DiscountGracePeriodInDays).Date;
+        var daysUntilExpiry = (expiryDate - now.Date).Days;
+
+        foreach (var rule in rules)
+        {
+            if (rule.DaysBeforeDiscountPeriodExpires == daysUntilExpiry)
+            {
+                yield return (yearcard.User!, rule.TemplateName);
+            }
         }
     }
 
@@ -161,14 +223,13 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
             .Any(interval => interval.EndDate.Value.AddDays(discountGracePeriodDays) >= DateTime.Now);
     }
 
-    private async Task SendDiscountReminderAsync(ApplicationUser user, ITransactionalMailService mailService)
+    private async Task SendDiscountReminderAsync(ApplicationUser user, string templateName, ITransactionalMailService mailService)
     {
         if (user == null || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrEmpty(_settings.Current.SenderDomain))
         {
             return;
         }
 
-        var templateName = _settings.Current.DiscountMailTemplate;
         if (string.IsNullOrWhiteSpace(templateName))
         {
             _logger.LogWarning("Discount mail template is not configured, so no reminder email is sent for user {UserId}.", user.Id);
@@ -186,8 +247,9 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
             await mailService.SendTemplateEmailAsync(
                 templateName,
                 user.Email,
-                $"no-reply@{_settings.Current.SenderDomain}", //TODO Set Settings Domain
-                variables
+                $"no-reply@{_settings.Current.SenderDomain}",
+                variables,
+                string.Empty
             );
 
             _logger.LogInformation("Sent discount reminder email to user {UserId}.", user.Id);

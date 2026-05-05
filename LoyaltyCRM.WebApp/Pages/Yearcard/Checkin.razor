@@ -9,25 +9,25 @@
 
 <div class="wrapper d-flex flex-column align-items-center justify-content-center vh-80">
     <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
-        <h3 class="mb-4 text-center">@L["Check Yearcard Validity"]</h3>
-        <h8 class="mb-4 text-center">@L["Fill out one of the fields"]</h8>
+        <h3 class="mb-4 text-center">@L["Checkin.Title"]</h3>
+        <h8 class="mb-4 text-center">@L["Checkin.FillOutOneField"]</h8>
 
         <EditForm Model="@PhoneNumber" OnValidSubmit="CheckYearcard">
             <DataAnnotationsValidator />
             <ValidationSummary />
             <div class="mb-3 text-center">
-                <label for="phoneNumber" class="form-label mb-2">@L["Phone Number:"]</label>
+                <label for="phoneNumber" class="form-label mb-2">@L["Checkin.PhoneNumber"]</label>
                 <PhoneNumberInput @bind-Value="PhoneNumber.Phone" InputId="phoneNumber" />
             </div>
             <div class="mb-3 text-center">
-                <label for="email" class="form-label mb-2">@L["Email:"]</label>
+                <label for="email" class="form-label mb-2">@L["Checkin.Email"]</label>
                 <input type="text" id="email" @bind="Email.Email" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
             </div>
-            <div class="mb-3 text-center">
-                <label for="username" class="form-label mb-2">@L["Username:"]</label>
+            @* <div class="mb-3 text-center">
+                <label for="username" class="form-label mb-2">@L["Checkin.Username"]</label>
                 <input type="text" id="username" @bind="UserName.UserName" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
-            </div>
-            <button class="btn btn-primary w-100 mt-2" type="submit">@L["Check In"]</button>
+            </div> *@
+            <button class="btn btn-primary w-100 mt-2" type="submit">@L["Checkin.CheckInButton"]</button>
         </EditForm>
 
         <div style="height: 56px; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; flex-direction: column;">
@@ -82,20 +82,20 @@
             // Display message based on API result
             if (CheckInResponse.IsValid)
             {
-                ResultMessage = L["Card with"] +  $" {LastChecked} " + L["is valid!"];
+                ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Valid"];
                 ResultClass = "alert-success";
             }
             else
             {
-                ResultMessage = L["Card with"] +  $" {LastChecked} " + L["is invalid!"];
+                ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Invalid"];
                 ResultClass = "alert-danger";
             }
 
             if(CheckInResponse.IsValidForDiscount && CheckInResponse.IsValid){
-                ResultMessage += Environment.NewLine + L["And is valid for renewal discount!"];
+                ResultMessage += Environment.NewLine + L["Checkin.AndValidForDiscount"];
             }
             else if(CheckInResponse.IsValidForDiscount && !CheckInResponse.IsValid){
-                ResultMessage += Environment.NewLine + L["BUT is valid for renewal discount!"];
+                ResultMessage += Environment.NewLine + L["Checkin.ButValidForDiscount"];
             }
         }
         catch(Exception ex){

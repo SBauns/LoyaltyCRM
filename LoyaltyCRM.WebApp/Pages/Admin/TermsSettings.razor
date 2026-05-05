@@ -9,25 +9,25 @@
 @inject AuthService AuthService
 @inject IStringLocalizer<Resources> L
 
-<h4 class="text-center mb-3">@L["Terms setting"]</h4>
+<h4 class="text-center mb-3">@L["TermsSettings.Title"]</h4>
 
 <div class="mb-3 d-flex gap-2 justify-content-center">
     <button class="btn btn-sm @(BoldActive ? "btn-primary" : "btn-outline-secondary")"
             @onclick="ExecBold">
-        @L["Bold"]
+        @L["TermsEditor.Bold"]
     </button>
 
     <button class="btn btn-sm @(BulletsActive ? "btn-primary" : "btn-outline-secondary")"
             @onclick="ExecBullets">
-        @L["Bullets"]
+        @L["TermsEditor.Bullets"]
     </button>
 
     <button class="btn btn-sm btn-primary" @onclick="SaveTermsToServer">
-        @L["Save"]
+        @L["TermsEditor.Save"]
     </button>
 
     <button class="btn btn-sm btn-outline-danger" @onclick="ClearTerms">
-        @L["Clear"]
+        @L["TermsEditor.Clear"]
     </button>
 </div>
 
@@ -99,7 +99,7 @@
             if (string.IsNullOrWhiteSpace(content))
             {
                 editorSuccess = false;
-                editorMessage = L["Cannot save empty terms."];
+                editorMessage = L["TermsEditor.CannotSaveEmpty"];
                 return;
             }
 
@@ -121,7 +121,7 @@
             if (resp.IsSuccessStatusCode)
             {
                 editorSuccess = true;
-                editorMessage = L["Saved terms to server."];
+                editorMessage = L["TermsEditor.SavedSuccessfully"];
             }
             else
             {
@@ -132,7 +132,7 @@
         catch (Exception ex)
         {
             editorSuccess = false;
-            editorMessage = L["Save error:"] + $" {ex.Message}";
+            editorMessage = L["TermsEditor.SaveError"] + $" {ex.Message}";
         }
     }
 
@@ -141,7 +141,7 @@
         await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", string.Empty);
 
         editorSuccess = true;
-        editorMessage = L["Terms cleared."];
+        editorMessage = L["TermsEditor.TermsCleared"];
     }
 
         private async Task ExecBold()

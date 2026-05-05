@@ -34,7 +34,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
             var result = await _sut.CheckInWithYearcards(yearcard.Id!.Value);
 
             // Assert
-            Assert.True(result);
+            Assert.True(result.IsValid);
         }
 
         [Fact]
@@ -59,7 +59,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
             var result = await _sut.CheckInWithYearcards(yearcard.Id!.Value);
 
             // Assert
-            Assert.False(result);
+            Assert.False(result.IsValid);
         }
 
         [Fact]
@@ -84,7 +84,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
             var result = await _sut.CheckInWithPhone(new PhoneNumber("+45-12345678"));
 
             // Assert
-            Assert.True(result);
+            Assert.True(result.IsValid);
         }
 
             [Fact]
@@ -109,7 +109,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
             var result = await _sut.CheckInWithPhone(new PhoneNumber("+45-12345678"));
 
             // Assert
-            Assert.False(result);
+            Assert.False(result.IsValid);
         }
 
         [Fact]

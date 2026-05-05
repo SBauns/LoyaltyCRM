@@ -1,180 +1,159 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <root>
-  <data name="Create Yearcard" xml:space="preserve">
-    <value>Create Yearcard</value>
-  </data>
-  <data name="Card ID" xml:space="preserve">
-    <value>Card ID</value>
-  </data>
-  <data name="Phone" xml:space="preserve">
-    <value>Phone</value>
-  </data>
-  <data name="CardId" xml:space="preserve">
-    <value>CardId</value>
-  </data>
-  <data name="Check Yearcard Validity" xml:space="preserve">
-    <value>Check Yearcard Validity</value>
-  </data>
-  <data name="Page" xml:space="preserve">
-    <value>Page</value>
-  </data>
-  <data name="Confirm Delete" xml:space="preserve">
-    <value>Confirm Delete</value>
-  </data>
-  <data name="of" xml:space="preserve">
-    <value>of</value>
-  </data>
-  <data name="Actions" xml:space="preserve">
-    <value>Actions</value>
-  </data>
-  <data name="Valid Until" xml:space="preserve">
-    <value>Valid Until</value>
-  </data>
-  <data name="Waiting Yearcards" xml:space="preserve">
-    <value>Waiting Yearcards</value>
-  </data>
-  <data name="Logout" xml:space="preserve">
-    <value>Logout</value>
-  </data>
-  <data name="Update Yearcard" xml:space="preserve">
-    <value>Update Yearcard</value>
-  </data>
-  <data name="Rows per page:" xml:space="preserve">
-    <value>Rows per page:</value>
-  </data>
-  <data name="Cancel" xml:space="preserve">
-    <value>Cancel</value>
-  </data>
-  <data name="Phone:" xml:space="preserve">
-    <value>Phone:</value>
-  </data>
-  <data name="Discount Eligibility" xml:space="preserve">
-    <value>Discount Eligibility</value>
-  </data>
-  <data name="Search:" xml:space="preserve">
-    <value>Search:</value>
-  </data>
-  <data name="Check-in Yearcard" xml:space="preserve">
-    <value>Check-in Yearcard</value>
-  </data>
-  <data name="Login" xml:space="preserve">
-    <value>Login</value>
-  </data>
-  <data name="Loading..." xml:space="preserve">
-    <value>Loading...</value>
-  </data>
-  <data name="Reject" xml:space="preserve">
-    <value>Reject</value>
-  </data>
-  <data name="Edit" xml:space="preserve">
-    <value>Edit</value>
-  </data>
-  <data name="Email" xml:space="preserve">
-    <value>Email</value>
-  </data>
-  <data name="Phone Number:" xml:space="preserve">
-    <value>Phone Number:</value>
-  </data>
-  <data name="Are you sure you want to delete this yearcard?" xml:space="preserve">
-    <value>Are you sure you want to delete this yearcard?</value>
-  </data>
-  <data name="Check In" xml:space="preserve">
-    <value>Check In</value>
-  </data>
-  <data name="Create Another?" xml:space="preserve">
-    <value>Create Another?</value>
-  </data>
-  <data name="Password:" xml:space="preserve">
-    <value>Password:</value>
-  </data>
-  <data name="Email:" xml:space="preserve">
-    <value>Email:</value>
-  </data>
-  <data name="Valid for Discount:" xml:space="preserve">
-    <value>Valid for Discount:</value>
-  </data>
-  <data name="Papa Homepage" xml:space="preserve">
-    <value>Papa Homepage</value>
-  </data>
-  <data name="Confirm" xml:space="preserve">
-    <value>Confirm</value>
-  </data>
-  <data name="Next" xml:space="preserve">
-    <value>Next</value>
-  </data>
-  <data name="Delete" xml:space="preserve">
-    <value>Delete</value>
-  </data>
-  <data name="Yes, Delete" xml:space="preserve">
-    <value>Yes, Delete</value>
-  </data>
-  <data name="Yearcard Details" xml:space="preserve">
-    <value>Yearcard Details</value>
-  </data>
-  <data name="No" xml:space="preserve">
-    <value>No</value>
-  </data>
-  <data name="Previous" xml:space="preserve">
-    <value>Previous</value>
-  </data>
-  <data name="Card ID:" xml:space="preserve">
-    <value>Card ID:</value>
-  </data>
-  <data name="I Accept the Terms and Agreement" xml:space="preserve">
-    <value>I Accept the Terms and Agreement</value>
-  </data>
-  <data name="Valid To:" xml:space="preserve">
-    <value>Valid To:</value>
-  </data>
-  <data name="Unconfirmed Yearcards" xml:space="preserve">
-    <value>Unconfirmed Yearcards</value>
-  </data>
-  <data name="Yes" xml:space="preserve">
-    <value>Yes</value>
-  </data>
-  <data name="Yearcards" xml:space="preserve">
-    <value>Yearcards</value>
-  </data>
-  <data name="Card ID, Phone, Email..." xml:space="preserve">
-    <value>Card ID, Phone, Email...</value>
-  </data>
-  <data name="Terms Editor" xml:space="preserve">
-    <value>Terms Editor</value>
-  </data>
-  <data name="Bold" xml:space="preserve">
-    <value>Bold</value>
-  </data>
-  <data name="Bullets" xml:space="preserve">
-    <value>Bullets</value>
-  </data>
-  <data name="Save" xml:space="preserve">
-    <value>Save</value>
-  </data>
-  <data name="Clear" xml:space="preserve">
-    <value>Clear</value>
-  </data>
-  <data name="Cannot save empty terms." xml:space="preserve">
-    <value>Cannot save empty terms.</value>
-  </data>
-  <data name="Saved terms to server." xml:space="preserve">
-    <value>Saved terms to server.</value>
-  </data>
-  <data name="Save failed:" xml:space="preserve">
-    <value>Save failed:</value>
-  </data>
-  <data name="Save error:" xml:space="preserve">
-    <value>Save error:</value>
-  </data>
-  <data name="Terms cleared." xml:space="preserve">
-    <value>Terms cleared.</value>
-  </data>
-  <data name="Terms and Agreement" xml:space="preserve">
-    <value>Terms and Agreement</value>
-  </data>
-  <data name="Close" xml:space="preserve">
-    <value>Close</value>
-  </data>
-  <data name="Terms are not available. Please contact an administrator." xml:space="preserve">
-    <value>Terms are not available. Please contact an administrator.</value>
-  </data>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+
+  <!-- New codes -->
+  <data name="AppSettings.Title"><value>App settings</value></data>
+  <data name="AppSettings.SavedSuccessfully"><value>App settings saved successfully.</value></data>
+  <data name="AppSettings.Description"><value>Configure app settings using numeric values or a time value where appropriate. These are validated before saving.</value></data>
+  <data name="AppSettings.SaveButton"><value>Save App Settings</value></data>
+  <data name="AppSettings.SaveFailed"><value>Save failed:</value></data>
+  <data name="AppSettings.UnableToLoad"><value>Unable to load app settings:</value></data>
+  <data name="AppSettings.YearcardLength"><value>Length of yearcard (days)</value></data>
+  <data name="AppSettings.DiscountGracePeriod"><value>Discount grace period (days)</value></data>
+  <data name="AppSettings.DeleteInvalidYearcardDays"><value>Delete invalid yearcard after (days)</value></data>
+  <data name="AppSettings.TimeToDeleteCards"><value>Time of Day to Delete Invalid Yearcards</value></data>
+  <data name="AppSettings.DiscountNotificationRules"><value>Discount notification rules</value></data>
+  <data name="AppSettings.MailchimpApiKey"><value>Mailchimp Api Key</value></data>
+  <data name="AppSettings.MailchimpServerPrefix"><value>Mailchimp Server Prefix</value></data>
+  <data name="AppSettings.MailchimpAudienceId"><value>Mailchimp Audience Id</value></data>
+  <data name="AppSettings.MandrillApiKey"><value>Mandrill Api Key</value></data>
+  <data name="AppSettings.Domain"><value>Domain</value></data>
+  <data name="AppSettings.NotificationCount"><value>Notification count</value></data>
+  <data name="AppSettings.DiscountRuleDescription"><value>Add at least one discount notification rule to send reminders on a specific number of days before the discount period expires.</value></data>
+  <data name="AppSettings.DaysBeforeExpiry"><value>Days before discount period expires</value></data>
+  <data name="AppSettings.TemplateName"><value>Template name</value></data>
+  <data name="AppSettings.Remove"><value>Remove</value></data>
+  <data name="AppSettings.AddRule"><value>Add rule</value></data>
+  <data name="Yearcard.AddInterval"><value>Add Interval</value></data>
+  <data name="Navigation.Administration"><value>Administration</value></data>
+  <data name="Common.ErrorOccurred"><value>An error occurred:</value></data>
+  <data name="Checkin.ValidForDiscountWarning"><value>And is valid for renewal discount!</value></data>
+  <data name="YearcardList.ConfirmDeleteMessage"><value>Are you sure you want to delete this yearcard?</value></data>
+  <data name="TermsSettings.Bold"><value>Bold</value></data>
+  <data name="TermsSettings.Bullets"><value>Bullets</value></data>
+  <data name="Checkin.ValidForDiscountAlternative"><value>BUT is valid for renewal discount!</value></data>
+  <data name="Common.Cancel"><value>Cancel</value></data>
+  <data name="Yearcard.ValidTo"><value>Valid To</value></data>
+  <data name="YearcardList.SearchPlaceholder"><value>Card ID, Phone, Name...</value></data>
+  <data name="Yearcard.CardIdLabel"><value>Card ID:</value></data>
+  <data name="Checkin.CardWith"><value>Card with</value></data>
+  <data name="YearcardEdit.CardIdField"><value>CardId</value></data>
+  <data name="Navigation.CheckinYearcard"><value>Check-in Yearcard</value></data>
+  <data name="Checkin.CheckInButton"><value>Check In</value></data>
+  <data name="Checkin.Title"><value>Check Yearcard Validity</value></data>
+  <data name="Common.Close"><value>Close</value></data>
+  <data name="YearcardList.ConfirmDeleteTitle"><value>Confirm Delete</value></data>
+  <data name="Navigation.CreateYearcard"><value>Create Yearcard</value></data>
+  <data name="Yearcard.CreateTitle"><value>Create Yearcard</value></data>
+  <data name="YearcardList.Delete"><value>Delete</value></data>
+  <data name="YearcardList.DiscountEligibility"><value>Discount Eligibility</value></data>
+  <data name="YearcardList.Edit"><value>Edit</value></data>
+  <data name="Yearcard.Email"><value>Email</value></data>
+  <data name="Checkin.Email"><value>Email:</value></data>
+  <data name="Yearcard.EmailLabel"><value>Email:</value></data>
+  <data name="Checkin.FillOutOneField"><value>Fill out one of the fields</value></data>
+  <data name="YearcardEdit.FirstName"><value>First Name</value></data>
+  <data name="YearcardEdit.AddInterval"><value>Add Interval</value></data>
+  <data name="Yearcard.GiftStartDate"><value>From whence shall this card be active from?</value></data>
+  <data name="Yearcard.FullNameLabel"><value>Full Name:</value></data>
+  <data name="Yearcard.AcceptTerms"><value>I Accept the Terms and Agreement</value></data>
+  <data name="Checkin.Invalid"><value>is invalid!</value></data>
+  <data name="Checkin.Valid"><value>is valid!</value></data>
+  <data name="Yearcard.IsGiftCheckbox"><value>It is a gift</value></data>
+  <data name="YearcardList.LastUpdated"><value>Last Updated</value></data>
+  <data name="Common.Loading"><value>Loading...</value></data>
+  <data name="Navigation.Login"><value>Login</value></data>
+  <data name="Login.Title"><value>Login</value></data>
+  <data name="Navigation.Logout"><value>Logout</value></data>
+  <data name="Yearcard.Name"><value>Name</value></data>
+  <data name="Pagination.Next"><value>Next</value></data>
+  <data name="Common.No"><value>No</value></data>
+  <data name="Pagination.Of"><value>of</value></data>
+  <data name="Pagination.Page"><value>Page</value></data>
+  <data name="Login.Password"><value>Password:</value></data>
+  <data name="Yearcard.Phone"><value>Phone</value></data>
+  <data name="Yearcard.PhoneLabel"><value>Phone:</value></data>
+  <data name="Checkin.PhoneNumber"><value>Phone Number:</value></data>
+  <data name="Yearcard.ReturnTablet"><value>Please return the tablet to the bartender</value></data>
+  <data name="Pagination.Previous"><value>Previous</value></data>
+  <data name="YearcardList.RowsPerPage"><value>Rows per page:</value></data>
+  <data name="Common.Save"><value>Save</value></data>
+  <data name="YearcardList.Search"><value>Search:</value></data>
+  <data name="Yearcard.TermsTitle"><value>Terms and Agreement</value></data>
+  <data name="YearcardEdit.UpdateButton"><value>Update Yearcard</value></data>
+  <data name="YearcardEdit.UserName"><value>User Name</value></data>
+  <data name="Yearcard.Username"><value>Username</value></data>
+  <data name="Create.UsernameField"><value>Username</value></data>
+  <data name="Login.Username"><value>Username:</value></data>
+  <data name="Checkin.Username"><value>Username:</value></data>
+  <data name="Checkin.AndValidForDiscount"><value>AND is valid for discount:</value></data>
+  <data name="Checkin.ButValidForDiscount"><value>BUT is valid for discount:</value></data>
+  <data name="YearcardList.ValidUntil"><value>Valid Until</value></data>
+  <data name="YearcardEdit.ValidityDates"><value>Validity Dates</value></data>
+  <data name="Navigation.WaitingYearcards"><value>Waiting Yearcards</value></data>
+  <data name="Common.Yes"><value>Yes</value></data>
+  <data name="YearcardList.ConfirmDelete"><value>Yes, Delete</value></data>
+  <data name="Yearcard.CreatedSuccessfully"><value>Yearcard created successfully!</value></data>
+  <data name="YearcardDisplay.Title"><value>Yearcard Details</value></data>
+  <data name="YearcardEdit.UpdatedSuccessfully"><value>Yearcard Updated successfully!</value></data>
+  <data name="Navigation.Yearcards"><value>Yearcards</value></data>
+  <data name="YearcardList.Title"><value>Yearcards</value></data>
+  <data name="Yearcard.Create"><value>Create Yearcard</value></data>
+  <data name="translation.yearcard.already_created"><value>Yearcard already exists. Want to extend?</value></data>
+  <data name="TermsEditor.Title"><value>Terms Editor</value></data>
+  <data name="TermsEditor.Bold"><value>Bold</value></data>
+  <data name="TermsEditor.Bullets"><value>Bullets</value></data>
+  <data name="TermsEditor.Save"><value>Save</value></data>
+  <data name="TermsEditor.Clear"><value>Clear</value></data>
+  <data name="TermsEditor.CannotSaveEmpty"><value>Cannot save empty terms.</value></data>
+  <data name="TermsEditor.SavedSuccessfully"><value>Saved terms to server.</value></data>
+  <data name="TermsEditor.SaveFailed"><value>Save failed:</value></data>
+  <data name="TermsEditor.SaveError"><value>Save error:</value></data>
+  <data name="TermsEditor.TermsCleared"><value>Terms cleared.</value></data>
+  <data name="TermsEditor.TermsAndAgreement"><value>Terms and Agreement</value></data>
+  <data name="TermsEditor.Close"><value>Close</value></data>
+  <data name="TermsEditor.TermsNotAvailable"><value>Terms are not available. Please contact an administrator.</value></data>
+  <data name="AdminLayout.Title"><value>Admin Panel</value></data>
+  <data name="Navigation.PasswordSettings"><value>Password settings</value></data>
+  <data name="Navigation.TermsSettings"><value>Terms setting</value></data>
+  <data name="Navigation.AppSettings"><value>App settings</value></data>
+  <data name="Navigation.ImportUsers"><value>Import users</value></data>
+  <data name="ImportUsers.Title"><value>Import users</value></data>
+  <data name="ImportUsers.Description"><value>Upload a CSV or Excel file and map its first row to the correct yearcard fields.</value></data>
+  <data name="ImportUsers.File"><value>File</value></data>
+  <data name="ImportUsers.PreviewHeaders"><value>Preview headers</value></data>
+  <data name="ImportUsers.ImportButton"><value>Import file</value></data>
+  <data name="ImportUsers.FoundHeaders"><value>Found Headers</value></data>
+  <data name="ImportUsers.SelectHeader"><value>Select a header</value></data>
+  <data name="ImportUsers.StartDate"><value>Start Date</value></data>
+  <data name="ImportUsers.SelectFileBeforePreview"><value>Select a file before previewing.</value></data>
+  <data name="ImportUsers.UnableToReadHeaders"><value>Unable to read file headers:</value></data>
+  <data name="ImportUsers.SelectFileBeforeImport"><value>Select a file before importing.</value></data>
+  <data name="ImportUsers.ImportFailed"><value>Import failed:</value></data>
+  <data name="AdminIndex.SelectSection"><value>Select a section</value></data>
+  <data name="PasswordSettings.Title"><value>Password settings</value></data>
+  <data name="PasswordSettings.Admin"><value>Admin</value></data>
+  <data name="PasswordSettings.AdminUsername"><value>Admin Username:</value></data>
+  <data name="PasswordSettings.CurrentPassword"><value>Current Password:</value></data>
+  <data name="PasswordSettings.NewPassword"><value>New Password:</value></data>
+  <data name="PasswordSettings.ChangePassword"><value>Change Password</value></data>
+  <data name="PasswordSettings.ChangedSuccessfully"><value>Password changed successfully!</value></data>
+  <data name="PasswordSettings.Bartender"><value>Bartender</value></data>
+  <data name="PasswordSettings.BartenderUsername"><value>Bartender Username:</value></data>
+  <data name="TermsSettings.Title"><value>Terms setting</value></data>
+  <data name="Fullscreen.Enter"><value>Enter Fullscreen</value></data>
+  <data name="Fullscreen.Exit"><value>Exit Fullscreen</value></data>
+
 </root>

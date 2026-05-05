@@ -19,7 +19,7 @@
         {                
             <div class="nav-item px-3">
                 <NavLink class="nav-link nav-icon" href="yearcard/create" Match="NavLinkMatch.All">
-                    <img src="icons/pen.svg" alt="Create Yearcard"> @L["Create Yearcard"]
+                    <img src="icons/pen.svg" alt="Create Yearcard"> @L["Navigation.CreateYearcard"]
                 </NavLink>
             </div>
             @if (AuthService._role == AuthService.Role.Papa || AuthService._role == AuthService.Role.Bartender)
@@ -31,7 +31,7 @@
             </div> *@
             <div class="nav-item px-3">
                 <NavLink class="nav-link nav-icon" href="yearcard/checkin" Match="NavLinkMatch.All">
-                     <img src="icons/eye.svg" alt="Check-In Yearcard"> @L["Check-in Yearcard"]
+                     <img src="icons/eye.svg" alt="Check-In Yearcard"> @L["Navigation.CheckinYearcard"]
                 </NavLink>
             </div>
             }
@@ -39,12 +39,12 @@
                 {            
             <div class="nav-item px-3">
                 <NavLink class="nav-link nav-icon" href="yearcard/getall">
-                     <img src="icons/card.svg" alt="Yearcards"> @L["Yearcards"]
+                     <img src="icons/card.svg" alt="Yearcards"> @L["Navigation.Yearcards"]
                 </NavLink>
             </div>
             <div class="nav-item px-3">
                 <NavLink class="nav-link nav-icon" href="admin/password">
-                     <img src="icons/admin.svg" alt="admin"> @L["Administration"]
+                     <img src="icons/admin.svg" alt="admin"> @L["Navigation.Administration"]
                 </NavLink>
             </div>
             }
@@ -52,7 +52,7 @@
         else{
         <div class="nav-item px-3">
             <NavLink href="login" class="nav-link nav-icon" Match="NavLinkMatch.All">
-                 <img src="icons/dice-six.svg" alt="Login"> @L["Login"]
+                 <img src="icons/dice-six.svg" alt="Login"> @L["Navigation.Login"]
             </NavLink>
         </div>
         }
@@ -60,7 +60,7 @@
         { 
         <div @onclick="Logout" class="nav-item px-3">
             <NavLink href="" class="nav-link nav-icon" Match="NavLinkMatch.All">
-                 <img src="icons/dice-one.svg" alt="Logout"> @L["Logout"]
+                 <img src="icons/dice-one.svg" alt="Logout"> @L["Navigation.Logout"]
             </NavLink>
         </div>
         }

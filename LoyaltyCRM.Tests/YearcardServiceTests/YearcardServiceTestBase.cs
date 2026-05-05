@@ -19,6 +19,7 @@ public abstract class YearcardServiceTestBase : IDisposable
     protected readonly Mock<ITransactionService> _transactionMock;
 
     protected readonly Mock<IAppSettingsProvider> _settingsMock;
+    protected readonly Mock<IAudienceSyncService> _audienceSyncMock;
 
     protected readonly YearcardService _sut;
 
@@ -38,6 +39,7 @@ public abstract class YearcardServiceTestBase : IDisposable
         _settingsMock
             .Setup(s => s.Current)
             .Returns(new AppSettings());
+        _audienceSyncMock = new Mock<IAudienceSyncService>();
 
         MapsterConfig.RegisterMappings();
 
@@ -47,7 +49,8 @@ public abstract class YearcardServiceTestBase : IDisposable
             _userManagerMock.Object,
             _loggerMock.Object,
             _transactionMock.Object,
-            _settingsMock.Object
+            _settingsMock.Object,
+            _audienceSyncMock.Object
         );
     }
 
