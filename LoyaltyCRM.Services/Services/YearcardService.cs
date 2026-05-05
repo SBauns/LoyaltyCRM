@@ -5,6 +5,7 @@ using FuzzySharp;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Exceptions;
 using LoyaltyCRM.Domain.Models;
+using LoyaltyCRM.DTOs.Enums;
 using LoyaltyCRM.DTOs.Requests.Checkin;
 using LoyaltyCRM.DTOs.Requests.Yearcard;
 using LoyaltyCRM.Infrastructure.Context;
@@ -406,10 +407,17 @@ namespace LoyaltyCRM.Services.Services
                 throw new ArgumentException("yearcard.not_found");
             }
             yearcard.SetIsYearcardValidForDiscount(_appSettingsProvider.Current.DiscountGracePeriodInDays);
+
+            IsValidForDiscount isValidForDiscount = IsValidForDiscount.NotApplicable;
+
+            if (_appSettingsProvider.Current.IsDiscountActive)
+            {
+                isValidForDiscount = yearcard.IsValidForDiscount ? IsValidForDiscount.IsValid : IsValidForDiscount.NotValid;
+            }
             return new CheckInResponse()
             {
                 IsValid = ConfirmValidityOfYearcard(yearcard),
-                IsValidForDiscount = yearcard.IsValidForDiscount
+                IsValidForDiscount = isValidForDiscount
             };
         }
 

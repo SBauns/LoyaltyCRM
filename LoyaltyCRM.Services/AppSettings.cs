@@ -4,6 +4,7 @@ namespace LoyaltyCRM.Services
     {
         public int LengthOfYearcardInDays { get; set; } = 365;
         public int DiscountGracePeriodInDays { get; set; } = 90;
+        public bool IsDiscountActive { get; set; } = false;
         public int TimeBeforeDeleteInvalidYearcard { get; set; } = 90;
         public TimeOnly TimeToCleanUpCards { get; set; } = new TimeOnly(2, 0);
         public string MailChimpApiKey { get; set; } = string.Empty;

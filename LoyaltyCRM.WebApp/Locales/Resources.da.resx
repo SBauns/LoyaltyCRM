@@ -23,6 +23,9 @@
   <data name="AppSettings.UnableToLoad"><value>Kan ikke indlæse app-indstillinger:</value></data>
   <data name="AppSettings.YearcardLength"><value>Længde af årskort (dage)</value></data>
   <data name="AppSettings.DiscountGracePeriod"><value>Rabat nådeperiode (dage)</value></data>
+  <data name="AppSettings.IsDiscountActive"><value>Aktiver Discount</value></data>
+  <data name="AppSettings.Enabled"><value>Aktiveret</value></data>
+  <data name="AppSettings.Disabled"><value>Deaktiveret</value></data>
   <data name="AppSettings.DeleteInvalidYearcardDays"><value>Slet ugyldigt årskort efter (dage)</value></data>
   <data name="AppSettings.TimeToDeleteCards"><value>Tidspunkt for sletning af ugyldige kort</value></data>
   <data name="AppSettings.DiscountNotificationRules"><value>Rabat notifikationsregler</value></data>

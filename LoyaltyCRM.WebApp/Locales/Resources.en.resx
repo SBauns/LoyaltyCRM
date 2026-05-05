@@ -22,6 +22,9 @@
   <data name="AppSettings.UnableToLoad"><value>Unable to load app settings:</value></data>
   <data name="AppSettings.YearcardLength"><value>Length of yearcard (days)</value></data>
   <data name="AppSettings.DiscountGracePeriod"><value>Discount grace period (days)</value></data>
+  <data name="AppSettings.IsDiscountActive"><value>Activate Discount</value></data>
+  <data name="AppSettings.Enabled"><value>Activated</value></data>
+  <data name="AppSettings.Disabled"><value>Deactivated</value></data>
   <data name="AppSettings.DeleteInvalidYearcardDays"><value>Delete invalid yearcard after (days)</value></data>
   <data name="AppSettings.TimeToDeleteCards"><value>Time of Day to Delete Invalid Yearcards</value></data>
   <data name="AppSettings.DiscountNotificationRules"><value>Discount notification rules</value></data>
