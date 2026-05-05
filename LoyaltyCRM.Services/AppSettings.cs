@@ -4,7 +4,6 @@ namespace LoyaltyCRM.Services
     {
         public int LengthOfYearcardInDays { get; set; } = 365;
         public int DiscountGracePeriodInDays { get; set; } = 90;
-        public string DiscountMailTemplate { get; set; } = string.Empty;
         public int TimeBeforeDeleteInvalidYearcard { get; set; } = 90;
         public TimeOnly TimeToCleanUpCards { get; set; } = new TimeOnly(2, 0);
         public string MailChimpApiKey { get; set; } = string.Empty;
@@ -12,5 +11,6 @@ namespace LoyaltyCRM.Services
         public string MailChimpServerPrefix { get; set; } = string.Empty;
         public string MailChimpListId { get; set; } = string.Empty;
         public string MandrillApiKey { get; set; } = string.Empty;
+        public string DiscountNotificationRules { get; set; } = "[]";
     }
 }

@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 public class AudienceSyncService : IAudienceSyncService
 {
     private readonly HttpClient _httpClient;
-    private readonly string _listId;
+    private readonly string _listId = "";
 
     private readonly bool canSend = true;
 
@@ -19,6 +19,12 @@ public class AudienceSyncService : IAudienceSyncService
 
         var apiKey = config.Current.MailChimpApiKey;
         var serverPrefix = config.Current.MailChimpServerPrefix;
+
+        if(string.IsNullOrWhiteSpace(apiKey) || string.IsNullOrWhiteSpace(serverPrefix) || string.IsNullOrWhiteSpace(_listId))
+        {
+            canSend = false;
+            return;
+        }
 
         _listId = config.Current.MailChimpListId
             ?? throw new ArgumentNullException("ListId missing");
@@ -32,8 +38,6 @@ public class AudienceSyncService : IAudienceSyncService
         _httpClient.DefaultRequestHeaders.Authorization =
             new System.Net.Http.Headers.AuthenticationHeaderValue("Basic", auth);
 
-        if(string.IsNullOrEmpty(apiKey) && string.IsNullOrEmpty(serverPrefix) && string.IsNullOrEmpty(_listId))
-            canSend = false;
     }
 
     // 🔹 CREATE / UPDATE USER

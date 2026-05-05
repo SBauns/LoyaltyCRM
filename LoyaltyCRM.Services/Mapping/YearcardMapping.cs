@@ -19,8 +19,8 @@ namespace LoyaltyCRM.Api.Mapping
                 .Map(dest => dest.User, src => src.Adapt<ApplicationUser>());
 
             config.NewConfig<YearcardCreateRequest, ApplicationUser>()
-                .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.Email, src => new Email(src.Email).Value)
+                .Map(dest => dest.PhoneNumber, src => new PhoneNumber(src.PhoneNumber).Value )
                 .Map(dest => dest.UserName, src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name);
 
             config.NewConfig<Yearcard, YearcardCreateResponse>()
@@ -72,8 +72,8 @@ namespace LoyaltyCRM.Api.Mapping
                 .Ignore(dest => dest.UpdatedAt);
 
             config.NewConfig<YearcardUpdateRequest, ApplicationUser>()
-                .Map(dest => dest.Email, src => src.Email)
-                .Map(dest => dest.PhoneNumber, src => src.PhoneNumber)
+                .Map(dest => dest.Email, src => new Email(src.Email).Value)
+                .Map(dest => dest.PhoneNumber, src => new PhoneNumber(src.PhoneNumber).Value)
                 .Map(dest => dest.UserName, src => src.UserName ?? src.Email ?? src.PhoneNumber ?? src.Name);
 
             //VALIDITITY INTERVALS REQUEST AND RESPONSE

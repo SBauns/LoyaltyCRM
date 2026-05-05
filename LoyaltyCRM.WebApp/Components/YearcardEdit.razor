@@ -15,36 +15,36 @@
             <div class="row g-3">
                 <div class="col-12 col-md-6">
                     <div class="mb-3">
-                        <label for="CardId" class="form-label">@L["CardId"]</label>
+                        <label for="CardId" class="form-label">@L["YearcardEdit.CardIdField"]</label>
                         <InputNumber id="CardId" class="form-control" @bind-Value="Yearcard!.CardId" />
                         <ValidationMessage For="@(() => Yearcard.CardId)" />
                     </div>
                     <div class="mb-3">
-                        <label for="Name" class="form-label">@L["First Name"]</label>
+                        <label for="Name" class="form-label">@L["YearcardEdit.FirstName"]</label>
                         <InputText id="Name" class="form-control" @bind-Value="Yearcard.Name" />
                         <ValidationMessage For="@(() => Yearcard.Name)" />
                     </div>
-                    <div class="mb-3">
-                        <label for="UserName" class="form-label">@L["User Name"]</label>
+                    @* <div class="mb-3">
+                        <label for="UserName" class="form-label">@L["YearcardEdit.UserName"]</label>
                         <InputText id="UserName" class="form-control" @bind-Value="Yearcard.UserName" />
                         <ValidationMessage For="@(() => Yearcard.UserName)" />
-                    </div>
+                    </div> *@
                 </div>
                 <div class="col-12 col-md-6">
                     <div class="mb-3">
-                        <label for="Phone" class="form-label">@L["Phone"]</label>
+                        <label for="Phone" class="form-label">@L["Yearcard.Phone"]</label>
                         <PhoneNumberInput @bind-Value="Yearcard.PhoneNumber" InputId="PhoneNumber" />
                         <ValidationMessage For="@(() => Yearcard.PhoneNumber)" />
                     </div>
                     <div class="mb-3">
-                        <label for="Email" class="form-label">@L["Email"]</label>
+                        <label for="Email" class="form-label">@L["Yearcard.Email"]</label>
                         <InputText id="Email" class="form-control" @bind-Value="Yearcard.Email" />
                         <ValidationMessage For="@(() => Yearcard.Email)" />
                     </div>
                 </div>
             </div>
             <div class="mb-3">
-                <label class="form-label">@L["Validity Dates"]</label>
+                <label class="form-label">@L["YearcardEdit.ValidityDates"]</label>
                 <div class="row g-2">
                     @if (Yearcard.ValidityIntervals != null && Yearcard.ValidityIntervals.Count > 0)
                     {
@@ -63,13 +63,13 @@
                         }
                     }
                 </div>
-                <button type="button" class="btn btn-success btn-sm mt-2" @onclick="AddInterval">@L["Add Interval"]</button>
+                <button type="button" class="btn btn-success btn-sm mt-2" @onclick="AddInterval">@L["YearcardEdit.AddInterval"]</button>
             </div>
-            <button type="submit" class="btn btn-primary w-100 mt-3">@L["Update Yearcard"]</button>
+            <button type="submit" class="btn btn-primary w-100 mt-3">@L["YearcardEdit.UpdateButton"]</button>
         </EditForm>
         @if (!string.IsNullOrEmpty(ErrorMessage))
         {
-            <div class="alert alert-danger mt-3 text-center">@L["An error occurred:"] @L[ErrorMessage]</div>
+            <div class="alert alert-danger mt-3 text-center">@L["Common.ErrorOccurred"] @L[ErrorMessage]</div>
         }
         @if (!string.IsNullOrEmpty(Message))
         {
@@ -126,7 +126,7 @@
 
             if (await yearcards.UpdateYearcardAsync(yearcard))
             {
-                Message = "Yearcard Updated successfully!";
+                Message = "YearcardEdit.UpdatedSuccessfully";
             }
             else
             {
@@ -150,7 +150,7 @@
             PhoneNumber = yearcard.PhoneNumber,
             Email = yearcard.Email,
             Name = yearcard.Name,
-            UserName = yearcard.UserName,
+            @* UserName = yearcard.UserName, *@
             ValidityIntervals = yearcard.ValidityIntervals.Select(v => new ValidityIntervalDTO
             {
                 Id = v.Id,
@@ -182,7 +182,7 @@
         yearcard.PhoneNumber = originalYearcard.PhoneNumber;
         yearcard.Email = originalYearcard.Email;
         yearcard.Name = originalYearcard.Name;
-        yearcard.UserName = originalYearcard.UserName;
+        @* yearcard.UserName = originalYearcard.UserName; *@
         yearcard.ValidityIntervals = originalYearcard.ValidityIntervals.Select(v => new ValidityIntervalDTO
         {
             Id = v.Id,

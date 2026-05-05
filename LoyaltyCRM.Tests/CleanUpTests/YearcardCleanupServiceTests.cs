@@ -188,7 +188,8 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
             .Returns(new AppSettings
             {
                 DiscountGracePeriodInDays = 90,
-                DiscountMailTemplate = "expired-discount-template"
+                DiscountNotificationRules = "[{ \"DaysBeforeDiscountPeriodExpires\": 60, \"TemplateName\": \"expired-discount-template\" }]",
+                SenderDomain = "loyaltycrm.com"
             });
 
         var transactionalMailMock = new Mock<ITransactionalMailService>();
@@ -197,8 +198,7 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
                 It.IsAny<string>(),
                 It.IsAny<string>(),
                 It.IsAny<string>(),
-                It.IsAny<Dictionary<string, string>>(),
-                It.IsAny<string>()))
+                It.IsAny<Dictionary<string, string>>()))
             .ReturnsAsync(true);
 
         var audienceSyncMock = new Mock<IAudienceSyncService>();
@@ -250,7 +250,7 @@ public class YearcardCleanupServiceTests : WithInMemoryDatabase
                 user.Email,
                 "no-reply@loyaltycrm.com",
                 It.Is<Dictionary<string, string>>(v => v["DISCOUNT_GRACE_PERIOD_DAYS"] == "90"),
-                It.IsAny<string>()),
+                string.Empty),
             Times.Once);
 
         userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<ApplicationUser>()), Times.Never);

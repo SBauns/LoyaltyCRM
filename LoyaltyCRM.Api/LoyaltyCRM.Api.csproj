@@ -13,6 +13,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Resources\**\*">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\LoyaltyCRM.Services\LoyaltyCRM.Services.csproj" />
     <ProjectReference Include="..\LoyaltyCRM.DTOs\LoyaltyCRM.DTOs.csproj" />
   </ItemGroup>

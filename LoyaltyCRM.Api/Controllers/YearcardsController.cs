@@ -92,13 +92,45 @@ namespace LoyaltyCRM.Api.Controllers
         //CREATE NEW YEARCARD OR REFRESH OLD ONE
         //POST: api/Yearcards
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
+        [HttpPost("create")]
         [Authorize]
         public async Task<ActionResult<YearcardCreateResponse>> PostYearcard(YearcardCreateRequest request)
         {
             try
             {
-                var response = await _yearcardService.CreateOrExtendYearcard(request);
+                var response = await _yearcardService.CreateYearcard(request);
+
+                return CreatedAtAction("PostYearcard", new { id = response.Id }, response);
+            }
+            catch (ArgumentException ex)
+            {
+                // Bad Request for invalid arguments
+                return BadRequest(new { Code = ex.Message });
+            }
+            catch (YearcardAlreadyCreatedException ex)
+            {
+                // Conflict for database-related issues
+                return Conflict(new { Code = ex.Message });
+            }
+            catch (DbUpdateException ex)
+            {
+                // Conflict for database-related issues
+                return Conflict(new { Code = "yearcard.database_error", details = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                // Internal Server Error for any other unhandled exceptions
+                return StatusCode(500, new { Code = "yearcard.unexpected_error", details = ex.Message });
+            }
+        }
+
+        [HttpPost("extend")]
+        [Authorize]
+        public async Task<ActionResult<YearcardCreateResponse>> ExtendYearcard(YearcardCreateRequest request)
+        {
+            try
+            {
+                var response = await _yearcardService.ExtendYearcard(request);
 
                 return CreatedAtAction("PostYearcard", new { id = response.Id }, response);
             }
@@ -117,7 +149,6 @@ namespace LoyaltyCRM.Api.Controllers
                 // Internal Server Error for any other unhandled exceptions
                 return StatusCode(500, new { Code = "yearcard.unexpected_error", details = ex.Message });
             }
-
         }
 
         //DELETE YEARCARD
