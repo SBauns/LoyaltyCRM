@@ -3,6 +3,10 @@ services:
     build:
       context: .
       dockerfile: nginx.Dockerfile
+      args:
+        # Pass the variable here. You can define this in your .env file
+        # or hardcode it per environment in the compose file.
+        API_BASE_URL: ${API_BASE_URL} 
     ports:
       - "80:80"
       - "443:443"
