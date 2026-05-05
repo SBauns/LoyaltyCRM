@@ -77,6 +77,25 @@
                 </button>
             </div>
         }
+        else if (string.Equals(inputType, "boolean", StringComparison.OrdinalIgnoreCase))
+        {
+            var isChecked = setting.Value?.Equals("true", StringComparison.OrdinalIgnoreCase) == true;
+
+            <div class="col-12 col-md-6">
+                <label class="form-label">@L[FormatSettingLabel(setting.Key)]</label>
+
+                <div class="form-check form-switch">
+                    <input type="checkbox"
+                        class="form-check-input"
+                        role="switch"
+                        checked="@isChecked"
+                        @onchange="(ChangeEventArgs eventArgs) => ToggleBooleanSetting(setting, eventArgs)" />
+                    <label class="form-check-label ms-2">
+                        @(isChecked ? L["AppSettings.Enabled"] : L["AppSettings.Disabled"])
+                    </label>
+                </div>
+            </div>
+        }
         else
         {
             <div class="col-12 col-md-6">
@@ -100,6 +119,7 @@
     {
         "LengthOfYearcardInDays",
         "DiscountGracePeriodInDays",
+        "IsDiscountActive",
         "TimeBeforeDeleteInvalidYearcard",
         "TimeToCleanUpCards",
         "DiscountNotificationRules",
@@ -114,6 +134,7 @@
     {
         ["LengthOfYearcardInDays"] = ("AppSettings.YearcardLength", "number"),
         ["DiscountGracePeriodInDays"] = ("AppSettings.DiscountGracePeriod", "number"),
+        ["IsDiscountActive"] = ("AppSettings.IsDiscountActive", "boolean"),
         ["TimeBeforeDeleteInvalidYearcard"] = ("AppSettings.DeleteInvalidYearcardDays", "number"),
         ["TimeToCleanUpCards"] = ("AppSettings.TimeToDeleteCards", "time"),
         ["DiscountNotificationRules"] = ("AppSettings.DiscountNotificationRules", "textarea"),
@@ -291,5 +312,11 @@
         return SettingMetadata.TryGetValue(key, out var metadata)
             ? metadata.Label
             : key;
+    }
+
+    private void ToggleBooleanSetting(SettingDto setting, ChangeEventArgs eventArgs)
+    {
+        setting.Value = (bool)eventArgs.Value ? "true" : "false";
+        StateHasChanged(); // Required to refresh UI after modifying list item
     }
 }

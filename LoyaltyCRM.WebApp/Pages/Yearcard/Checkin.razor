@@ -2,6 +2,7 @@
 @inject YearcardService _yearcardService
 @inject NavigationManager Navigation
 @inject AuthService AuthService
+@using LoyaltyCRM.DTOs.Enums
 @using LoyaltyCRM.DTOs.Requests.Checkin
 @using LoyaltyCRM.WebApp.Components
 @using LoyaltyCRM.WebApp.Locales
@@ -90,13 +91,16 @@
                 ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Invalid"];
                 ResultClass = "alert-danger";
             }
+            
+            if(CheckInResponse.IsValidForDiscount != IsValidForDiscount.NotApplicable){
+                if(CheckInResponse.IsValidForDiscount == IsValidForDiscount.IsValid && CheckInResponse.IsValid){
+                    ResultMessage += Environment.NewLine + L["Checkin.AndValidForDiscount"];
+                }
+                else if(CheckInResponse.IsValidForDiscount == IsValidForDiscount.IsValid && !CheckInResponse.IsValid){
+                    ResultMessage += Environment.NewLine + L["Checkin.ButValidForDiscount"];
+                }
+            }
 
-            if(CheckInResponse.IsValidForDiscount && CheckInResponse.IsValid){
-                ResultMessage += Environment.NewLine + L["Checkin.AndValidForDiscount"];
-            }
-            else if(CheckInResponse.IsValidForDiscount && !CheckInResponse.IsValid){
-                ResultMessage += Environment.NewLine + L["Checkin.ButValidForDiscount"];
-            }
         }
         catch(Exception ex){
             ResultMessage = ex.Message;
