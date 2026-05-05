@@ -1,0 +1,241 @@
+@page "/yearcard/create"
+@inject YearcardService yearcards
+@using System.Net.Http.Json
+@using System.ComponentModel.DataAnnotations
+@using LoyaltyCRM.WebApp.Components
+@using LoyaltyCRM.WebApp.Locales
+@using System.Net
+@inject IStringLocalizer<Resources> L
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@inject IJSRuntime JS
+@inject System.Net.Http.HttpClient Http
+
+<div class="wrapper d-flex flex-column align-items-center justify-content-center vh-80">
+    <div class="card shadow-sm p-4 w-100" style="max-width: 600px;">
+        @if (CreatedYearcard == null)
+        {
+            <h3 class="text-center mb-3">@L["Yearcard.CreateTitle"]</h3>
+
+            <EditForm Model="@Yearcard" OnSubmit="HandleSubmit">
+                <DataAnnotationsValidator />
+
+                <div class="row g-3">
+                    <div class="col-12 col-md-6">
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">@L["Yearcard.Name"]*</label>
+                            <InputText id="Name" class="form-control" @bind-Value="Yearcard.Name" />
+                        </div>
+                        @* <div class="mb-3">
+                            <label for="UserName" class="form-label">@L["Create.UsernameField"]</label>
+                            <InputText id="UserName" class="form-control" @bind-Value="Yearcard.UserName" />
+                        </div> *@
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <input class="form-check-input" type="checkbox" id="acceptTerms" @bind="AcceptedTerms" style="margin-right: 0.5em;" />
+                            <button type="button" class="btn btn-link p-0 align-baseline" style="text-decoration:underline; color:inherit; font-weight:normal;" @onclick="TooggleTermsModal">
+                                @L["Yearcard.AcceptTerms"]
+                            </button>
+                        </div>
+                    </div>
+                    <div class="col-12 col-md-6">
+                        <div class="mb-3">
+                            <label for="PhoneNumber" class="form-label">@L["Yearcard.Phone"]*</label>
+                            <PhoneNumberInput @bind-Value="Yearcard.PhoneNumber" InputId="PhoneNumber" />
+                            <ValidationMessage For="@(() => Yearcard.PhoneNumber)" />
+                        </div>
+                        <div class="mb-3">
+                            <label for="Email" class="form-label">@L["Yearcard.Email"]*</label>
+                            <InputText id="Email" class="form-control" @bind-Value="Yearcard.Email" />
+                        </div>
+                        <div class="mb-3 d-flex align-items-center gap-2">
+                            <input class="form-check-input" type="checkbox" id="isgift" @bind="IsGiftCard" style="margin-right: 0.5em;" />
+                            <label for="isgift" class="form-label mb-0">@L["Yearcard.IsGiftCheckbox"]*</label>
+                        </div>
+                        @if (IsGiftCard)
+                        {
+                            <div class="mb-3">
+                                <label for="startDate" class="form-label">@L["Yearcard.GiftStartDate"]</label>
+                                <input type="date" id="startDate" class="form-control" @bind="Yearcard.StartDate" min="@TodayString" />
+                            </div>
+                        }
+                    </div>
+                </div>
+                @if (ShowExtendButton)
+                {
+                    <div class="d-flex flex-column flex-md-row gap-2">
+                        <button type="submit" class="btn btn-primary w-100 mt-2" disabled="@(!EverythingIsValid())">@ExtendMessage</button>
+                        <button type="button" class="btn btn-outline-secondary w-100 mt-2" @onclick="CancelExtend">@L["Common.No"]</button>
+                    </div>
+                }
+                else
+                {
+                    <button type="submit" class="btn btn-primary w-100 mt-2" disabled="@(!EverythingIsValid())">@L["Yearcard.Create"]</button>
+                }
+            </EditForm>
+        }
+        else
+        {
+            @if (!string.IsNullOrEmpty(Message))
+            {
+                <h1 class="alert alert-success mt-3 text-center">@L[Message]</h1>
+            }
+            <YearcardDisplay Yearcard="CreatedYearcard" />
+            <h1 class="alert alert-success mt-3 text-center">@L["Yearcard.ReturnTablet"]</h1>
+        }
+
+
+        @if (!string.IsNullOrEmpty(ErrorMessage))
+        {
+            <div class="alert alert-danger mt-3 text-center">@L["Common.ErrorOccurred"] @L[ErrorMessage]</div>
+        }
+
+        @if (ShowModal)
+        {
+            <div class="modal-overlay">
+                <div class="modal-content">
+                    <h5>@L["Yearcard.TermsTitle"]</h5>
+                    <div class="terms-content">
+                        @((MarkupString)TermsHtml)
+                    </div>
+                    <button class="btn btn-secondary mt-3" @onclick="TooggleTermsModal">@L["Common.Close"]</button>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    private YearcardDTO Yearcard { get; set; } = new YearcardDTO();
+    private YearcardDTO? CreatedYearcard { get; set; }
+    private string Message { get; set; } = string.Empty;
+    private string ErrorMessage { get; set; } = string.Empty;
+    private bool ShowExtendButton { get; set ; } = false;
+    private string ExtendMessage { get; set; } = string.Empty;
+    private bool AcceptedTerms { get; set; } = false;
+    private bool IsGiftCard { get; set; } = false;
+    private bool ShowModal { get; set; } = false;
+    private string TermsHtml { get; set; } = string.Empty;
+    private string TodayString => DateTime.Today.ToString("yyyy-MM-dd");
+
+    protected override void OnInitialized()
+    {
+        Navigation.LocationChanged += OnLocationChanged;
+        ResetForm();
+    }
+
+    private void OnLocationChanged(object? sender, Microsoft.AspNetCore.Components.Routing.LocationChangedEventArgs e)
+    {
+        // Only reset if navigating to this page
+        var uri = Navigation.ToBaseRelativePath(e.Location);
+        if (uri.StartsWith("yearcard/create", StringComparison.OrdinalIgnoreCase))
+        {
+            ResetForm();
+            StateHasChanged();
+        }
+    }
+
+    public void Dispose()
+    {
+        Navigation.LocationChanged -= OnLocationChanged;
+    }
+
+    private async Task HandleSubmit(EditContext context)
+    {
+        try
+        {
+            if (!context.Validate() && EverythingIsValid())
+            {
+                ErrorMessage = string.Join(", ", context.GetValidationMessages());
+                return;
+            }
+            if(ShowExtendButton){
+                CreatedYearcard = await yearcards.ExtendYearcardAsync(Yearcard);
+            }
+            else{
+                CreatedYearcard = await yearcards.CreateYearcardAsync(Yearcard);
+            }
+            Message = "Yearcard.CreatedSuccessfully";
+            ErrorMessage = string.Empty;
+            ShowExtendButton = false;
+        }
+        catch (HttpRequestException httpEx) when (httpEx.StatusCode == HttpStatusCode.Conflict)
+        {
+            ShowExtendButton = true;
+            ExtendMessage = LocalizeApiMessage(httpEx.Message);
+            ErrorMessage = string.Empty;
+        }
+        catch (UnauthorizedAccessException)
+        {
+            ErrorMessage = "Unauthorized access. Please log in again.";
+            Navigation.NavigateTo("/login", true);
+        }
+        catch (Exception ex)
+        {
+            ErrorMessage = LocalizeApiMessage(ex.Message);
+            ShowExtendButton = false;
+        }
+    }
+
+    private bool EverythingIsValid()
+    {
+        return !string.IsNullOrWhiteSpace(Yearcard.PhoneNumber) &&
+               !string.IsNullOrWhiteSpace(Yearcard.Email) &&
+               !string.IsNullOrWhiteSpace(Yearcard.Name) &&
+               AcceptedTerms;
+    }
+
+    private void CancelExtend()
+    {
+        ShowExtendButton = false;
+        ExtendMessage = string.Empty;
+        ErrorMessage = string.Empty;
+    }
+
+    private string LocalizeApiMessage(string message)
+    {
+        if (string.IsNullOrWhiteSpace(message))
+        {
+            return string.Empty;
+        }
+
+        var localized = L[message];
+        return localized.ResourceNotFound ? message : localized.Value;
+    }
+
+    private void ResetForm()
+    {
+        CreatedYearcard = null;
+        Yearcard = new YearcardDTO(); // Reset the form data
+        Message = string.Empty;
+        ErrorMessage = string.Empty;
+        ShowExtendButton = false;
+        ExtendMessage = string.Empty;
+        AcceptedTerms = false;
+        IsGiftCard = false;
+    }
+
+    private async Task TooggleTermsModal()
+    {
+        if(ShowModal){
+            ShowModal = false;
+        }
+        else{
+            ShowModal = true;
+            // Prefer terms from server API, then fall back to static file
+            try
+            {
+                if(String.IsNullOrEmpty(TermsHtml)){
+                    var resp = await Http.GetAsync("/api/terms");
+                    if (resp.IsSuccessStatusCode)
+                    {
+                        TermsHtml = await resp.Content.ReadAsStringAsync();
+                        StateHasChanged();
+                        return;
+                    }
+                }
+            }
+            catch { }
+        }
+        StateHasChanged();
+    }
+}

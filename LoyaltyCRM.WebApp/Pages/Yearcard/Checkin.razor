@@ -1,0 +1,128 @@
+@page "/yearcard/checkin"
+@inject YearcardService _yearcardService
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@using LoyaltyCRM.DTOs.Requests.Checkin
+@using LoyaltyCRM.WebApp.Components
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<div class="wrapper d-flex flex-column align-items-center justify-content-center vh-80">
+    <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
+        <h3 class="mb-4 text-center">@L["Checkin.Title"]</h3>
+        <h8 class="mb-4 text-center">@L["Checkin.FillOutOneField"]</h8>
+
+        <EditForm Model="@PhoneNumber" OnValidSubmit="CheckYearcard">
+            <DataAnnotationsValidator />
+            <ValidationSummary />
+            <div class="mb-3 text-center">
+                <label for="phoneNumber" class="form-label mb-2">@L["Checkin.PhoneNumber"]</label>
+                <PhoneNumberInput @bind-Value="PhoneNumber.Phone" InputId="phoneNumber" />
+            </div>
+            <div class="mb-3 text-center">
+                <label for="email" class="form-label mb-2">@L["Checkin.Email"]</label>
+                <input type="text" id="email" @bind="Email.Email" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
+            </div>
+            @* <div class="mb-3 text-center">
+                <label for="username" class="form-label mb-2">@L["Checkin.Username"]</label>
+                <input type="text" id="username" @bind="UserName.UserName" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
+            </div> *@
+            <button class="btn btn-primary w-100 mt-2" type="submit">@L["Checkin.CheckInButton"]</button>
+        </EditForm>
+
+        <div style="height: 56px; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+            @if (!string.IsNullOrEmpty(ResultMessage))
+            {
+                <div class="alert @ResultClass text-center w-100 m-0" style="position:relative;">
+                    <div>@ResultMessage</div>
+                    <span class="fw-bold">@CountdownSeconds</span>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    public PhoneNumberCheckInRequest PhoneNumber { get; set; } = new PhoneNumberCheckInRequest();
+    public EmailCheckInRequest Email { get; set; } = new EmailCheckInRequest();
+    public UsernameCheckInRequest UserName { get; set; } = new UsernameCheckInRequest();
+    public string ResultMessage { get; set; } = string.Empty;
+    public string ResultClass { get; set; } = string.Empty;
+    private string LastChecked { get; set; } = string.Empty;
+    private int CountdownSeconds { get; set; } = 0;
+    private CancellationTokenSource? CountdownCts;
+    private CheckInResponse CheckInResponse { get; set; } = new CheckInResponse();
+
+    private async Task CheckYearcard()
+    {
+        // Reset animation and message
+        ResultMessage = "";
+        ResultClass = "";
+        LastChecked = "";
+        CountdownSeconds = 10;
+        CountdownCts?.Cancel();
+        CountdownCts = new CancellationTokenSource();
+        StateHasChanged();
+
+        try{
+            // Call the API with the entered phone number
+            if(PhoneNumber.Phone != null && !string.IsNullOrWhiteSpace(PhoneNumber.Phone)){
+                CheckInResponse = await _yearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
+                LastChecked = PhoneNumber.Phone;
+            }
+            if(!CheckInResponse.IsValid && Email.Email != null && !string.IsNullOrWhiteSpace(Email.Email)){
+                CheckInResponse = await _yearcardService.CheckinWithEmailAsync(Email);
+                LastChecked = Email.Email;
+            }
+            if(!CheckInResponse.IsValid && UserName.UserName != null && !string.IsNullOrWhiteSpace(UserName.UserName)){
+                CheckInResponse = await _yearcardService.CheckinWithUsernameAsync(UserName);
+                LastChecked = UserName.UserName;
+            }
+            
+            // Display message based on API result
+            if (CheckInResponse.IsValid)
+            {
+                ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Valid"];
+                ResultClass = "alert-success";
+            }
+            else
+            {
+                ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Invalid"];
+                ResultClass = "alert-danger";
+            }
+
+            if(CheckInResponse.IsValidForDiscount && CheckInResponse.IsValid){
+                ResultMessage += Environment.NewLine + L["Checkin.AndValidForDiscount"];
+            }
+            else if(CheckInResponse.IsValidForDiscount && !CheckInResponse.IsValid){
+                ResultMessage += Environment.NewLine + L["Checkin.ButValidForDiscount"];
+            }
+        }
+        catch(Exception ex){
+            ResultMessage = ex.Message;
+            ResultClass = "alert-danger";
+        }
+        
+        PhoneNumber = new PhoneNumberCheckInRequest();
+        Email = new EmailCheckInRequest();
+        UserName = new UsernameCheckInRequest();
+        CheckInResponse = new CheckInResponse();
+        StateHasChanged();
+
+        // Numeric countdown
+        var token = CountdownCts.Token;
+        for (int i = 10; i > 0; i--)
+        {
+            CountdownSeconds = i;
+            StateHasChanged();
+            try { await Task.Delay(1000, token); } catch { break; }
+        }
+        if (!token.IsCancellationRequested)
+        {
+            ResultMessage = string.Empty;
+            ResultClass = string.Empty;
+            CountdownSeconds = 0;
+            StateHasChanged();
+        }
+    }
+}

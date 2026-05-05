@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Launch API",
+      "type": "coreclr",
+      "request": "launch",
+      "launchBrowser": {
+        "enabled": false
+      },
+      "preLaunchTask": "build-api",
+      "program": "${workspaceFolder}/LoyaltyCRM.Api/bin/Debug/net10.0/LoyaltyCRM.Api.dll",
+      "cwd": "${workspaceFolder}/LoyaltyCRM.Api",
+      "stopAtEntry": false
+    },
+    {
+      "name": "Launch WebApp",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "build-app",
+      "launchBrowser": {
+        "enabled": false
+      },
+      "program": "dotnet",
+      "args": ["watch", "run", "--project", "${workspaceFolder}/LoyaltyCRM.WebApp"],
+      "cwd": "${workspaceFolder}/LoyaltyCRM.WebApp",
+      "stopAtEntry": false,
+      "console": "integratedTerminal"
+    }
+  ],
+    "compounds": [
+    {
+      "name": "Launch API + WebApp",
+      "configurations": ["Launch API", "Launch WebApp"],
+      "stopAll": true
+    }
+  ]
+}

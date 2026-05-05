@@ -1,0 +1,96 @@
+@using Microsoft.JSInterop
+@implements IAsyncDisposable
+
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<button @onclick="ToggleFullscreen" disabled="@IsDisposing">
+    @(IsFullscreen ? @L["Fullscreen.Exit"] : @L["Fullscreen.Enter"])
+</button>
+
+@if (!string.IsNullOrEmpty(ErrorMessage))
+{
+    <div class="alert alert-warning">@ErrorMessage</div>
+}
+
+@code {
+    [Inject]
+    public IJSRuntime JavaScriptRuntime { get; set; } = default!;
+
+    private bool IsFullscreen { get; set; }
+    private bool IsDisposing { get; set; }
+    private string? ErrorMessage { get; set; }
+    private DotNetObjectReference<FullscreenController>? JavaScriptReference { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        try 
+        {
+            // Import the module directly
+            var module = await JavaScriptRuntime.InvokeAsync<IJSObjectReference>("import", "./js/fullscreencontroller.js");
+            
+            JavaScriptReference = DotNetObjectReference.Create(this);
+            
+            // Call init on the imported module
+            await module.InvokeVoidAsync("init", JavaScriptReference);
+            await module.InvokeVoidAsync("subscribeToEvents", JavaScriptReference);
+            
+            // Store the module reference to call methods later
+            _module = module;
+        }
+        catch (JSException ex) 
+        {
+            ErrorMessage = "Fullscreen API not supported or module failed to load.";
+            Console.WriteLine(ex.Message);
+        }
+        catch (Exception ex) 
+        {
+            ErrorMessage = "Failed to initialize fullscreen controller.";
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private IJSObjectReference? _module;
+
+    // Update ToggleFullscreen to use _module
+    public async Task ToggleFullscreen()
+    {
+        if (_module == null) return;
+        
+        try 
+        {
+            if (IsFullscreen)
+            {
+                await _module.InvokeVoidAsync("exitFullscreen");
+                IsFullscreen = false;
+            }
+            else
+            {
+                await _module.InvokeVoidAsync("enterFullscreen");
+                IsFullscreen = true;
+            }
+            ErrorMessage = null;
+        }
+        catch (JSException ex) 
+        {
+            ErrorMessage = ex.Message;
+        }
+    }
+
+    // Update DisposeAsync
+    public async ValueTask DisposeAsync()
+    {
+        if (_module != null)
+        {
+            try 
+            {
+                await _module.InvokeVoidAsync("unsubscribeFromEvents");
+                await _module.DisposeAsync();
+            }
+            catch { /* Ignore cleanup errors */ }
+        }
+        JavaScriptReference?.Dispose();
+    }
+}

@@ -1,0 +1,23 @@
+﻿@inherits LayoutComponentBase
+@using LoyaltyCRM.WebApp.Components
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <div class="language-selector">
+                <CultureSelector></CultureSelector>
+                @* <FullscreenController></FullscreenController> *@
+            </div>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>

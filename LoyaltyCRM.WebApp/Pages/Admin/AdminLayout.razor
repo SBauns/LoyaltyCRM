@@ -1,0 +1,20 @@
+@layout MainLayout
+@inherits LayoutComponentBase
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<div class="wrapper d-flex flex-column align-items-center vh-80">
+    <div class="card shadow-sm p-4 w-100" style="max-width: 820px;">
+        
+        <h3 class="text-center mb-3">Admin Panel</h3>
+
+        <div class="btn-group w-100 mb-4" role="group">
+            <NavLink class="btn btn-outline-secondary" href="/admin/password">@L["Navigation.PasswordSettings"]</NavLink>
+            <NavLink class="btn btn-outline-secondary" href="/admin/terms">@L["Navigation.TermsSettings"]</NavLink>
+            <NavLink class="btn btn-outline-secondary" href="/admin/app">@L["Navigation.AppSettings"]</NavLink>
+            <NavLink class="btn btn-outline-secondary" href="/admin/import">@L["Navigation.ImportUsers"]</NavLink>
+        </div>
+
+        @Body
+    </div>
+</div>

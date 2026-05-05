@@ -1,0 +1,181 @@
+@page "/admin/terms"
+@layout AdminLayout
+
+@using LoyaltyCRM.WebApp.Locales
+
+@inject IJSRuntime JS
+
+@inject HttpClient Http
+@inject AuthService AuthService
+@inject IStringLocalizer<Resources> L
+
+<h4 class="text-center mb-3">@L["TermsSettings.Title"]</h4>
+
+<div class="mb-3 d-flex gap-2 justify-content-center">
+    <button class="btn btn-sm @(BoldActive ? "btn-primary" : "btn-outline-secondary")"
+            @onclick="ExecBold">
+        @L["TermsEditor.Bold"]
+    </button>
+
+    <button class="btn btn-sm @(BulletsActive ? "btn-primary" : "btn-outline-secondary")"
+            @onclick="ExecBullets">
+        @L["TermsEditor.Bullets"]
+    </button>
+
+    <button class="btn btn-sm btn-primary" @onclick="SaveTermsToServer">
+        @L["TermsEditor.Save"]
+    </button>
+
+    <button class="btn btn-sm btn-outline-danger" @onclick="ClearTerms">
+        @L["TermsEditor.Clear"]
+    </button>
+</div>
+
+@if (!string.IsNullOrEmpty(editorMessage))
+{
+    <div class="alert mt-2 @(editorSuccess ? "alert-success" : "alert-danger") text-center">
+        @editorMessage
+    </div>
+}
+
+<div id="termsEditor"
+     contenteditable="true"
+     class="border rounded p-3"
+     style="min-height:240px; overflow:auto;">
+</div>
+
+@code {
+    private string editorMessage = string.Empty;
+    private bool editorSuccess;
+
+    private bool BoldActive;
+    private bool BulletsActive;
+
+    private string html = string.Empty;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GetTermsAsync();
+        }
+    }
+
+        private async Task GetTermsAsync()
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(html))
+            {
+                var resp = await Http.GetAsync("/api/terms");
+                if (resp.IsSuccessStatusCode)
+                {
+                    html = await resp.Content.ReadAsStringAsync();
+                }
+            }
+
+            if (!string.IsNullOrWhiteSpace(html))
+            {
+                await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", html);
+            }
+        }
+        catch
+        {
+            // optional logging
+        }
+    }
+
+        private async Task SaveTermsToServer()
+    {
+        editorMessage = string.Empty;
+
+        try
+        {
+            var content = await JS.InvokeAsync<string>(
+                "authHelpers.getEditorContent",
+                "termsEditor"
+            );
+
+            if (string.IsNullOrWhiteSpace(content))
+            {
+                editorSuccess = false;
+                editorMessage = L["TermsEditor.CannotSaveEmpty"];
+                return;
+            }
+
+            var token = await AuthService.GetTokenAsync();
+
+            var req = new HttpRequestMessage(HttpMethod.Put, "/api/terms")
+            {
+                Content = new StringContent(content, System.Text.Encoding.UTF8, "text/html")
+            };
+
+            if (!string.IsNullOrEmpty(token))
+            {
+                req.Headers.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            var resp = await Http.SendAsync(req);
+
+            if (resp.IsSuccessStatusCode)
+            {
+                editorSuccess = true;
+                editorMessage = L["TermsEditor.SavedSuccessfully"];
+            }
+            else
+            {
+                editorSuccess = false;
+                editorMessage = $"{(int)resp.StatusCode}: {await resp.Content.ReadAsStringAsync()}";
+            }
+        }
+        catch (Exception ex)
+        {
+            editorSuccess = false;
+            editorMessage = L["TermsEditor.SaveError"] + $" {ex.Message}";
+        }
+    }
+
+        private async Task ClearTerms()
+    {
+        await JS.InvokeVoidAsync("authHelpers.setEditorContent", "termsEditor", string.Empty);
+
+        editorSuccess = true;
+        editorMessage = L["TermsEditor.TermsCleared"];
+    }
+
+        private async Task ExecBold()
+    {
+        await JS.InvokeAsync<bool>("authHelpers.execAndGetState", "bold", "termsEditor");
+        await UpdateCommandStates();
+    }
+
+    private async Task ExecBullets()
+    {
+        await JS.InvokeAsync<bool>("authHelpers.execAndGetState", "insertUnorderedList", "termsEditor");
+        await UpdateCommandStates();
+    }
+
+        private async Task UpdateCommandStates()
+    {
+        try
+        {
+            BoldActive = await JS.InvokeAsync<bool>(
+                "authHelpers.queryCommandState",
+                "bold",
+                "termsEditor"
+            );
+
+            BulletsActive = await JS.InvokeAsync<bool>(
+                "authHelpers.queryCommandState",
+                "insertUnorderedList",
+                "termsEditor"
+            );
+
+            StateHasChanged();
+        }
+        catch
+        {
+        }
+    }
+}

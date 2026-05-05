@@ -1,0 +1,55 @@
+services:
+  reverse-proxy:
+    build:
+      context: .
+      dockerfile: nginx.Dockerfile
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - papascrm-api
+    networks:
+      - papanet
+
+  papascrm-api:
+    build:
+      context: .
+      dockerfile: LoyaltyCRM.Api/Dockerfile
+    # volumes:
+    #   # Only mount the cert if using HTTPS in production
+    #   - ./certs/TODOCERT.pfx:/https/TODOCERT.pfx:ro
+    env_file:
+      - .env
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT}
+      - ASPNETCORE_URLS=${ASPNETCORE_URLS}
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=${CERT_PATH}
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=${CERT_PASSWORD}
+      - ConnectionStrings__DefaultConnection=${CONNECTION_STRING}
+      - ASPNETCORE_URLS=http://+:80
+    # ports:
+    #   - "${EXPOSED_HTTPS_PORT:-444}:444"
+    #   - "${EXPOSED_HTTP_PORT:-81}:80"
+    depends_on:
+      - sqlserver
+    networks:
+      - papanet
+      - backend
+
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2025-CTP2.1-ubuntu-22.04
+    environment:
+      - SA_PASSWORD=${SA_PASSWORD}
+      - ACCEPT_EULA=Y
+    networks:
+      - backend
+    volumes:
+      - sqlvolume:/var/opt/mssql
+
+volumes:
+  sqlvolume:
+
+networks: 
+  papanet:
+  backend:
+    internal: true

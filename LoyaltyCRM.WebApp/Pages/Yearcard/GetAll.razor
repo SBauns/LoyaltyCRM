@@ -1,0 +1,348 @@
+@page "/yearcard/getall"
+@inject YearcardService _yearcardService
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@inject AuthService AuthService
+@using LoyaltyCRM.WebApp.Components
+@using LoyaltyCRM.WebApp.Locales
+@inject IStringLocalizer<Resources> L
+
+<h3>@L["YearcardList.Title"]</h3>
+
+@if (yearcards == null)
+{
+    <p><em>@L["Common.Loading"]</em></p>
+}
+else if(showOverlay)
+{
+    <div class="overlay">
+        <div class="overlay-content position-relative">
+            <YearcardEdit Yearcard="selectedYearcard" OnClose="CloseOverlay" />
+        </div>
+    </div>
+}
+else
+{
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <label for="pageSizeSelect">@L["YearcardList.RowsPerPage"]</label>
+            <select id="pageSizeSelect" @onchange="OnPageSizeChanged" class="form-select d-inline w-auto mx-2">
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+        </div>
+        <div class="ms-auto">
+            <label for="searchInput" class="me-2">@L["YearcardList.Search"]</label>
+            <input id="searchInput" class="form-control d-inline w-auto" @bind="SearchText" @bind:event="oninput" placeholder=@L["YearcardList.SearchPlaceholder"]/>
+        </div>
+    </div>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+            <th style="cursor:pointer" @onclick='() => SortBy("CardId")'>
+                @L["Yearcard.CardIdLabel"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("ValidTo")'>
+                @L["YearcardList.ValidUntil"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("PhoneNumber")'>
+                @L["Yearcard.Phone"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("Name")'>
+                @L["Yearcard.Name"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("Email")'>
+                @L["Yearcard.Email"]
+            </th>
+
+            <th>
+                @L["YearcardList.DiscountEligibility"]
+            </th>
+
+            <th style="cursor:pointer" @onclick='() => SortBy("UpdatedAt")'>
+                @L["YearcardList.LastUpdated"]
+            </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var card in PagedYearcards)
+            {
+                <tr>
+                    <td>@card.CardId</td>
+                    <td>@card.ValidTo.ToString("dd-MM-yyyy")</td>
+                    <td>@card.PhoneNumber</td>
+                    <td>@card.Name</td>
+                    <td>@card.Email</td>
+                    <td>@(card.IsValidForDiscount ? @L["Common.Yes"] : @L["Common.No"])</td>
+                    <td>@card.UpdatedAt</td>
+                    <td>
+                        <button class="btn btn-warning btn-sm" @onclick="() => EditYearcard(card.Id)">@L["YearcardList.Edit"]</button>
+                        <button class="btn btn-danger btn-sm" @onclick="() => ConfirmDeleteYearcard(card.Id)">@L["YearcardList.Delete"]</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+    <div class="d-flex justify-content-between align-items-center mt-2">
+        <button class="btn btn-outline-primary btn-sm" @onclick="PreviousPage" disabled="@(currentPage == 1)">@L["Pagination.Previous"]</button>
+        <span>
+            @L["Pagination.Page"]
+            <input type="number" min="1" max="@TotalPages" value="@currentPage" @onchange="OnPageInputChanged" style="width: 60px; text-align: center;" />
+            @L["Pagination.Of"] @TotalPages
+        </span>
+        <button class="btn btn-outline-primary btn-sm" @onclick="NextPage" disabled="@(currentPage == TotalPages)">@L["Pagination.Next"]</button>
+    </div>
+}
+
+@if (showDeleteConfirmation)
+{
+    <div class="modal-overlay">
+        <div class="modal-content">
+            <h5>@L["YearcardList.ConfirmDeleteTitle"]</h5>
+            <p>@L["YearcardList.ConfirmDelete"]</p>
+            <button class="btn btn-danger" @onclick="ConfirmDelete">@L["YearcardList.ConfirmDelete"]</button>
+            <button class="btn btn-secondary" @onclick="CancelDelete">@L["Common.Cancel"]</button>
+        </div>
+    </div>
+}
+
+@code {
+    private List<YearcardDTO>? yearcards;
+    private string errorMessage = string.Empty;
+    private YearcardDTO? selectedYearcard;
+    private bool showOverlay = false;
+    private bool showDeleteConfirmation = false;
+    private Guid? yearcardToDelete;
+
+    // Pagination fields
+    private int pageSize = 10;
+    private int currentPage = 1;
+    private string searchText = string.Empty;
+    private List<YearcardDTO> filteredYearcards = new();
+    private List<YearcardDTO> pagedYearcards = new();
+    private int totalPages = 1;
+
+    //Sorting Fields
+    private string? sortColumn = null;
+    private bool sortAscending = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            yearcards = await _yearcardService.GetAllYearcardsAsync();
+            UpdateFilteredAndPagedYearcards();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+    }
+
+    private void UpdateFilteredAndPagedYearcards()
+    {
+        if (yearcards == null)
+        {
+            filteredYearcards = new List<YearcardDTO>();
+            pagedYearcards = new List<YearcardDTO>();
+            totalPages = 1;
+            return;
+        }
+
+        // FILTER
+        if (string.IsNullOrWhiteSpace(searchText))
+        {
+            filteredYearcards = yearcards.ToList();
+        }
+        else
+        {
+            filteredYearcards = yearcards.Where(card =>
+                (card.CardId.ToString().Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                (card.PhoneNumber != null && card.PhoneNumber.Contains(searchText, StringComparison.OrdinalIgnoreCase)) ||
+                (card.Name != null && card.Name.Contains(searchText, StringComparison.OrdinalIgnoreCase))
+            ).ToList();
+        }
+
+        // SORT 👇 NEW
+        if (!string.IsNullOrWhiteSpace(sortColumn))
+        {
+            filteredYearcards = sortColumn switch
+            {
+                "CardId" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.CardId).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.CardId).ToList(),
+
+                "ValidTo" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.ValidTo).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.ValidTo).ToList(),
+
+                "PhoneNumber" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.PhoneNumber).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.PhoneNumber).ToList(),
+
+                "Name" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.Name).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.Name).ToList(),
+
+                "Email" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.Email).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.Email).ToList(),
+
+                "UpdatedAt" => sortAscending
+                    ? filteredYearcards.OrderBy(x => x.UpdatedAt).ToList()
+                    : filteredYearcards.OrderByDescending(x => x.UpdatedAt).ToList(),
+
+                _ => filteredYearcards
+            };
+        }
+
+        // PAGING
+        totalPages = filteredYearcards.Count > 0
+            ? (int)Math.Ceiling(filteredYearcards.Count / (double)pageSize)
+            : 1;
+
+        if (currentPage > totalPages) currentPage = totalPages;
+
+        pagedYearcards = filteredYearcards
+            .Skip((currentPage - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private IEnumerable<YearcardDTO> PagedYearcards => pagedYearcards;
+    private int TotalPages => totalPages;
+
+    private string SearchText
+    {
+        get => searchText;
+        set
+        {
+            if (searchText != value)
+            {
+                searchText = value;
+                currentPage = 1;
+                UpdateFilteredAndPagedYearcards();
+            }
+        }
+    }
+
+    private void OnPageSizeChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newSize))
+        {
+            pageSize = newSize;
+            currentPage = 1;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void OnPageInputChanged(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out int newPage))
+        {
+            if (newPage < 1)
+                newPage = 1;
+            if (newPage > TotalPages)
+                newPage = TotalPages;
+            currentPage = newPage;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void PreviousPage()
+    {
+        if (currentPage > 1)
+        {
+            currentPage--;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void NextPage()
+    {
+        if (currentPage < TotalPages)
+        {
+            currentPage++;
+            UpdateFilteredAndPagedYearcards();
+        }
+    }
+
+    private void CloseOverlay()
+    {
+        showOverlay = false;
+        selectedYearcard = null;
+    }
+
+    private void EditYearcard(Guid? id)
+    {
+        selectedYearcard = yearcards?.Find(y => y.Id == id);
+        if (selectedYearcard != null)
+        {
+            showOverlay = true;
+        }
+    }
+
+    private void ConfirmDeleteYearcard(Guid? id)
+    {
+        yearcardToDelete = id;
+        showDeleteConfirmation = true;
+    }
+
+    private async Task ConfirmDelete()
+    {
+        if (yearcardToDelete.HasValue)
+        {
+            try
+            {
+                await _yearcardService.DeleteYearcardAsync(yearcardToDelete.Value);
+                yearcards?.RemoveAll(y => y.Id == yearcardToDelete);
+                // Adjust current page if needed
+                if ((currentPage - 1) * pageSize >= yearcards?.Count && currentPage > 1)
+                {
+                    currentPage--;
+                }
+                UpdateFilteredAndPagedYearcards();
+            }
+            catch (Exception ex)
+            {
+                errorMessage = $"Failed to delete yearcard: {ex.Message}";
+            }
+            finally
+            {
+                yearcardToDelete = null;
+                showDeleteConfirmation = false;
+            }
+        }
+    }
+
+    private void CancelDelete()
+    {
+        showDeleteConfirmation = false;
+        yearcardToDelete = null;
+    }
+
+    //Sorting Methods
+
+    private void SortBy(string column)
+    {
+        if (sortColumn == column)
+        {
+            // toggle direction
+            sortAscending = !sortAscending;
+        }
+        else
+        {
+            sortColumn = column;
+            sortAscending = true;
+        }
+
+        currentPage = 1;
+        UpdateFilteredAndPagedYearcards();
+    }
+}

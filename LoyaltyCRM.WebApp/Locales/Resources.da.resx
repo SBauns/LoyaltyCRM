@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, ...</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, ...</value>
+  </resheader>
+
+
+  <!-- New codes with Danish translations -->
+  <data name="AppSettings.Title"><value>App-indstillinger</value></data>
+  <data name="AppSettings.SavedSuccessfully"><value>App-indstillinger blev gemt.</value></data>
+  <data name="AppSettings.Description"><value>Konfigurer app-indstillinger med numeriske værdier eller tidsværdier, hvor det er relevant. Disse valideres før gemning.</value></data>
+  <data name="AppSettings.SaveButton"><value>Gem app-indstillinger</value></data>
+  <data name="AppSettings.SaveFailed"><value>Gemning mislykkedes:</value></data>
+  <data name="AppSettings.UnableToLoad"><value>Kan ikke indlæse app-indstillinger:</value></data>
+  <data name="AppSettings.YearcardLength"><value>Længde af årskort (dage)</value></data>
+  <data name="AppSettings.DiscountGracePeriod"><value>Rabat nådeperiode (dage)</value></data>
+  <data name="AppSettings.DeleteInvalidYearcardDays"><value>Slet ugyldigt årskort efter (dage)</value></data>
+  <data name="AppSettings.TimeToDeleteCards"><value>Tidspunkt for sletning af ugyldige kort</value></data>
+  <data name="AppSettings.DiscountNotificationRules"><value>Rabat notifikationsregler</value></data>
+  <data name="AppSettings.MailchimpApiKey"><value>Mailchimp API-nøgle</value></data>
+  <data name="AppSettings.MailchimpServerPrefix"><value>Mailchimp server præfiks</value></data>
+  <data name="AppSettings.MailchimpAudienceId"><value>Mailchimp publikums-ID</value></data>
+  <data name="AppSettings.MandrillApiKey"><value>Mandrill API-nøgle</value></data>
+  <data name="AppSettings.Domain"><value>Domæne</value></data>
+  <data name="AppSettings.NotificationCount"><value>Notifikationsantal</value></data>
+  <data name="AppSettings.DiscountRuleDescription"><value>Tilføj mindst én rabat notifikationsregel for at sende påmindelser et specifikt antal dage før rabatperioden udløber.</value></data>
+  <data name="AppSettings.DaysBeforeExpiry"><value>Dage før rabatperioden udløber</value></data>
+  <data name="AppSettings.TemplateName"><value>Skabelonnavn</value></data>
+  <data name="AppSettings.Remove"><value>Fjern</value></data>
+  <data name="AppSettings.AddRule"><value>Tilføj regel</value></data>
+  <data name="Yearcard.AddInterval"><value>Tilføj interval</value></data>
+  <data name="Navigation.Administration"><value>Administration</value></data>
+  <data name="Common.ErrorOccurred"><value>Der opstod en fejl:</value></data>
+  <data name="Checkin.ValidForDiscountWarning"><value>OG er gyldigt til fornyelses rabat!</value></data>
+  <data name="YearcardList.ConfirmDeleteMessage"><value>Er du sikker på, at du vil slette dette årskort?</value></data>
+  <data name="TermsSettings.Bold"><value>Fed</value></data>
+  <data name="TermsSettings.Bullets"><value>Punkttegn</value></data>
+  <data name="Checkin.ValidForDiscountAlternative"><value>MEN er gyldigt for fornyelses rabat!</value></data>
+  <data name="Common.Cancel"><value>Annuller</value></data>
+  <data name="Yearcard.ValidTo"><value>Gyldig til</value></data>
+  <data name="YearcardList.SearchPlaceholder"><value>Kort-ID, telefon, navn...</value></data>
+  <data name="Yearcard.CardIdLabel"><value>Kort-ID:</value></data>
+  <data name="Checkin.CardWith"><value>Kort med</value></data>
+  <data name="YearcardEdit.CardIdField"><value>KortId</value></data>
+  <data name="Navigation.CheckinYearcard"><value>Tjek årskort ind</value></data>
+  <data name="Checkin.CheckInButton"><value>Tjek ind</value></data>
+  <data name="Checkin.Title"><value>Tjek årskortets gyldighed</value></data>
+  <data name="Common.Close"><value>Luk</value></data>
+  <data name="YearcardList.ConfirmDeleteTitle"><value>Bekræft sletning</value></data>
+  <data name="Navigation.CreateYearcard"><value>Opret årskort</value></data>
+  <data name="Yearcard.CreateTitle"><value>Opret årskort</value></data>
+  <data name="YearcardList.Delete"><value>Slet</value></data>
+  <data name="YearcardList.DiscountEligibility"><value>Rabatberettigelse</value></data>
+  <data name="YearcardList.Edit"><value>Rediger</value></data>
+  <data name="Yearcard.Email"><value>E-mail</value></data>
+  <data name="Checkin.Email"><value>E-mail:</value></data>
+  <data name="Yearcard.EmailLabel"><value>E-mail:</value></data>
+  <data name="Checkin.FillOutOneField"><value>Udfyld et af felterne</value></data>
+  <data name="YearcardEdit.FirstName"><value>Fornavn</value></data>
+  <data name="YearcardEdit.AddInterval"><value>Tilføj Interval</value></data>
+  <data name="Yearcard.GiftStartDate"><value>Fra hvornår skal dette kort være aktivt?</value></data>
+  <data name="Yearcard.FullNameLabel"><value>Fulde navn:</value></data>
+  <data name="Yearcard.AcceptTerms"><value>Jeg accepterer vilkår og betingelser</value></data>
+  <data name="Checkin.Invalid"><value>er ugyldigt!</value></data>
+  <data name="Checkin.Valid"><value>er gyldigt!</value></data>
+  <data name="Yearcard.IsGiftCheckbox"><value>Det er en gave</value></data>
+  <data name="YearcardList.LastUpdated"><value>Sidst opdateret</value></data>
+  <data name="Common.Loading"><value>Indlæser...</value></data>
+  <data name="Navigation.Login"><value>Log ind</value></data>
+  <data name="Login.Title"><value>Log ind</value></data>
+  <data name="Navigation.Logout"><value>Log ud</value></data>
+  <data name="Yearcard.Name"><value>Navn</value></data>
+  <data name="Pagination.Next"><value>Næste</value></data>
+  <data name="Common.No"><value>Nej</value></data>
+  <data name="Pagination.Of"><value>af</value></data>
+  <data name="Pagination.Page"><value>Side</value></data>
+  <data name="Login.Password"><value>Adgangskode:</value></data>
+  <data name="Yearcard.Phone"><value>Telefon</value></data>
+  <data name="Yearcard.PhoneLabel"><value>Telefon:</value></data>
+  <data name="Checkin.PhoneNumber"><value>Telefonnummer:</value></data>
+  <data name="Yearcard.ReturnTablet"><value>Returnér venligst tabletten til bartenderen</value></data>
+  <data name="Pagination.Previous"><value>Forrige</value></data>
+  <data name="YearcardList.RowsPerPage"><value>Rækker pr. side:</value></data>
+  <data name="Common.Save"><value>Gem</value></data>
+  <data name="YearcardList.Search"><value>Søg:</value></data>
+  <data name="Yearcard.TermsTitle"><value>Vilkår og betingelser</value></data>
+  <data name="YearcardEdit.UpdateButton"><value>Opdater årskort</value></data>
+  <data name="YearcardEdit.UserName"><value>Brugernavn</value></data>
+  <data name="Yearcard.Username"><value>Brugernavn</value></data>
+  <data name="Create.UsernameField"><value>Brugernavn</value></data>
+  <data name="Login.Username"><value>Brugernavn:</value></data>
+  <data name="Checkin.Username"><value>Brugernavn:</value></data>
+  <data name="Checkin.AndValidForDiscount"><value>OG er gyldig for rabat:</value></data>
+  <data name="Checkin.ButValidForDiscount"><value>MEN er gyldig for rabat:</value></data>
+  <data name="YearcardList.ValidUntil"><value>Gyldig indtil</value></data>
+  <data name="YearcardEdit.ValidityDates"><value>Gyldighedsdatoer</value></data>
+  <data name="Navigation.WaitingYearcards"><value>Afventende årskort</value></data>
+  <data name="Common.Yes"><value>Ja</value></data>
+  <data name="YearcardList.ConfirmDelete"><value>Ja, slet</value></data>
+  <data name="Yearcard.CreatedSuccessfully"><value>Årskort oprettet!</value></data>
+  <data name="YearcardDisplay.Title"><value>Årskortdetaljer</value></data>
+  <data name="YearcardEdit.UpdatedSuccessfully"><value>Årskort opdateret!</value></data>
+  <data name="Navigation.Yearcards"><value>Årskort</value></data>
+  <data name="YearcardList.Title"><value>Årskort</value></data>
+  <data name="Yearcard.Create"><value>Opret årskort</value></data>
+  <data name="translation.yearcard.already_created"><value>Årskort eksisterer allerede. Vil du forlænge?</value></data>
+  <data name="TermsEditor.Title"><value>Vilkårseditor</value></data>
+  <data name="TermsEditor.Bullets"><value>Punkttegn</value></data>
+  <data name="TermsEditor.Save"><value>Gem</value></data>
+  <data name="TermsEditor.Clear"><value>Ryd</value></data>
+  <data name="TermsEditor.CannotSaveEmpty"><value>Kan ikke gemme tomme vilkår.</value></data>
+  <data name="TermsEditor.SavedSuccessfully"><value>Vilkår gemt på serveren.</value></data>
+  <data name="TermsEditor.SaveFailed"><value>Gemning mislykkedes:</value></data>
+  <data name="TermsEditor.SaveError"><value>Fejl ved gemning:</value></data>
+  <data name="TermsEditor.TermsCleared"><value>Vilkår ryddet.</value></data>
+  <data name="TermsEditor.TermsAndAgreement"><value>Vilkår og betingelser</value></data>
+  <data name="TermsEditor.Close"><value>Luk</value></data>
+  <data name="TermsEditor.TermsNotAvailable"><value>Vilkår er ikke tilgængelige. Kontakt venligst en administrator.</value></data>
+  <data name="AdminLayout.Title"><value>Admin Panel</value></data>
+  <data name="Navigation.PasswordSettings"><value>Adgangskodeindstillinger</value></data>
+  <data name="Navigation.TermsSettings"><value>Indstillinger for vilkår</value></data>
+  <data name="Navigation.AppSettings"><value>App-indstillinger</value></data>
+  <data name="Navigation.ImportUsers"><value>Importer brugere</value></data>
+  <data name="ImportUsers.Title"><value>Importer brugere</value></data>
+  <data name="ImportUsers.Description"><value>Upload en CSV- eller Excel-fil og kortlæg første række til de korrekte årskortfelter.</value></data>
+  <data name="ImportUsers.File"><value>Fil</value></data>
+  <data name="ImportUsers.PreviewHeaders"><value>Forhåndsvis overskrifter</value></data>
+  <data name="ImportUsers.ImportButton"><value>Importer fil</value></data>
+  <data name="ImportUsers.FoundHeaders"><value>Fundne overskrifter</value></data>
+  <data name="ImportUsers.SelectHeader"><value>Vælg en overskrift</value></data>
+  <data name="ImportUsers.StartDate"><value>Startdato</value></data>
+  <data name="ImportUsers.SelectFileBeforePreview"><value>Vælg en fil før forhåndsvisning.</value></data>
+  <data name="ImportUsers.UnableToReadHeaders"><value>Kan ikke læse filoverskrifter:</value></data>
+  <data name="ImportUsers.SelectFileBeforeImport"><value>Vælg en fil før import.</value></data>
+  <data name="ImportUsers.ImportFailed"><value>Import mislykkedes:</value></data>
+  <data name="AdminIndex.SelectSection"><value>Vælg en sektion</value></data>
+  <data name="PasswordSettings.Title"><value>Adgangskodeindstillinger</value></data>
+  <data name="PasswordSettings.Admin"><value>Administrator</value></data>
+  <data name="PasswordSettings.AdminUsername"><value>Administrator brugernavn:</value></data>
+  <data name="PasswordSettings.CurrentPassword"><value>Nuværende adgangskode:</value></data>
+  <data name="PasswordSettings.NewPassword"><value>Ny adgangskode:</value></data>
+  <data name="PasswordSettings.ChangePassword"><value>Skift adgangskode</value></data>
+  <data name="PasswordSettings.ChangedSuccessfully"><value>Adgangskoden blev ændret!</value></data>
+  <data name="PasswordSettings.Bartender"><value>Bartender</value></data>
+  <data name="PasswordSettings.BartenderUsername"><value>Bartender brugernavn:</value></data>
+  <data name="TermsSettings.Title"><value>Indstillinger for vilkår</value></data>
+  <data name="TermsEditor.Bold"><value>Fed</value></data>
+  <data name="Fullscreen.Enter"><value>Gå Fuld skærm</value></data>
+  <data name="Fullscreen.Exit"><value>Ud af Fuld skærm</value></data>
+
+</root>
+
