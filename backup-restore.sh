@@ -2,53 +2,54 @@
 
 set -euo pipefail
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-
 # Configuration
-# Ideally, this matches the service name in your docker-compose.yml
-CONTAINER_NAME="loyaltycrm-sqlserver-1" 
+CONTAINER_NAME="loyaltycrm-sqlserver-1"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="${SCRIPT_DIR}/backups"
 
-# Select the latest backup file
-BACKUP_FILE=$(ls -t "$BACKUP_DIR"/loyaltycrm_backup_*.tar.gz 2>/dev/null | head -n 1)
-
-if [ -z "$BACKUP_FILE" ] || [ ! -f "$BACKUP_FILE" ]; then
-    echo "Error: No backup file found in $BACKUP_DIR"
-    exit 1
+# 1. Handle Input Argument
+# If an argument is provided, use it. Otherwise, find the latest file.
+if [ $# -gt 0 ]; then
+    BACKUP_FILE="$1"
+    # Validate the file exists
+    if [ ! -f "$BACKUP_DIR/$BACKUP_FILE" ]; then
+        echo "Error: Backup file '$BACKUP_FILE' not found in $BACKUP_DIR"
+        exit 1
+    fi
+    echo "Restoring from specified file: $BACKUP_FILE"
+else
+    BACKUP_FILE=$(ls -t "$BACKUP_DIR"/loyaltycrm_backup_*.tar.gz 2>/dev/null | head -n 1)
+    if [ -z "$BACKUP_FILE" ] || [ ! -f "$BACKUP_FILE" ]; then
+        echo "Error: No backup files found in $BACKUP_DIR"
+        exit 1
+    fi
+    echo "No file specified. Defaulting to latest: $(basename "$BACKUP_FILE")"
 fi
 
-echo "Selected backup: $BACKUP_FILE"
-
-# 1. CRITICAL CHECK: Ensure the container exists
-# We check if the container ID exists, regardless of its state (running/stopped)
+# 2. CRITICAL CHECK: Ensure the container exists
 if ! docker ps -a --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
     echo "CRITICAL ERROR: Container '$CONTAINER_NAME' does not exist."
     echo "This script is designed to restore an EXISTING container managed by Docker Compose."
-    echo "Do not run this script to create a new container. Check your docker-compose.yml."
     exit 1
 fi
 
 echo "Container '$CONTAINER_NAME' found."
 
-# 2. Stop the container to release file locks
-# We use 'docker stop' which respects the timeout defined in compose or defaults to 10s
+# 3. Stop the container
 echo "Stopping container '$CONTAINER_NAME'..."
 docker stop "$CONTAINER_NAME"
 
-# 3. Determine the mount point
-# We inspect the existing container to find where the volume is mounted
+# 4. Determine mount point
 MOUNT_POINT=$(docker inspect "$CONTAINER_NAME" --format='{{range .Mounts}}{{if eq .Type "volume"}}{{.Destination}}{{end}}{{end}}')
 
 if [ -z "$MOUNT_POINT" ]; then
     echo "Error: Could not determine volume mount point for '$CONTAINER_NAME'."
-    echo "Ensure the container has a named volume mounted."
     exit 1
 fi
 
 echo "Target mount point: $MOUNT_POINT"
 
-# 4. Extract the backup
-# We use a temporary container to extract files into the volume of the stopped container
+# 5. Extract the backup
 echo "Extracting backup to $MOUNT_POINT..."
 docker run --rm \
     --volumes-from "$CONTAINER_NAME" \
@@ -56,29 +57,25 @@ docker run --rm \
     alpine \
     sh -c "cd $MOUNT_POINT && tar xzf /backup/$(basename "$BACKUP_FILE")"
 
-# 5. Fix Permissions (CRITICAL for SQL Server)
-# SQL Server runs as user 'mssql' (UID 10001). 
-# Extracting as root (default in docker run) leaves files owned by root, causing SQL to crash.
+# 6. Fix Permissions
 echo "Correcting file ownership to mssql (UID 10001)..."
 docker run --rm \
     --volumes-from "$CONTAINER_NAME" \
     alpine \
     chown -R 10001:10001 "$MOUNT_POINT"
 
-# 6. Start the container
+# 7. Start the container
 echo "Starting container '$CONTAINER_NAME'..."
 docker start "$CONTAINER_NAME"
 
-# 7. Wait for SQL Server to be ready
-# SQL Server takes time to initialize after a restore. 
-# We wait 15 seconds, but in production you might want a health check loop.
+# 8. Wait for SQL Server to be ready
 echo "Waiting for SQL Server to initialize..."
 sleep 15
 
-# Optional: Verify the container is actually running
+# 9. Verify
 if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
-    echo "SUCCESS: Restore complete. Container '$CONTAINER_NAME' is running."
+    echo "SUCCESS: Restore complete from '$(basename "$BACKUP_FILE")'. Container '$CONTAINER_NAME' is running."
 else
-    echo "WARNING: Container started but may have exited. Check logs with: docker logs $CONTAINER_NAME"
+    echo "WARNING: Container started but may have exited. Check logs: docker logs $CONTAINER_NAME"
     exit 1
 fi
