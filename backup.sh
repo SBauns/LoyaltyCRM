@@ -27,15 +27,14 @@ if [ -z "$MOUNT_POINT" ]; then
     exit 1
 fi
 
-# 5. Perform Backup
+# 5. Perform Backup (as root inside container, so tar can read SQL Server files)
 docker run --rm \
-    --user "$(id -u):$(id -g)" \
     --volumes-from "$CONTAINER_NAME" \
     -v "$BACKUP_DIR":/backup \
     alpine \
     tar czf "/backup/$BACKUP_FILE" -C "$MOUNT_POINT" .
 
-# 6. Verify
+# 6. Verify the archive
 if docker run --rm -v "$BACKUP_DIR":/backup alpine tar tf "/backup/$BACKUP_FILE" > /dev/null 2>&1; then
     echo "Backup created and verified: $BACKUP_DIR/$BACKUP_FILE"
 else
@@ -44,6 +43,14 @@ else
     exit 1
 fi
 
-# 7. Cleanup
+# 7. Fix Ownership (Critical for host-side cleanup)
+# The backup file was created as root inside the container.
+# We must change it to the current user so the host can delete old backups.
+docker run --rm \
+    -v "$BACKUP_DIR":/backup \
+    alpine \
+    chown -R "$(id -u):$(id -g)" /backup
+
+# 8. Cleanup Old Backups
 find "$BACKUP_DIR" -type f -name "loyaltycrm_backup_*.tar.gz" -mtime +${RETENTION_DAYS} -delete
 echo "Cleanup complete."
