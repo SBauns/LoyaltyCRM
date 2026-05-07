@@ -1,25 +1,35 @@
 #!/bin/bash
 
-VOLUME_NAME="loyaltycrm_sqlvolume"
-BACKUP_DIR="/opt/backups"
-TIMESTAMP=$(date +%Y%m%d-%H%M%S)
-BACKUP_FILE="${BACKUP_DIR}/${VOLUME_NAME}-${TIMESTAMP}.tar.gz"
+set -euo pipefail
 
-# Ensure backup directory exists
-mkdir -p "$BACKUP_DIR"
+CONTAINER_NAME="loyaltycrm-sqlserver-1"
+BACKUP_DIR="$(pwd)"
+TIMESTAMP=$(date +%Y%m%d_%H%M%S)
+BACKUP_FILE="loyaltycrm_backup_${TIMESTAMP}.tar.gz"
 
-echo "Starting backup of volume '${VOLUME_NAME}'..."
+# 1. Determine the mount point dynamically
+MOUNT_POINT=$(docker inspect "$CONTAINER_NAME" --format='{{range .Mounts}}{{if eq .Type "volume"}}{{.Destination}}{{end}}{{end}}')
 
-# Create the snapshot
+if [ -z "$MOUNT_POINT" ]; then
+    echo "Error: Could not determine volume mount point for $CONTAINER_NAME"
+    exit 1
+fi
+
+echo "Detected mount point: $MOUNT_POINT"
+
+# 2. Perform the backup using alpine for minimal footprint
+# We use 'tar czf' for gzip compression
 docker run --rm \
-  -v "${VOLUME_NAME}:/source:ro" \
-  -v "${BACKUP_DIR}:/backup" \
-  alpine tar czf "/backup/${VOLUME_NAME}-${TIMESTAMP}.tar.gz" -C /source .
+    --volumes-from "$CONTAINER_NAME" \
+    -v "$BACKUP_DIR":/backup \
+    alpine \
+    tar czf "/backup/$BACKUP_FILE" -C "$MOUNT_POINT" .
 
-if [ $? -eq 0 ]; then
-  echo "SUCCESS: Backup created at ${BACKUP_FILE}"
-  ls -lh "$BACKUP_FILE"
+# 3. Verify the archive
+if docker run --rm -v "$BACKUP_DIR":/backup alpine tar tf "/backup/$BACKUP_FILE" > /dev/null 2>&1; then
+    echo "Backup created and verified: $BACKUP_DIR/$BACKUP_FILE"
 else
-  echo "ERROR: Backup failed"
-  exit 1
+    echo "Error: Backup verification failed. Removing corrupted file."
+    rm -f "$BACKUP_DIR/$BACKUP_FILE"
+    exit 1
 fi
