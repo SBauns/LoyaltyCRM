@@ -3,7 +3,7 @@
 set -euo pipefail
 
 CONTAINER_NAME="loyaltycrm-sqlserver-1"
-BACKUP_DIR="$(pwd)"
+BACKUP_DIR="$(pwd)/backups"
 TIMESTAMP=$(date +%Y%m%d_%H%M%S)
 BACKUP_FILE="loyaltycrm_backup_${TIMESTAMP}.tar.gz"
 
