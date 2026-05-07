@@ -29,6 +29,7 @@ fi
 
 # 5. Perform Backup
 docker run --rm \
+    --user "$(id -u):$(id -g)" \
     --volumes-from "$CONTAINER_NAME" \
     -v "$BACKUP_DIR":/backup \
     alpine \
