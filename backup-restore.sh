@@ -71,7 +71,12 @@ docker start "$CONTAINER_NAME"
 # SQL Server takes time to initialize after a restore. 
 # We wait 15 seconds, but in production you might want a health check loop.
 echo "Waiting for SQL Server to initialize..."
-sleep 15
+maxattempts=10
+attempts=0
+while ! docker logs "$CONTAINER_NAME" 2>&1 | grep -q "SQL Server is now ready for client connections"; || $attempts < $maxattempts do
+    echo "Waiting for SQL Server to be ready..."
+    sleep 5
+done
 
 # Optional: Verify the container is actually running
 if docker ps --format '{{.Names}}' | grep -q "^${CONTAINER_NAME}$"; then
