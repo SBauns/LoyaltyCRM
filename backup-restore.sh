@@ -12,7 +12,7 @@ BACKUP_DIR="${SCRIPT_DIR}/backups"
 if [ $# -gt 0 ]; then
     BACKUP_FILE="$1"
     # Validate the file exists
-    if [ ! -f "$BACKUP_DIR/$BACKUP_FILE" ]; then
+    if [ ! -f "$SCRIPT_DIR/$BACKUP_FILE" ]; then
         echo "Error: Backup file '$BACKUP_FILE' not found in $BACKUP_DIR"
         exit 1
     fi
