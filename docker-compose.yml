@@ -48,7 +48,6 @@ services:
 
 volumes:
   sqlvolume:
-    external: true
 
 networks: 
   papanet:
