@@ -56,3 +56,5 @@ nunit-*.xml
 .venv
 .env
 .tar.gz
+backups/
+*.log

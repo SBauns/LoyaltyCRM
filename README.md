@@ -23,6 +23,20 @@ docker ps --format '{{.Names}}'
 # 5. Make the script executable
 chmod +x scripts/backup.sh
 
-# 6. Set up the cron job
+# 6. Set up the cron job and rotate
 crontab -e
-# Add: 0 3 * * 0 /opt/papascrm/scripts/backup.sh >> /var/log/papascrm_backup.log 2>&1
+sudo nano /etc/logrotate.d/loyaltycrm_backup
+
+Create `/etc/logrotate.d/loyaltycrm_backup`:
+```
+/var/log/loyaltycrm_backup.log {
+    weekly
+    rotate 4
+    compress
+    missingok
+    notifempty
+}
+```
+
+
+# Add: 0 5 * * 0 /opt/papascrm/scripts/backup.sh >> /var/log/papascrm_backup.log 2>&1

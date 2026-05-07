@@ -2,10 +2,12 @@
 
 set -euo pipefail
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Configuration
 # Ideally, this matches the service name in your docker-compose.yml
 CONTAINER_NAME="loyaltycrm-sqlserver-1" 
-BACKUP_DIR="$(pwd)/backups"
+BACKUP_DIR="${SCRIPT_DIR}/backups"
 
 # Select the latest backup file
 BACKUP_FILE=$(ls -t "$BACKUP_DIR"/loyaltycrm_backup_*.tar.gz 2>/dev/null | head -n 1)
