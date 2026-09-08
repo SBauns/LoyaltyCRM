@@ -3,6 +3,7 @@ services:
     build:
       context: .
       dockerfile: nginx.Dockerfile
+    restart: unless-stopped
     ports:
       - "80:80"
       - "443:443"
@@ -15,6 +16,7 @@ services:
     build:
       context: .
       dockerfile: LoyaltyCRM.Api/Dockerfile
+    restart: unless-stopped
     # volumes:
     #   # Only mount the cert if using HTTPS in production
     #   - ./certs/TODOCERT.pfx:/https/TODOCERT.pfx:ro
@@ -38,6 +40,7 @@ services:
 
   sqlserver:
     image: mcr.microsoft.com/mssql/server:2025-CTP2.1-ubuntu-22.04
+    restart: unless-stopped
     environment:
       - SA_PASSWORD=${SA_PASSWORD}
       - ACCEPT_EULA=Y
@@ -49,7 +52,7 @@ services:
 volumes:
   sqlvolume:
 
-networks: 
+networks:
   papanet:
   backend:
     internal: true
