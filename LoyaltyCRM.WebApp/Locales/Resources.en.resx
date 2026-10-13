@@ -158,5 +158,9 @@
   <data name="TermsSettings.Title"><value>Terms setting</value></data>
   <data name="Fullscreen.Enter"><value>Enter Fullscreen</value></data>
   <data name="Fullscreen.Exit"><value>Exit Fullscreen</value></data>
+  <data name="CardId"><value>Card ID</value></data>
+  <data name="Name"><value>Name</value></data>
+  <data name="ExpirationDate"><value>Experation Date</value></data>
+  <data name="Checkin.Error.ServiceUnavailable"><value>Server is unavailable.</value></data>
 
 </root>

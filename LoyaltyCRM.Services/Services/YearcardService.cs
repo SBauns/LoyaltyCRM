@@ -415,12 +415,13 @@ namespace LoyaltyCRM.Services.Services
             {
                 isValidForDiscount = yearcard.IsValidForDiscount ? IsValidForDiscount.IsValid : IsValidForDiscount.NotValid;
             }
+            EndDate ExpirationEndDate = yearcard.GetLastEndDate();
             return new CheckInResponse()
             {
                 IsValid = ConfirmValidityOfYearcard(yearcard),
-                CardId = yearcard.CardId.Value,
-                Name = yearcard.Name.Value,
-                ExpirationDate = yearcard.GetLastEndDate().Value.Date.ToString(),
+                CardId = yearcard.CardId != null ? yearcard.CardId.Value : 0,
+                Name = yearcard.Name != null ? yearcard.Name.Value : "",
+                ExpirationDate = ExpirationEndDate != null ? ExpirationEndDate.Value.ToString("dd/MM/yyyy") : "",
                 IsValidForDiscount = isValidForDiscount
             };
         }

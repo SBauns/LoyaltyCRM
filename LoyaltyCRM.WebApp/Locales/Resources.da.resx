@@ -159,6 +159,10 @@
   <data name="TermsEditor.Bold"><value>Fed</value></data>
   <data name="Fullscreen.Enter"><value>Gå Fuld skærm</value></data>
   <data name="Fullscreen.Exit"><value>Ud af Fuld skærm</value></data>
+  <data name="CardId"><value>Kort ID</value></data>
+  <data name="Name"><value>Navn</value></data>
+  <data name="ExpirationDate"><value>Udløbsdato</value></data>
+  <data name="Checkin.Error.ServiceUnavailable"><value>Server kan ikke kontaktes.</value></data>
 
 </root>
 
