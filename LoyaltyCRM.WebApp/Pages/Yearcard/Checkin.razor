@@ -23,7 +23,8 @@
                 <div class="mb-3 text-center">
                     <label for="email" class="form-label mb-2">@L["Checkin.Email"]</label>
                     <input type="text" id="email" @bind="Email.Email"
-                           class="form-control w-100 mx-auto text-center" />
+                           class="form-control w-100 mx-auto text-center" 
+                           autocapitalize="none" autocorrect="off" spellcheck="false"  />
                 </div>
 
                 <button class="btn btn-primary w-100 mt-2" type="submit">@L["Checkin.CheckInButton"]</button>
