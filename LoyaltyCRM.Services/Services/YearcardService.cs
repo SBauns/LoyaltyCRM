@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using DocumentFormat.OpenXml.Bibliography;
 using FuzzySharp;
 using LoyaltyCRM.Domain.DomainPrimitives;
 using LoyaltyCRM.Domain.Exceptions;
@@ -417,6 +418,9 @@ namespace LoyaltyCRM.Services.Services
             return new CheckInResponse()
             {
                 IsValid = ConfirmValidityOfYearcard(yearcard),
+                CardId = yearcard.CardId.Value,
+                Name = yearcard.Name.Value,
+                ExpirationDate = yearcard.GetLastEndDate().Value.Date.ToString(),
                 IsValidForDiscount = isValidForDiscount
             };
         }

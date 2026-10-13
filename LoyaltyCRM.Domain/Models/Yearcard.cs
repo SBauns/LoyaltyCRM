@@ -68,5 +68,14 @@ namespace LoyaltyCRM.Domain.Models
             }
             IsValidForDiscount = false;
         }
+
+        public EndDate? GetLastEndDate()
+        {
+            return ValidityIntervals
+                .Where(interval => interval.EndDate is not null)
+                .Select(interval => interval.EndDate)
+                .OrderByDescending(endDate => endDate!.Value)
+                .FirstOrDefault();
+        }
     }
 }
