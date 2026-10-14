@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using LoyaltyCRM.Application.Services;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories;
 using LoyaltyCRM.Services.Repositories.Interfaces;
@@ -27,6 +28,7 @@ public static class DependencyInjection
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IFileReaderService, FileReaderService>();
         services.AddScoped<IFileImportService, FileImportService>();
+        services.AddScoped<ITermsService, TermsService>();
         services.AddHttpClient<ITransactionalMailService, TransactionalMailService>();
         services.AddHttpClient<IAudienceSyncService, AudienceSyncService>();
 
