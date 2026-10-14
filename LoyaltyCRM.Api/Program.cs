@@ -198,65 +198,41 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-using (var scope = app.Services.CreateScope())
+using IServiceScope scope = app.Services.CreateScope();
+IServiceProvider services = scope.ServiceProvider;
+var context = services.GetRequiredService<LoyaltyContext>();
+var logger = services.GetRequiredService<ILogger<Program>>();
+
+const int maxAttempts = 5;
+var applyDelay = TimeSpan.FromSeconds(5);
+var migrated = false;
+
+for (int attempt = 1; attempt <= maxAttempts; attempt++)
 {
-    var context = scope.ServiceProvider.GetRequiredService<LoyaltyContext>();
-
-    // Retry logic for DB connection using EF Core
-    var maxRetries = 5;
-    var delay = TimeSpan.FromSeconds(5);
-    var retries = 0;
-    var dbReady = false;
-    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
-
     try
     {
-        context.Database.Migrate(); // Automatically apply pending migrations and create tables.   
+        logger.LogInformation("Applying database migrations, attempt {Attempt}.", attempt);
+        await context.Database.MigrateAsync();
+        migrated = true;
+        break;
     }
-    catch (Exception ex)
+    catch (Exception exception)
     {
-        logger.LogError(ex, "An error occurred while applying migrations.");
+        logger.LogWarning(exception, "Migration attempt {Attempt} failed.", attempt);
+        await Task.Delay(applyDelay);
     }
-
-    while (retries < maxRetries && !dbReady)
-    {
-        logger.LogInformation("Attempts with connectionstring: {connection}.", context.Database.GetConnectionString());
-        try
-        {
-            dbReady = await context.Database.CanConnectAsync();
-            if (dbReady)
-            {
-                logger.LogInformation("Successfully connected to the database on attempt {Attempt}.", retries + 1);
-            }
-            else
-            {
-                logger.LogWarning("Database connection attempt {Attempt} failed.", retries + 1);
-            }
-        }
-        catch (Exception ex)
-        {
-            logger.LogWarning(ex, "Database connection attempt {Attempt} threw an exception.", retries + 1);
-            dbReady = false;
-        }
-
-        if (!dbReady)
-        {
-            retries++;
-            if (retries == maxRetries)
-                throw new Exception("Could not connect to the database after multiple attempts.");
-            await Task.Delay(delay);
-        }
-    }
-
-    //Seed Roles and base users if not already there
-    var services = scope.ServiceProvider;
-    await DataSeeder.SeedUsersAsync(services, builder.Configuration, logger);
-
-    var settingsProvider = app.Services.GetRequiredService<IAppSettingsProvider>();
-    await settingsProvider.InitializeAsync();
-
-    // if(services.GetRequiredService<IHostEnvironment>().IsDevelopment())
-    //     await DataSeeder.SeedTestData(services, context);
 }
+
+if (!migrated)
+{
+    logger.LogCritical("Could not apply database migrations after {Attempts} attempts.", maxAttempts);
+    throw new InvalidOperationException("Database migrations could not be applied.");
+}
+
+// Seed Roles and base users if not already there
+await DataSeeder.SeedUsersAsync(services, builder.Configuration, logger);
+
+var settingsProvider = app.Services.GetRequiredService<IAppSettingsProvider>();
+await settingsProvider.InitializeAsync();
 
 app.Run();
