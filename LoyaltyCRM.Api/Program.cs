@@ -79,9 +79,6 @@ MapsterConfig.RegisterMappings();
 // Use DefaultConnection by default, override with env variable in Docker
 builder.Services.AddDatabase(builder.Configuration);
 
-//Add Yearcard cleaner that will remove invalid yearcards
-builder.Services.AddHostedService<YearcardCleanupService>();
-
 //Adding Authentication and Authorization using https://learn.microsoft.com/en-us/aspnet/core/fundamentals/minimal-apis/security?view=aspnetcore-8.0
 
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");

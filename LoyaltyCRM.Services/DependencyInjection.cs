@@ -18,12 +18,14 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        
         //Add Repos
         services.AddScoped<ICustomerRepo, CustomerRepo>();
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddScoped<ISettingsRepo, SettingsRepo>();
-        services.AddScoped<ISettingsService, SettingsService>();
         services.AddSingleton<IAppSettingsProvider, AppSettingsProvider>();
+        services.AddHostedService<YearcardCleanupService>();
+        services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<IYearcardService, YearcardService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IFileReaderService, FileReaderService>();
@@ -33,7 +35,6 @@ public static class DependencyInjection
         services.AddHttpClient<IAudienceSyncService, AudienceSyncService>();
 
 
-        services.AddHostedService<YearcardCleanupService>();
 
         //Add extra Services
         // services.AddHttpClient<IMailService, MailchimpService>();
