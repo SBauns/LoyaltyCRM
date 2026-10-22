@@ -8,6 +8,7 @@
     <BlazorWebAssemblyLoadAllGlobalizationData>true</BlazorWebAssemblyLoadAllGlobalizationData>
     <RunAOTCompilation>false</RunAOTCompilation>
     <WasmFingerprintAssets>false</WasmFingerprintAssets>
+    <ServiceWorkerAssetsManifest>service-worker-assets.js</ServiceWorkerAssetsManifest>
   </PropertyGroup>
 
   <ItemGroup>
