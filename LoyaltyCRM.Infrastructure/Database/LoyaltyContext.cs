@@ -17,6 +17,8 @@ namespace LoyaltyCRM.Infrastructure.Context
 
         //public DbSet<PhoneEntity> Phones { get; set; } = null!;
 
+        public DbSet<TermsDocument> TermsDocuments {get; set; } = null!;
+
         public DbSet<Yearcard> Yearcards { get; set; } = null!;
         public DbSet<AppSetting> Settings { get; set; } = null!;
 

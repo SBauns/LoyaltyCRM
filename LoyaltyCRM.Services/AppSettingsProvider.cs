@@ -15,10 +15,12 @@ namespace LoyaltyCRM.Services
 {
     public class AppSettingsProvider : IAppSettingsProvider
     {
+        public event EventHandler? SettingsReloaded;
         private readonly IServiceScopeFactory _scopeFactory;
         private readonly IConfiguration _configuration;
         private readonly object _sync = new();
         private AppSettings _current = new();
+
 
         public AppSettingsProvider(IServiceScopeFactory scopeFactory, IConfiguration configuration)
         {
@@ -51,6 +53,8 @@ namespace LoyaltyCRM.Services
             {
                 _current = values;
             }
+
+            SettingsReloaded?.Invoke(this, EventArgs.Empty);
         }
 
         private async Task<IEnumerable<AppSetting>> LoadSettingsAsync()

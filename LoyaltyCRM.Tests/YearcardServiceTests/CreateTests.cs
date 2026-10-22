@@ -50,7 +50,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(createdCard);
 
             // Act
-            var result = await _sut.CreateOrExtendYearcard(request);
+            var result = await _sut.CreateYearcard(request);
 
             // Assert
             Assert.NotNull(result);
@@ -89,7 +89,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
                 .ReturnsAsync(createdCard);
 
             // Act
-            var result = await _sut.CreateOrExtendYearcard(request);
+            var result = await _sut.ExtendYearcard(request);
 
             // Assert
             Assert.NotNull(result);
@@ -118,7 +118,7 @@ namespace LoyaltyCRM.Tests.YearcardServiceTests
 
             // Act
             var ex = await Assert.ThrowsAsync<Exception>(() =>
-                _sut.CreateOrExtendYearcard(request));
+                _sut.CreateYearcard(request));
 
             // Assert
             Assert.Contains("Data invalid", ex.Message);

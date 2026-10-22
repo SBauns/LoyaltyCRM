@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using LoyaltyCRM.Application.Services;
 using LoyaltyCRM.Infrastructure.Context;
 using LoyaltyCRM.Services.Repositories;
 using LoyaltyCRM.Services.Repositories.Interfaces;
@@ -17,21 +18,23 @@ public static class DependencyInjection
         this IServiceCollection services,
         IConfiguration configuration)
     {
+        
         //Add Repos
         services.AddScoped<ICustomerRepo, CustomerRepo>();
         services.AddScoped<IYearcardRepo, YearcardRepo>();
         services.AddScoped<ISettingsRepo, SettingsRepo>();
-        services.AddScoped<ISettingsService, SettingsService>();
         services.AddSingleton<IAppSettingsProvider, AppSettingsProvider>();
+        services.AddHostedService<YearcardCleanupService>();
+        services.AddScoped<ISettingsService, SettingsService>();
         services.AddScoped<IYearcardService, YearcardService>();
         services.AddScoped<ITransactionService, TransactionService>();
         services.AddScoped<IFileReaderService, FileReaderService>();
         services.AddScoped<IFileImportService, FileImportService>();
+        services.AddScoped<ITermsService, TermsService>();
         services.AddHttpClient<ITransactionalMailService, TransactionalMailService>();
         services.AddHttpClient<IAudienceSyncService, AudienceSyncService>();
 
 
-        services.AddHostedService<YearcardCleanupService>();
 
         //Add extra Services
         // services.AddHttpClient<IMailService, MailchimpService>();

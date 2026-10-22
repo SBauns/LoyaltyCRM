@@ -158,5 +158,27 @@
   <data name="TermsSettings.Title"><value>Terms setting</value></data>
   <data name="Fullscreen.Enter"><value>Enter Fullscreen</value></data>
   <data name="Fullscreen.Exit"><value>Exit Fullscreen</value></data>
+  <data name="CardId"><value>Card ID</value></data>
+  <data name="Name"><value>Name</value></data>
+  <data name="ExpirationDate"><value>Experation Date</value></data>
+  <data name="Checkin.Error.ServiceUnavailable"><value>Server is unavailable.</value></data>
+  <data name="TermsVersions.SelectPrompt"><value>Choose version...</value></data>
+  <data name="TermsVersions.CurrentSuffix"><value>current</value></data>
+  <data name="TermsVersions.MakeCurrent"><value>Set as current</value></data>
+  <data name="TermsVersions.Delete"><value>Delete</value></data>
+  <data name="TermsVersions.VersionLoaded"><value>Version loaded into the editor.</value></data>
+  <data name="TermsVersions.Deleted"><value>Version deleted.</value></data>
+  <data name="TermsVersions.CurrentSet"><value>The selected version is now current.</value></data>
+  <data name="TermsVersions.CannotDeleteCurrent"><value>The current version cannot be deleted. Make another version current first.</value></data>
+  <data name="TermsVersions.ConfirmDeleteTitle"><value>Delete version</value></data>
+  <data name="TermsVersions.ConfirmDeleteMessage"><value>This permanently deletes the selected version from the version history. This cannot be undone.</value></data>
+  <data name="TermsVersions.ConfirmCurrentTitle"><value>Set as current</value></data>
+  <data name="TermsVersions.ConfirmCurrentMessage"><value>The selected version will be published as the current version. A new copy is saved to the version history.</value></data>
+  <data name="TermsVersions.UnsavedChangesTitle"><value>Unsaved changes</value></data>
+  <data name="TermsVersions.UnsavedChangesMessage"><value>The editor contains unsaved changes. Loading a version discards them. Continue?</value></data>
+  <data name="TermsEditor.ConfirmClearTitle"><value>Clear editor</value></data>
+  <data name="TermsEditor.ConfirmClearMessage"><value>This clears the editor content. Unsaved changes are lost. Continue?</value></data>
+  <data name="Common.Confirm"><value>Confirm</value></data>
+  <data name="Common.Cancel"><value>Cancel</value></data>
 
 </root>

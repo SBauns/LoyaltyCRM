@@ -47,8 +47,32 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
     [ExcludeFromCodeCoverage]
     public Task StartAsync(CancellationToken cancellationToken)
     {
+        if (!_subscribedToSettingsReload)
+        {
+            _settings.SettingsReloaded += OnSettingsReloaded;
+            _subscribedToSettingsReload = true;
+        }
+
         ScheduleTimer();
         return Task.CompletedTask;
+    }
+
+    private readonly object _scheduleLock = new object();
+
+    private bool _subscribedToSettingsReload;
+
+    private void OnSettingsReloaded(object? sender, EventArgs eventArgs)
+    {
+        Reschedule();
+    }
+
+    private void Reschedule()
+    {
+        lock (_scheduleLock)
+        {
+            _timer?.Dispose();
+            ScheduleTimer(); // recomputes initialDelay from _settings.Current
+        }
     }
 
     [ExcludeFromCodeCoverage]
@@ -117,6 +141,9 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
                 }
             }
         }
+
+        //reschedule after a run
+        Reschedule();
 
         await WarnUsersWithExpiredYearcardDiscountsAsync(yearcards);
     }
@@ -301,6 +328,13 @@ public class YearcardCleanupService : IHostedService, IDisposable, IYearcardClea
     [ExcludeFromCodeCoverage]
     public void Dispose()
     {
+
+        if (_subscribedToSettingsReload)
+        {
+            _settings.SettingsReloaded -= OnSettingsReloaded;
+            _subscribedToSettingsReload = false;
+        }
+
         _timer?.Dispose();
     }
 }

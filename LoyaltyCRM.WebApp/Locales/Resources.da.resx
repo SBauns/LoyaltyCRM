@@ -159,6 +159,28 @@
   <data name="TermsEditor.Bold"><value>Fed</value></data>
   <data name="Fullscreen.Enter"><value>Gå Fuld skærm</value></data>
   <data name="Fullscreen.Exit"><value>Ud af Fuld skærm</value></data>
+  <data name="CardId"><value>Kort ID</value></data>
+  <data name="Name"><value>Navn</value></data>
+  <data name="ExpirationDate"><value>Udløbsdato</value></data>
+  <data name="Checkin.Error.ServiceUnavailable"><value>Server kan ikke kontaktes.</value></data>
+  <data name="TermsVersions.SelectPrompt"><value>Vælg version...</value></data>
+  <data name="TermsVersions.CurrentSuffix"><value>nuværende</value></data>
+  <data name="TermsVersions.MakeCurrent"><value>Gør nuværende</value></data>
+  <data name="TermsVersions.Delete"><value>Slet</value></data>
+  <data name="TermsVersions.VersionLoaded"><value>Versionen er hentet til editoren.</value></data>
+  <data name="TermsVersions.Deleted"><value>Versionen er slettet.</value></data>
+  <data name="TermsVersions.CurrentSet"><value>Den valgte version er nu den nuværende.</value></data>
+  <data name="TermsVersions.CannotDeleteCurrent"><value>Den nuværende version kan ikke slettes. Gør en anden version nuværende først.</value></data>
+  <data name="TermsVersions.ConfirmDeleteTitle"><value>Slet version</value></data>
+  <data name="TermsVersions.ConfirmDeleteMessage"><value>Den valgte version slettes permanent fra versionshistorikken. Det kan ikke fortrydes.</value></data>
+  <data name="TermsVersions.ConfirmCurrentTitle"><value>Gør nuværende</value></data>
+  <data name="TermsVersions.ConfirmCurrentMessage"><value>Den valgte version offentliggøres som den nuværende version, og en ny kopi gemmes i historikken.</value></data>
+  <data name="TermsVersions.UnsavedChangesTitle"><value>Ikke-gemte ændringer</value></data>
+  <data name="TermsVersions.UnsavedChangesMessage"><value>Editoren indeholder ændringer, der ikke er gemt. Hvis du henter en version, kasseres de. Fortsæt?</value></data>
+  <data name="TermsEditor.ConfirmClearTitle"><value>Ryd editor</value></data>
+  <data name="TermsEditor.ConfirmClearMessage"><value>Indholdet i editoren ryddes. Ændringer, der ikke er gemt, går tabt. Fortsæt?</value></data>
+  <data name="Common.Confirm"><value>Bekræft</value></data>
+  <data name="Common.Cancel"><value>Annuller</value></data>
 
 </root>
 

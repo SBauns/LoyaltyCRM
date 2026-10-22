@@ -1,7 +1,5 @@
 @page "/yearcard/checkin"
-@inject YearcardService _yearcardService
-@inject NavigationManager Navigation
-@inject AuthService AuthService
+@inject YearcardService YearcardService
 @using LoyaltyCRM.DTOs.Enums
 @using LoyaltyCRM.DTOs.Requests.Checkin
 @using LoyaltyCRM.WebApp.Components
@@ -10,33 +8,39 @@
 
 <div class="wrapper d-flex flex-column align-items-center justify-content-center vh-80">
     <div class="card shadow-sm p-4 w-100" style="max-width: 400px;">
-        <h3 class="mb-4 text-center">@L["Checkin.Title"]</h3>
-        <h8 class="mb-4 text-center">@L["Checkin.FillOutOneField"]</h8>
+        <h3 class="mb-3 text-center">@L["Checkin.Title"]</h3>
+        <p class="mb-4 text-center text-muted small">@L["Checkin.FillOutOneField"]</p>
 
-        <EditForm Model="@PhoneNumber" OnValidSubmit="CheckYearcard">
-            <DataAnnotationsValidator />
-            <ValidationSummary />
-            <div class="mb-3 text-center">
-                <label for="phoneNumber" class="form-label mb-2">@L["Checkin.PhoneNumber"]</label>
-                <PhoneNumberInput @bind-Value="PhoneNumber.Phone" InputId="phoneNumber" />
-            </div>
-            <div class="mb-3 text-center">
-                <label for="email" class="form-label mb-2">@L["Checkin.Email"]</label>
-                <input type="text" id="email" @bind="Email.Email" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
-            </div>
-            @* <div class="mb-3 text-center">
-                <label for="username" class="form-label mb-2">@L["Checkin.Username"]</label>
-                <input type="text" id="username" @bind="UserName.UserName" class="form-control w-100 mx-auto text-center" style="min-width: 150px; max-width: 100%;" />
-            </div> *@
-            <button class="btn btn-primary w-100 mt-2" type="submit">@L["Checkin.CheckInButton"]</button>
-        </EditForm>
+        <div class="position-relative">
+            <EditForm Model="PhoneNumber" OnValidSubmit="CheckYearcard">
+                <DataAnnotationsValidator />
+                <ValidationSummary />
 
-        <div style="height: 56px; margin-top: 1.5rem; display: flex; align-items: center; justify-content: center; flex-direction: column;">
-            @if (!string.IsNullOrEmpty(ResultMessage))
+                <div class="mb-3 text-center">
+                    <label for="phoneNumber" class="form-label mb-2">@L["Checkin.PhoneNumber"]</label>
+                    <PhoneNumberInput @bind-Value="PhoneNumber.Phone" InputId="phoneNumber" />
+                </div>
+                <div class="mb-3 text-center">
+                    <label for="email" class="form-label mb-2">@L["Checkin.Email"]</label>
+                    <input type="text" id="email" @bind="Email.Email"
+                           class="form-control w-100 mx-auto text-center" 
+                           autocapitalize="none" autocorrect="off" spellcheck="false"  />
+                </div>
+
+                <button class="btn btn-primary w-100 mt-2" type="submit">@L["Checkin.CheckInButton"]</button>
+            </EditForm>
+
+            @if (HasResult)
             {
-                <div class="alert @ResultClass text-center w-100 m-0" style="position:relative;">
-                    <div>@ResultMessage</div>
-                    <span class="fw-bold">@CountdownSeconds</span>
+                <div class="checkin-overlay">
+                    <div class="alert @ResultClass alert-dismissible mb-0 w-100" role="alert">
+                        <button type="button" class="btn-close" aria-label="@L["Common.Close"]"
+                                @onclick="DismissResult" />
+                        @foreach (string line in ResultLines)
+                        {
+                            <div>@line</div>
+                        }
+                    </div>
                 </div>
             }
         </div>
@@ -44,89 +48,118 @@
 </div>
 
 @code {
-    public PhoneNumberCheckInRequest PhoneNumber { get; set; } = new PhoneNumberCheckInRequest();
-    public EmailCheckInRequest Email { get; set; } = new EmailCheckInRequest();
-    public UsernameCheckInRequest UserName { get; set; } = new UsernameCheckInRequest();
-    public string ResultMessage { get; set; } = string.Empty;
-    public string ResultClass { get; set; } = string.Empty;
-    private string LastChecked { get; set; } = string.Empty;
-    private int CountdownSeconds { get; set; } = 0;
-    private CancellationTokenSource? CountdownCts;
-    private CheckInResponse CheckInResponse { get; set; } = new CheckInResponse();
+    private PhoneNumberCheckInRequest PhoneNumber { get; set; } = new();
+    private EmailCheckInRequest Email { get; set; } = new();
+    private UsernameCheckInRequest UserName { get; set; } = new();
+
+    private List<string> ResultLines { get; set; } = new();
+    private string ResultClass { get; set; } = string.Empty;
+
+    private bool HasResult => ResultLines.Count > 0;
 
     private async Task CheckYearcard()
     {
-        // Reset animation and message
-        ResultMessage = "";
-        ResultClass = "";
-        LastChecked = "";
-        CountdownSeconds = 10;
-        CountdownCts?.Cancel();
-        CountdownCts = new CancellationTokenSource();
-        StateHasChanged();
+        ClearResult();
 
-        try{
-            // Call the API with the entered phone number
-            if(PhoneNumber.Phone != null && !string.IsNullOrWhiteSpace(PhoneNumber.Phone)){
-                CheckInResponse = await _yearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
-                LastChecked = PhoneNumber.Phone;
-            }
-            if(!CheckInResponse.IsValid && Email.Email != null && !string.IsNullOrWhiteSpace(Email.Email)){
-                CheckInResponse = await _yearcardService.CheckinWithEmailAsync(Email);
-                LastChecked = Email.Email;
-            }
-            if(!CheckInResponse.IsValid && UserName.UserName != null && !string.IsNullOrWhiteSpace(UserName.UserName)){
-                CheckInResponse = await _yearcardService.CheckinWithUsernameAsync(UserName);
-                LastChecked = UserName.UserName;
-            }
-            
-            // Display message based on API result
-            if (CheckInResponse.IsValid)
+        try
+        {
+            (CheckInResponse response, string identifier) = await CheckInAsync();
+
+            if (string.IsNullOrWhiteSpace(identifier))
             {
-                ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Valid"];
-                ResultClass = "alert-success";
-            }
-            else
-            {
-                ResultMessage = L["Checkin.CardWith"] +  $" {LastChecked} " + L["Checkin.Invalid"];
-                ResultClass = "alert-danger";
-            }
-            
-            if(CheckInResponse.IsValidForDiscount != IsValidForDiscount.NotApplicable){
-                if(CheckInResponse.IsValidForDiscount == IsValidForDiscount.IsValid && CheckInResponse.IsValid){
-                    ResultMessage += Environment.NewLine + L["Checkin.AndValidForDiscount"];
-                }
-                else if(CheckInResponse.IsValidForDiscount == IsValidForDiscount.IsValid && !CheckInResponse.IsValid){
-                    ResultMessage += Environment.NewLine + L["Checkin.ButValidForDiscount"];
-                }
+                return;
             }
 
+            ShowResult(response, identifier);
         }
-        catch(Exception ex){
-            ResultMessage = ex.Message;
-            ResultClass = "alert-danger";
+        catch (HttpRequestException)
+        {
+            ShowError(L["Checkin.Error.ServiceUnavailable"]);
         }
-        
+        catch (Exception ex)
+        {
+            ShowErrorMessage(ex.Message);
+        }
+        finally
+        {
+            ResetInputs();
+        }
+    }
+
+    private async Task<(CheckInResponse Response, string Identifier)> CheckInAsync()
+    {
+        CheckInResponse response = new();
+        string identifier = string.Empty;
+
+        if (!string.IsNullOrWhiteSpace(PhoneNumber.Phone))
+        {
+            response = await YearcardService.CheckinWithPhonenumberAsync(PhoneNumber);
+            identifier = PhoneNumber.Phone;
+        }
+
+        if (!response.IsValid && !string.IsNullOrWhiteSpace(Email.Email))
+        {
+            response = await YearcardService.CheckinWithEmailAsync(Email);
+            identifier = Email.Email;
+        }
+
+        if (!response.IsValid && !string.IsNullOrWhiteSpace(UserName.UserName))
+        {
+            response = await YearcardService.CheckinWithUsernameAsync(UserName);
+            identifier = UserName.UserName;
+        }
+
+        return (response, identifier);
+    }
+
+    private void ShowResult(CheckInResponse response, string identifier)
+    {
+        string validityText = response.IsValid ? L["Checkin.Valid"] : L["Checkin.Invalid"];
+
+        List<string> lines = new()
+        {
+            $"{L["Checkin.CardWith"]} {identifier} {validityText}"
+        };
+
+        if (response.IsValidForDiscount == IsValidForDiscount.IsValid)
+        {
+            lines.Add(response.IsValid
+                ? L["Checkin.AndValidForDiscount"]
+                : L["Checkin.ButValidForDiscount"]);
+        }
+
+        lines.Add($"{L["CardId"]}: {response.CardId}");
+        lines.Add($"{L["Name"]}: {response.Name}");
+        lines.Add($"{L["ExpirationDate"]}: {response.ExpirationDate}");
+
+        ResultClass = response.IsValid ? "alert-success" : "alert-danger";
+        ResultLines = lines;
+    }
+
+    private void ShowError(LocalizedString message)
+    {
+        ResultClass = "alert-warning";
+        ResultLines = new List<string> { message };
+    }
+
+    private void ShowErrorMessage(string message)
+    {
+        ResultClass = "alert-warning";
+        ResultLines = new List<string> { message };
+    }
+
+    private void DismissResult() => ClearResult();
+
+    private void ClearResult()
+    {
+        ResultLines = new List<string>();
+        ResultClass = string.Empty;
+    }
+
+    private void ResetInputs()
+    {
         PhoneNumber = new PhoneNumberCheckInRequest();
         Email = new EmailCheckInRequest();
         UserName = new UsernameCheckInRequest();
-        CheckInResponse = new CheckInResponse();
-        StateHasChanged();
-
-        // Numeric countdown
-        var token = CountdownCts.Token;
-        for (int i = 10; i > 0; i--)
-        {
-            CountdownSeconds = i;
-            StateHasChanged();
-            try { await Task.Delay(1000, token); } catch { break; }
-        }
-        if (!token.IsCancellationRequested)
-        {
-            ResultMessage = string.Empty;
-            ResultClass = string.Empty;
-            CountdownSeconds = 0;
-            StateHasChanged();
-        }
     }
 }

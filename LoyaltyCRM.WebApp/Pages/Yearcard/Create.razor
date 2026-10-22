@@ -45,7 +45,8 @@
                         </div>
                         <div class="mb-3">
                             <label for="Email" class="form-label">@L["Yearcard.Email"]*</label>
-                            <InputText id="Email" class="form-control" @bind-Value="Yearcard.Email" />
+                            <InputText id="Email" class="form-control" @bind-Value="Yearcard.Email"
+                                    autocapitalize="none" autocorrect="off" spellcheck="false" />
                         </div>
                         <div class="mb-3 d-flex align-items-center gap-2">
                             <input class="form-check-input" type="checkbox" id="isgift" @bind="IsGiftCard" style="margin-right: 0.5em;" />

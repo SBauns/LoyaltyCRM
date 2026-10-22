@@ -1,121 +1,125 @@
-using System.IO;
-using System.Threading.Tasks;
+using LoyaltyCRM.Api.Extensions;
+using LoyaltyCRM.Application.Models;
+using LoyaltyCRM.Application.Services;
 using LoyaltyCRM.Authorization;
 using LoyaltyCRM.Domain.Enums;
+using LoyaltyCRM.Domain.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace LoyaltyCRM.Api.Controllers
+namespace LoyaltyCRM.Api.Controllers;
+
+[Route("api/[controller]")]
+[ApiController]
+public class TermsController : ControllerBase
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class TermsController : ControllerBase
+    private const int MaxHtmlLength = 512 * 1024; // 512 KB is generous for a legal document
+
+    private readonly ITermsService termsService;
+    private readonly ILogger<TermsController> logger;
+
+    public TermsController(ITermsService termsService, ILogger<TermsController> logger)
     {
-        private const string TermsFileName = "terms.html"; // Ensure lowercase to match Linux
+        this.termsService = termsService;
+        this.logger = logger;
+    }
 
-        private static string GetTermsFilePath()
+    [HttpGet]
+    public async Task<IActionResult> GetTerms([FromServices] ITermsService service, CancellationToken cancellationToken)
+    {
+        TermsDocument? current = await termsService.GetCurrentAsync(cancellationToken);
+
+        if (current is null)
         {
-            // Use AppContext.BaseDirectory instead of Directory.GetCurrentDirectory()
-            // This ensures it works regardless of where the process is started
-            var basePath = AppContext.BaseDirectory;
-            
-            // Construct the path relative to the base directory
-            // Assuming Resources is a sibling folder to the bin/ or the root of the app
-            // If Resources is inside the project root, we might need to go up or down depending on structure
-            
-            // STRATEGY A: If Resources is next to the DLLs (common in publish)
-            var path = Path.Combine(basePath, "Resources", TermsFileName);
-            
-            // STRATEGY B: If Resources is in the project root and you are in /app/LoyaltyCRM.Api
-            // You might need: Path.Combine(basePath, "..", "Resources", TermsFileName);
-            
-            // Let's stick to the standard publish structure where Resources is copied alongside the app
-            // If your Dockerfile copies the whole project, Resources might be at:
-            // /app/LoyaltyCRM.Api/Resources/terms.html
-            // In that case, we need to find the project root.
-            
-            // SAFER APPROACH: Check multiple locations
-            var possiblePaths = new[]
-            {
-                Path.Combine(basePath, "Resources", TermsFileName),
-                Path.Combine(basePath, "..", "Resources", TermsFileName), // If in subfolder
-                Path.Combine(Directory.GetCurrentDirectory(), "Resources", TermsFileName) // Fallback
-            };
-
-            foreach (var p in possiblePaths)
-            {
-                if (System.IO.File.Exists(p))
-                    return p;
-            }
-
-            // If none found, return the primary guess so the error message is clear
-            return Path.Combine(path, "Resources", TermsFileName);
+            return NotFound("Terms not found.");
         }
 
-        // PUT: api/terms
-        [HttpPut]
-        [Consumes("text/html", "text/plain", "application/json")]
-        [RequireRole(Role.Papa)]
-        public async Task<IActionResult> UpdateTerms()
+        return Content(current.Html, "text/html");
+    }
+
+    [HttpPut]
+    [Consumes("text/html", "text/plain", "application/json")]
+    [RequireRole(Role.Papa)]
+    public async Task<IActionResult> UpdateTerms(CancellationToken cancellationToken)
+    {
+        string html = await Request.ReadBodyAsStringAsync(cancellationToken);
+
+        if (string.IsNullOrWhiteSpace(html))
         {
-            string html;
-            using (var reader = new StreamReader(Request.Body))
-            {
-                html = await reader.ReadToEndAsync();
-            }
-
-            if (string.IsNullOrWhiteSpace(html))
-                return BadRequest("Cannot update empty terms.");
-
-            var path = GetTermsFilePath();
-
-            var willCreate = !System.IO.File.Exists(path);
-
-            try
-            {
-                var dirName = Path.GetDirectoryName(path);
-                if (!string.IsNullOrEmpty(dirName))
-                {
-                    Directory.CreateDirectory(dirName);
-                }
-                
-                await System.IO.File.WriteAllTextAsync(path, html);
-                
-                if (willCreate)
-                {
-                    return Created("/api/terms", "Terms published.");
-                }
-                return Ok("Terms updated.");
-            }
-            catch (System.Exception ex)
-            {
-                // Log the path for debugging
-                Console.WriteLine($"Error saving terms to: {path}. Exception: {ex.Message}");
-                return StatusCode(500, ex.Message);
-            }
+            return BadRequest("Cannot update empty terms.");
         }
 
-        // GET: api/terms
-        [HttpGet]
-        public IActionResult GetTerms()
+        if (html.Length > MaxHtmlLength)
         {
-            var path = GetTermsFilePath();
+            return BadRequest($"Terms exceed maximum length of {MaxHtmlLength} characters.");
+        }
 
-            if (!System.IO.File.Exists(path))
-            {
-                // Log the attempted path for debugging
-                Console.WriteLine($"Terms file not found at: {path}");
-                return NotFound("Terms not found.");
-            }
+        try
+        {
+            TermsDocument newVersion = await termsService.PublishNewVersionAsync(
+                html,
+                cancellationToken);
 
-            try
-            {
-                var html = System.IO.File.ReadAllText(path);
-                return Content(html, "text/html");
-            }
-            catch (System.Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
+            return Created($"/api/terms/{newVersion.Id}", "Terms published.");
+        }
+        catch (Exception exception)
+        {
+            logger.LogError(exception, "Failed to publish terms version {Length} chars", html.Length);
+            return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while publishing the terms.");
+        }
+    }
+
+        [HttpGet("history")]
+    [RequireRole(Role.Papa)]
+    public async Task<IActionResult> GetHistory(CancellationToken cancellationToken)
+    {
+        IReadOnlyList<TermsVersionSummary> history = await termsService.GetVersionHistoryAsync(cancellationToken);
+        return Ok(history);
+    }
+
+    [HttpGet("{id:int}")]
+    [RequireRole(Role.Papa)]
+    public async Task<IActionResult> GetVersion(int id, CancellationToken cancellationToken)
+    {
+        TermsDocument? version = await termsService.GetVersionAsync(id, cancellationToken);
+
+        if (version is null)
+        {
+            return NotFound("Version not found.");
+        }
+
+        return Content(version.Html, "text/html");
+    }
+
+    [HttpPut("{id:int}/current")]
+    [RequireRole(Role.Papa)]
+    public async Task<IActionResult> SetCurrentVersion(int id, CancellationToken cancellationToken)
+    {
+        TermsDocument? newCurrent = await termsService.SetCurrentVersionAsync(id, cancellationToken);
+
+        if (newCurrent is null)
+        {
+            return NotFound("Version not found.");
+        }
+
+        return Ok(new { newCurrent.Id, newCurrent.CreatedAtUtc });
+    }
+
+    [HttpDelete("{id:int}")]
+    [RequireRole(Role.Papa)]
+    public async Task<IActionResult> DeleteVersion(int id, CancellationToken cancellationToken)
+    {
+        TermsDeleteResult result = await termsService.DeleteVersionAsync(id, cancellationToken);
+
+        switch (result)
+        {
+            case TermsDeleteResult.Deleted:
+                return Ok("Version deleted.");
+            case TermsDeleteResult.NotFound:
+                return NotFound("Version not found.");
+            case TermsDeleteResult.IsCurrentVersion:
+                return Conflict("The current version cannot be deleted. Make another version current first.");
+            default:
+                return StatusCode(StatusCodes.Status500InternalServerError, "An error occurred while deleting the version.");
         }
     }
 }
